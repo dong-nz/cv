@@ -96,8 +96,9 @@ All specification documents are in `docs/design/`:
 |------|---------|
 | `spec.md` | Main PRD — product vision, positioning, narrative, IA, acceptance criteria |
 | `spec-v1.md` | v1 completion record — features implemented, known limitations, files summary |
-| `spec-v2.md` | v2 features — Resume, Blog, SEO, Analytics, Testing, CI/CD |
-| `spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
+| `spec-v2.md` | v2 index — overview, implementation order, feature list |
+| `specs/ui/spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
+| `specs/v2/spec-v2-*.md` | v2 feature specs (resume, seo, blog, analytics, testing, cicd) |
 
 Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 

@@ -8,6 +8,7 @@ interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
   variant?: ButtonVariant
   size?: ButtonSize
   href?: string
+  download?: boolean
   children: React.ReactNode
 }
 

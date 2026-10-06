@@ -1,3 +1,4 @@
+import { resumeAvailable } from '@/data/resume'
 import { Button } from '@/components/ui/Button'
 import { SocialLinks } from '@/components/ui/SocialLinks'
 import { profile } from '@/data/profile'
@@ -49,6 +50,11 @@ export function Hero() {
           <Button href="/projects" variant="primary">
             View Projects
           </Button>
+          {resumeAvailable && (
+            <Button href="/resume.pdf" variant="secondary" download>
+              Download Resume
+            </Button>
+          )}
           <Button href="/contact" variant="secondary">
             Contact Me
           </Button>
