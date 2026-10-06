@@ -11,7 +11,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 | Framework | React 19 |
 | Language | TypeScript 6 (bundler mode, `verbatimModuleSyntax`, `noEmit`) |
 | Bundler | Vite 8 |
-| Router | React Router DOM v6 (pin `6.30.6` — do NOT upgrade to v7) |
+| Router | React Router v8 (`react-router` package, pinned `8.4.0`) |
 | Linter | Oxlint 1 (`plugins: react, typescript, oxc`) |
 | Package manager | pnpm |
 
@@ -82,11 +82,25 @@ src/
 
 ## Known Issues & Gotchas
 
-1. **React Router v6 routing:** Use `<Layout><Routes>...</Routes></Layout>`, NOT `<Route element={<Layout />}>` with nested routes — the latter doesn't pass `children` correctly
-2. **React Router v6 pin:** `package.json` has `"react-router-dom": "6.30.6"` (exact, no `^`) — v7 breaks the build and routing
+1. **React Router v8 routing:** Use `<Layout><Routes>...</Routes></Layout>`, NOT `<Route element={<Layout />}>` with nested routes — the latter doesn't pass `children` correctly
+2. **Import path:** All router imports use `react-router` (not `react-router-dom`) — e.g., `import { Link, useLocation } from 'react-router'`
 3. **Theme cycle:** `cycleTheme` dependency array must be `[]` (empty), NOT `[setTheme]` — `setTheme` is not used inside `cycleTheme`
 4. **Theme from system:** When stored theme is `'system'`, `cycleTheme` must skip to opposite theme on first click (not go to `'dark'` which resolves to same visual)
 5. **Footer/Nav links:** Must use `<Link to>`, not `<a href>` for client-side navigation
+
+## Design Specs
+
+All specification documents are in `docs/design/`:
+
+| File | Purpose |
+|------|---------|
+| `spec.md` | Main PRD — product vision, positioning, narrative, IA, acceptance criteria |
+| `spec-v1.md` | v1 completion record — features implemented, known limitations, files summary |
+| `spec-v2.md` | v2 index — overview, implementation order, feature list |
+| `specs/ui/spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
+| `specs/v2/spec-v2-*.md` | v2 feature specs (resume, seo, blog, analytics, testing, cicd) |
+
+Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 
 ## Code Style & Linting
 

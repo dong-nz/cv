@@ -1,8 +1,10 @@
+import { motion } from "motion/react"
+
 interface SocialLink {
   label: string
   href: string
   icon: React.ReactNode
-  'aria-label': string
+  "aria-label": string
 }
 
 interface SocialLinksProps {
@@ -10,21 +12,23 @@ interface SocialLinksProps {
   className?: string
 }
 
-export function SocialLinks({ links, className = '' }: SocialLinksProps) {
+export function SocialLinks({ links, className = "" }: SocialLinksProps) {
   return (
     <div className={`social-links ${className}`}>
       {links.map((link) => (
-        <a
+        <motion.a
           key={link.label}
           href={link.href}
           target="_blank"
           rel="noopener noreferrer"
           className="social-link"
-          aria-label={link['aria-label']}
+          aria-label={link["aria-label"]}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         >
           {link.icon}
           <span>{link.label}</span>
-        </a>
+        </motion.a>
       ))}
     </div>
   )

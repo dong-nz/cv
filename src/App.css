@@ -200,6 +200,7 @@
 
 .btn-primary:hover {
   background: var(--accent-hover);
+  color: #ffffff;
 }
 
 .btn-primary:active {
@@ -355,6 +356,25 @@
   width: 20px;
   height: 20px;
 }
+/* ===== Section Background Gradient ===== */
+.section {
+  position: relative;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--bg-primary) 10%,
+    var(--bg-primary) 90%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
 
 /* ===== Hero ===== */
 .hero {
@@ -400,26 +420,32 @@
 }
 
 .hero-visual {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.hero-graphic {
+.hero-photo {
   width: 100%;
-  max-width: 400px;
-  aspect-ratio: 1;
-  position: relative;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 16px;
+  display: block;
 }
 
 @media (max-width: 768px) {
   .hero {
-    grid-template-columns: 1fr;
-    gap: 32px;
-    min-height: auto;
-    padding: 48px 0;
+    position: relative;
+    min-height: 500px;
+    overflow: hidden;
   }
-
+  .hero {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+  }
   .hero-cta {
     flex-direction: column;
   }
@@ -429,7 +455,26 @@
   }
 
   .hero-visual {
-    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-content {
+    position: absolute;
+    z-index: 1;
+    background: rgba(0, 0, 0, 0.55);
+    padding: 32px 24px;
+    backdrop-filter: blur(4px);
+    width: 100%;
+  }
+
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .hero-content {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }
 

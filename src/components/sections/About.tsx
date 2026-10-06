@@ -1,10 +1,12 @@
 import { SectionHeading } from '@/components/ui/SectionHeading'
+import { InView } from '@/components/ui/InView'
 import { Tag } from '@/components/ui/Tag'
 import { profile } from '@/data/profile'
 
 export function About() {
   return (
-    <section className="section container-content" aria-labelledby="about-heading">
+    <InView>
+    <section className="section container-wide" aria-labelledby="about-heading">
       <SectionHeading title="About Me" />
       <div style={{ maxWidth: '700px' }}>
         <p style={{ fontSize: '18px', marginBottom: '32px' }}>
@@ -41,5 +43,6 @@ export function About() {
         </div>
       </div>
     </section>
+    </InView>
   )
 }
