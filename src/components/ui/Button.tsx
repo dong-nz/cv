@@ -1,10 +1,11 @@
-import { forwardRef } from 'react'
-import type { ComponentPropsWithoutRef } from 'react'
+import { motion } from "motion/react"
+import { forwardRef } from "react"
+import type { ComponentPropsWithoutRef } from "react"
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost'
-type ButtonSize = 'sm' | 'md' | 'lg'
+type ButtonVariant = "primary" | "secondary" | "ghost"
+type ButtonSize = "sm" | "md" | "lg"
 
-interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
+interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   variant?: ButtonVariant
   size?: ButtonSize
   href?: string
@@ -13,36 +14,61 @@ interface ButtonProps extends ComponentPropsWithoutRef<'button'> {
 }
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: 'btn btn-primary',
-  secondary: 'btn btn-secondary',
-  ghost: 'btn btn-ghost',
+  primary: "btn btn-primary",
+  secondary: "btn btn-secondary",
+  ghost: "btn btn-ghost",
 }
 
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'btn-sm',
-  md: '',
-  lg: 'btn-lg',
+  sm: "btn-sm",
+  md: "",
+  lg: "btn-lg",
 }
 
 export const Button = forwardRef<
   HTMLButtonElement | HTMLAnchorElement,
   ButtonProps
->(({ variant = 'primary', size = 'md', href, className = '', children, ...props }, ref) => {
-  const classes = `${variantClasses[variant]} ${sizeClasses[size]} ${className}`.trim()
+>(
+  (
+    {
+      variant = "primary",
+      size = "md",
+      href,
+      className = "",
+      children,
+      ...props
+    },
+    ref
+  ) => {
+    const classes = `${variantClasses[variant]} ${sizeClasses[size]} ${className}`.trim()
 
-  if (href) {
+    if (href) {
+      return (
+        <motion.a
+          href={href}
+          className={classes}
+          ref={ref as React.Ref<HTMLAnchorElement>}
+
+          whileTap={{ scale: 0.95 }}
+          {...(props as Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonProps>)}
+        >
+          {children}
+        </motion.a>
+      )
+    }
+
     return (
-      <a href={href} className={classes} ref={ref as React.Ref<HTMLAnchorElement>} {...(props as React.AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      <motion.button
+        className={classes}
+        ref={ref as React.Ref<HTMLButtonElement>}
+
+        whileTap={{ scale: 0.95 }}
+        {...(props as Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonProps>)}
+      >
         {children}
-      </a>
+      </motion.button>
     )
   }
+)
 
-  return (
-    <button className={classes} ref={ref as React.Ref<HTMLButtonElement>} {...props}>
-      {children}
-    </button>
-  )
-})
-
-Button.displayName = 'Button'
+Button.displayName = "Button"
