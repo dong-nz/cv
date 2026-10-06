@@ -88,6 +88,19 @@ src/
 4. **Theme from system:** When stored theme is `'system'`, `cycleTheme` must skip to opposite theme on first click (not go to `'dark'` which resolves to same visual)
 5. **Footer/Nav links:** Must use `<Link to>`, not `<a href>` for client-side navigation
 
+## Design Specs
+
+All specification documents are in `docs/design/`:
+
+| File | Purpose |
+|------|---------|
+| `spec.md` | Main PRD — product vision, positioning, narrative, IA, acceptance criteria |
+| `spec_v1.md` | v1 completion record — features implemented, known limitations, files summary |
+| `spec-v2.md` | v2 features — Resume, Blog, SEO, Analytics, Testing, CI/CD |
+| `spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
+
+Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
+
 ## Code Style & Linting
 
 - TypeScript: `verbatimModuleSyntax`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`
