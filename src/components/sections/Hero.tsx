@@ -1,3 +1,4 @@
+import { OpenToWorkBadge } from '@/components/ui/OpenToWorkBadge'
 import { resumeAvailable } from '@/data/resume'
 import { Button } from '@/components/ui/Button'
 import { SocialLinks } from '@/components/ui/SocialLinks'
@@ -62,37 +63,12 @@ export function Hero() {
         <SocialLinks links={socialLinks} />
       </div>
       <div className="hero-visual">
-        <div className="hero-graphic">
-          <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Abstract system diagram */}
-            <circle cx="200" cy="200" r="160" stroke="var(--border)" strokeWidth="1" />
-            <circle cx="200" cy="200" r="100" stroke="var(--border)" strokeWidth="1" />
-            <circle cx="200" cy="200" r="40" stroke="var(--accent)" strokeWidth="2" opacity="0.6" />
-
-            {/* Nodes */}
-            <circle cx="200" cy="80" r="8" fill="var(--accent)" opacity="0.8" />
-            <circle cx="320" cy="200" r="8" fill="var(--accent)" opacity="0.8" />
-            <circle cx="200" cy="320" r="8" fill="var(--accent)" opacity="0.8" />
-            <circle cx="80" cy="200" r="8" fill="var(--accent)" opacity="0.8" />
-
-            {/* Connections */}
-            <line x1="200" y1="88" x2="200" y2="160" stroke="var(--accent)" strokeWidth="1" opacity="0.4" />
-            <line x1="312" y1="200" x2="240" y2="200" stroke="var(--accent)" strokeWidth="1" opacity="0.4" />
-            <line x1="200" y1="312" x2="200" y2="240" stroke="var(--accent)" strokeWidth="1" opacity="0.4" />
-            <line x1="88" y1="200" x2="160" y2="200" stroke="var(--accent)" strokeWidth="1" opacity="0.4" />
-
-            {/* Diagonal connections */}
-            <line x1="206" y1="86" x2="314" y2="194" stroke="var(--accent)" strokeWidth="0.5" opacity="0.2" />
-            <line x1="314" y1="206" x2="206" y2="314" stroke="var(--accent)" strokeWidth="0.5" opacity="0.2" />
-            <line x1="194" y1="314" x2="86" y2="206" stroke="var(--accent)" strokeWidth="0.5" opacity="0.2" />
-            <line x1="86" y1="194" x2="194" y2="86" stroke="var(--accent)" strokeWidth="0.5" opacity="0.2" />
-
-            {/* Center label */}
-            <text x="200" y="205" textAnchor="middle" fill="var(--accent)" fontSize="14" fontFamily="monospace">
-              core
-            </text>
-          </svg>
-        </div>
+        <img
+          src="/profile-photo.webp"
+          alt="Profile photo"
+          className="hero-photo"
+        />
+        <OpenToWorkBadge />
       </div>
     </section>
   )

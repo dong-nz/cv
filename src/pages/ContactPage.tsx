@@ -1,3 +1,4 @@
+import { DownloadResume } from '@/components/sections/DownloadResume'
 import { profile } from '@/data/profile'
 
 export function ContactPage() {
@@ -36,6 +37,7 @@ export function ContactPage() {
           </div>
         </a>
       </div>
+      <DownloadResume />
     </section>
   )
 }

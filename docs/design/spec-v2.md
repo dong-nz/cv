@@ -22,13 +22,14 @@ v2 bao gồm 6 tính năng, mỗi tính năng có spec riêng trong `specs/`:
 | File | Feature | Priority | Est. | Status |
 |------|---------|----------|------|--------|
 | `specs/v2/spec-v2-resume.md` | Resume download | P1 | ~15 min | ✅ Done |
+| `specs/v2/spec-v2-hero-carousel.md` | Hero visual carousel | P1 | ~1 hour | |
 | `specs/v2/spec-v2-seo.md` | SEO (metadata, OG, sitemap) | P1 | ~1 hour | |
 | `specs/v2/spec-v2-blog.md` | Blog (MDX, articles, syntax highlight) | P1 | ~4 hours | |
 | `specs/v2/spec-v2-analytics.md` | Analytics (Plausible) | P2 | ~30 min | |
 | `specs/v2/spec-v2-testing.md` | Testing (Vitest + E2E) | P5 | ~3 hours | |
 | `specs/v2/spec-v2-cicd.md` | CI/CD (GitHub Actions) | P5 | ~1 hour | |
 
-**Implementation order:** ~~Resume~~ → SEO → Blog → Analytics → Testing → CI/CD
+**Implementation order:** ~~Resume~~ → Hero Carousel → SEO → Blog → Analytics → Testing → CI/CD
 
 ---
 
