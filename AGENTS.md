@@ -2,7 +2,7 @@
 
 ## Project
 
-A bare **React + TypeScript + Vite** application (default `create-vite` scaffold). No custom components, utilities, or business logic yet.
+Personal engineering portfolio — multi-page SPA built with React + TypeScript + Vite. Data-driven content from `src/data/`, styled with CSS variables supporting dark/light/system themes.
 
 ## Tech Stack
 
@@ -11,6 +11,7 @@ A bare **React + TypeScript + Vite** application (default `create-vite` scaffold
 | Framework | React 19 |
 | Language | TypeScript 6 (bundler mode, `verbatimModuleSyntax`, `noEmit`) |
 | Bundler | Vite 8 |
+| Router | React Router DOM v6 (pin `6.30.6` — do NOT upgrade to v7) |
 | Linter | Oxlint 1 (`plugins: react, typescript, oxc`) |
 | Package manager | pnpm |
 
@@ -23,32 +24,73 @@ A bare **React + TypeScript + Vite** application (default `create-vite` scaffold
 | `pnpm lint` | Run Oxlint |
 | `pnpm preview` | Preview production build locally |
 
-## Project Structure
+## Routing
+
+- `App.tsx` wraps `<BrowserRouter>` → `<Layout>` → `<Routes>` (NOT nested `<Route element>` — causes `children` not to pass)
+- Layout: `<Navigation>` (top) → `<main id="main-content">` → `<Footer>` (bottom)
+- All internal navigation MUST use `<Link>`/`<NavLink>`, never `<a href>` (causes full page reload)
+- Footer internal links also use `<Link>`; external links (GitHub, LinkedIn, email) keep `<a>` with `target="_blank"`
+
+## Pages
+
+| Route | Component | Section |
+|-------|-----------|---------|
+| `/` | `HomePage` | Hero + About + Expertise + Experience + Projects + Contact |
+| `/about` | `AboutPage` | Full about section |
+| `/experience` | `ExperiencePage` | Timeline |
+| `/projects` | `ProjectsListPage` | All projects grid |
+| `/projects/:id` | `ProjectDetailPage` | Single project |
+| `/engineering` | `EngineeringPage` | Engineering philosophy |
+| `/contact` | `ContactPage` | Contact info |
+
+## Theming
+
+- `src/hooks/useTheme.tsx` — `ThemeProvider` + `useTheme` hook
+- State machine: `dark` ↔ `light` ↔ `system`
+- **Critical:** `cycleTheme` skips `system` when prev is `system` (goes to opposite theme instead)
+- `data-theme` attribute on `<html>` set by `useEffect`
+- Stored in `localStorage` key `portfolio-theme`
+
+## Data Layer
+
+- `src/data/profile.ts` — name, title, bio, links
+- `src/data/skills.ts` — skill groups → skills
+- `src/data/experience.ts` — work history entries
+- `src/data/projects.ts` — project cards with categories
+
+## Component Structure
 
 ```
 src/
-  main.tsx       — Entry point; renders <App> inside StrictMode
-  App.tsx        — Root component (currently Vite welcome page)
-  App.css        — Component styles
-  index.css      — Global styles, CSS variables, dark mode
-  assets/        — Images (hero.png, react.svg, vite.svg)
-public/
-  favicon.svg    — Site favicon
-  icons.svg      — SVG sprite sheet (icons used in App.tsx)
-index.html       — HTML shell
-vite.config.ts   — Vite config (react plugin only)
-tsconfig.app.json — TS compiler options (bundler mode, strict linting)
-.oxlintrc.json   — Oxlint rules (react hooks error, exports warn)
+  components/
+    layout/     — Layout.tsx, Navigation.tsx, Footer.tsx
+    sections/   — Hero, About, Expertise, Experience, Projects, Contact (used in HomePage)
+    ui/         — Badge, Button, Card, SectionHeading, SocialLinks, Tag
+    index.ts    — barrel export
+  data/         — profile, skills, experience, projects (TS modules)
+  hooks/        — useTheme.tsx
+  pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, EngineeringPage, ContactPage, index.ts
+  types/        — shared TypeScript interfaces
 ```
+
+## CSS Architecture
+
+- `src/index.css` — CSS variables (root + `[data-theme="dark"]`), global resets
+- `src/App.css` — component-level styles (Navigation, Footer, page sections)
+- No CSS library — plain CSS with variables for theming
+- `#main-content` in Layout has `style={{ flex: 1 }}` (parent `#root` is `display: flex; flex-direction: column`)
+
+## Known Issues & Gotchas
+
+1. **React Router v6 routing:** Use `<Layout><Routes>...</Routes></Layout>`, NOT `<Route element={<Layout />}>` with nested routes — the latter doesn't pass `children` correctly
+2. **React Router v6 pin:** `package.json` has `"react-router-dom": "6.30.6"` (exact, no `^`) — v7 breaks the build and routing
+3. **Theme cycle:** `cycleTheme` dependency array must be `[]` (empty), NOT `[setTheme]` — `setTheme` is not used inside `cycleTheme`
+4. **Theme from system:** When stored theme is `'system'`, `cycleTheme` must skip to opposite theme on first click (not go to `'dark'` which resolves to same visual)
+5. **Footer/Nav links:** Must use `<Link to>`, not `<a href>` for client-side navigation
 
 ## Code Style & Linting
 
 - TypeScript: `verbatimModuleSyntax`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`
-- Oxlint: `react/rules-of-hooks` = error, `react/only-export-components` = warn (allows constant exports)
+- Oxlint: `react/rules-of-hooks` = error, `react/only-export-components` = warn
 - No framework-specific CSS library — plain CSS with CSS variables
-
-## File Conventions
-
-- Components: `.tsx`, single default export per file
-- Styles: `.css` alongside components (co-located), global styles in `src/index.css`
-- Assets: imported in `src/assets/`, static files in `public/`
+- Data-driven: all content from TS modules, not hardcoded in JSX
