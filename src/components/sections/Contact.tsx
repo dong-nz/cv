@@ -8,7 +8,7 @@ export function Contact() {
   return (
     <InView>
       <motion.section
-        className="section container-content"
+        className="section container-wide"
         aria-labelledby="contact-heading"
         initial="hidden"
         whileInView="visible"
@@ -19,6 +19,7 @@ export function Contact() {
         }}
       >
         <SectionHeading title="Contact" />
+        <div style={{ maxWidth: '700px' }}>
         <div className="contact-links">
           <motion.a
             href={`mailto:${profile.email}`}
@@ -96,6 +97,7 @@ export function Contact() {
               </div>
             </div>
           </motion.a>
+        </div>
         </div>
         <DownloadResume />
       </motion.section>

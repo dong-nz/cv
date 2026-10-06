@@ -427,7 +427,6 @@ motion.config.reducedMotion = "user"
 | File | Action | Changes |
 |---|---|---|
 | `package.json` | Modify | Add `motion` dependency |
-| `src/components/ui/OpenToWorkBadge.tsx` | Rewrite | motion + SVG spring + hashtag |
 | `src/components/sections/Hero.tsx` | Modify | motion enter animations |
 | `src/components/ui/Button.tsx` | Modify | motion hover/tap |
 | `src/components/ui/InView.tsx` | **New** | Reusable scroll wrapper |

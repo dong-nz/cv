@@ -356,6 +356,25 @@
   width: 20px;
   height: 20px;
 }
+/* ===== Section Background Gradient ===== */
+.section {
+  position: relative;
+}
+
+.section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--bg-primary) 10%,
+    var(--bg-primary) 90%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
 
 /* ===== Hero ===== */
 .hero {
@@ -416,35 +435,16 @@
   display: block;
 }
 
-.otw-container {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.otw-spring {
-  width: 40px;
-  height: 80px;
-  flex-shrink: 0;
-}
-.otw-badge {
-  font-family: monospace;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--accent);
-  padding: 8px 16px;
-  border-radius: 8px;
-  white-space: nowrap;
-}
-
 @media (max-width: 768px) {
   .hero {
     position: relative;
     min-height: 500px;
     overflow: hidden;
+  }
+  .hero {
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
   }
   .hero-cta {
     flex-direction: column;
@@ -459,22 +459,23 @@
     inset: 0;
     z-index: 0;
   }
+
   .hero-content {
-    position: relative;
+    position: absolute;
     z-index: 1;
     background: rgba(0, 0, 0, 0.55);
     padding: 32px 24px;
-    border-radius: 16px;
     backdrop-filter: blur(4px);
+    width: 100%;
   }
-.otw-container {
-  top: 16px;
-  left: 16px;
-}
-.otw-badge {
-  font-size: 16px;
+
 }
 
+@media (min-width: 769px) and (max-width: 1200px) {
+  .hero-content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
 }
 
 /* ===== Expertise Grid ===== */

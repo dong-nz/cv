@@ -215,6 +215,21 @@ pre code {
   .section {
     padding: 48px 0;
   }
+  .container-wide,
+  .container-content,
+  .container-narrow {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .container-wide,
+  .container-content,
+  .container-narrow {
+    padding-left: 40px;
+    padding-right: 40px;
+  }
 }
 
 /* Scroll reveal animation */
@@ -228,6 +243,7 @@ pre code {
     transform: translateY(0);
   }
 }
+
 
 .animate-in {
   animation: fadeInUp var(--transition-slow) ease forwards;

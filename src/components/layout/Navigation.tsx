@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link, NavLink, useLocation } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { useTheme } from '@/hooks/useTheme'
+import { RollingTextLink } from '@/components/ui/RollingTextLink'
 
 const navItems = [
   { label: 'Home', path: '/' },
@@ -42,14 +43,12 @@ export function Navigation() {
           <ul className="nav-menu">
             {navItems.map((item) => (
               <li key={item.path}>
-                <NavLink
+                <RollingTextLink
                   to={item.path}
-                  className={({ isActive }) =>
-                    isActive ? 'nav-link active' : 'nav-link'
-                  }
+                  className={item.path === location.pathname ? 'nav-link active' : 'nav-link'}
                 >
                   {item.label}
-                </NavLink>
+                </RollingTextLink>
               </li>
             ))}
           </ul>
@@ -97,15 +96,13 @@ export function Navigation() {
         <ul className="mobile-menu-list">
           {navItems.map((item) => (
             <li key={item.path}>
-              <NavLink
+              <RollingTextLink
                 to={item.path}
-                className={({ isActive }) =>
-                  isActive ? 'mobile-menu-link active' : 'mobile-menu-link'
-                }
+                className={item.path === location.pathname ? 'mobile-menu-link active' : 'mobile-menu-link'}
                 onClick={() => setMobileOpen(false)}
               >
                 {item.label}
-              </NavLink>
+              </RollingTextLink>
             </li>
           ))}
         </ul>

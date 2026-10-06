@@ -1,5 +1,5 @@
-import { motion } from "motion/react"
-import { OpenToWorkBadge } from "@/components/ui/OpenToWorkBadge"
+import { motion, useScroll, useTransform } from "motion/react"
+import { InView } from "@/components/ui/InView"
 import { resumeAvailable } from "@/data/resume"
 import { Button } from "@/components/ui/Button"
 import { SocialLinks } from "@/components/ui/SocialLinks"
@@ -40,7 +40,11 @@ const socialLinks = [
 ]
 
 export function Hero() {
+  const { scrollY } = useScroll()
+  const y = useTransform(scrollY, [0, 300], [0, -80])
+  const opacity = useTransform(scrollY, [0, 200], [1, 0.3])
   return (
+    <InView>
     <motion.section
       className="hero container-wide"
       initial={{ opacity: 0 }}
@@ -50,6 +54,7 @@ export function Hero() {
     >
       <motion.div
         className="hero-content"
+        style={{ opacity }}
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
@@ -89,7 +94,7 @@ export function Hero() {
             View Projects
           </Button>
           {resumeAvailable && (
-            <Button href="/resume.pdf" variant="secondary" download>
+            <Button href="/resume.pdf" variant="secondary" target="_blank">
               Download Resume
             </Button>
           )}
@@ -101,6 +106,7 @@ export function Hero() {
       </motion.div>
       <motion.div
         className="hero-visual"
+        style={{ y }}
         initial={{ opacity: 0, x: 30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.4 }}
@@ -110,8 +116,8 @@ export function Hero() {
           alt="Profile photo"
           className="hero-photo"
         />
-        <OpenToWorkBadge />
       </motion.div>
     </motion.section>
+    </InView>
   )
 }

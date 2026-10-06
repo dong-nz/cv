@@ -1,7 +1,7 @@
 import type { Profile } from "@/types";
 
 export const profile: Profile = {
-  name: "Your Name",
+  name: "Dong Nguyen",
   title: "Senior Software Engineer",
   tagline:
     "Building scalable software systems,\nintelligent logistics solutions,\nand practical AI applications.",

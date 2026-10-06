@@ -6,7 +6,7 @@ export function Experience() {
   return (
     <InView>
       <motion.section
-        className="section container-content"
+        className="section container-wide"
         aria-labelledby="experience-heading"
         initial="hidden"
         whileInView="visible"
@@ -29,6 +29,7 @@ export function Experience() {
         >
           Experience
         </motion.h2>
+        <div style={{ maxWidth: '700px' }}>
         <div className="timeline">
           {experiences.map((exp, i) => (
             <motion.div
@@ -97,6 +98,7 @@ export function Experience() {
               ))}
             </motion.div>
           ))}
+        </div>
         </div>
       </motion.section>
     </InView>

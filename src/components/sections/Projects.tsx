@@ -1,7 +1,9 @@
+import { Link } from "react-router"
 import { motion } from "motion/react"
 import { Badge } from "@/components/ui/Badge"
 import { projects } from "@/data/projects"
 import { InView } from "@/components/ui/InView"
+const MotionLink = motion.create(Link)
 
 const categoryLabels: Record<string, string> = {
   "software-engineering": "Software Engineering",
@@ -44,20 +46,20 @@ export function Projects() {
           }}
         >
           <h2 id="projects-heading">Featured Projects</h2>
-          <motion.a
-            href="/projects"
+          <MotionLink
+            to="/projects"
             style={{ fontSize: "14px", fontWeight: 500, color: "var(--accent)" }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             View All →
-          </motion.a>
+          </MotionLink>
         </motion.div>
         <div className="projects-grid">
           {featured.map((project, i) => (
-            <motion.a
+            <MotionLink
               key={project.id}
-              href={`/projects/${project.id}`}
+              to={`/projects/${project.id}`}
               className="project-card"
               variants={{
                 hidden: { opacity: 0, y: 30 },
@@ -94,7 +96,7 @@ export function Projects() {
                 </div>
               )}
               <span className="project-card-cta">View Details →</span>
-            </motion.a>
+            </MotionLink>
           ))}
         </div>
       </motion.section>
