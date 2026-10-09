@@ -3,6 +3,14 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "packageManager": "pnpm@12.4.1",
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^24.0.0",
+      "onFailure": "download"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
