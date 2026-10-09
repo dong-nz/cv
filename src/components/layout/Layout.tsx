@@ -1,4 +1,5 @@
 import { Navigation } from './Navigation'
+import { BackToTop } from '@/components/ui/BackToTop'
 import { Footer } from './Footer'
 
 interface LayoutProps {
@@ -16,6 +17,7 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
       <Footer />
+      <BackToTop />
     </>
   )
 }

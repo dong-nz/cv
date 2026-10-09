@@ -1,0 +1,13 @@
+services:
+  dong-site:
+    image: nginx:alpine
+    container_name: dong-site
+    restart: unless-stopped
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - docker-network
+networks:
+  docker-network:
+    external: true
