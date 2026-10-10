@@ -42,6 +42,7 @@ jobs:
       - name: rsync deployments
         uses: burnett01/rsync-deployments@v9
         with:
+          debug: true
           switches: -avzr --delete
           path: dist/
           remote_path: /opt/stacks/dong-site/dist/ # ex: /var/www/html/
