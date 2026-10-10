@@ -80,6 +80,10 @@ src/
 - No CSS library — plain CSS with variables for theming
 - `#main-content` in Layout has `style={{ flex: 1 }}` (parent `#root` is `display: flex; flex-direction: column`)
 
+## Deployment
+
+- Deployment is triggered automatically by gitea workflow `.gitea/workflows/deploy.yml`setup in the repository.
+
 ## Known Issues & Gotchas
 
 1. **React Router v8 routing:** Use `<Layout><Routes>...</Routes></Layout>`, NOT `<Route element={<Layout />}>` with nested routes — the latter doesn't pass `children` correctly

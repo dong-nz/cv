@@ -28,5 +28,35 @@ If you are developing a production application, we recommend enabling type-aware
   }
 }
 ```
-
 See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
+## Deployment On Windows
+
+Open PowerShell on your Windows computer.
+
+Create an ssh key for gitea deployment:
+
+```powershell
+ssh-keygen -t ed25519 -C "gitea-deploy" -f "$HOME\.ssh\gitea_deploy_key"
+```
+
+In a VPS server, create the deployment user
+
+```bash
+sudo adduser gitea-deployer
+sudo install -d -m 700 -o deploy -g deploy /home/gitea-deployer/.ssh
+```
+
+Because no ssh-copy-id is available on Windows, you need to copy the public key to the server manually.
+
+```powershell
+type $HOME\.ssh\gitea_deploy_key.pub | ssh gitea-deployer@112.213.91.239 -p 2212 "cat >> ~/.ssh/authorized_keys"
+```
+
+Test ssh connected with a private key
+
+```powershell
+ssh gitea-deployer@112.213.91.239 -p 2212 -i "$HOME\.ssh\gitea_deploy_key" -o IdentitiesOnly=yes
+```
+
+

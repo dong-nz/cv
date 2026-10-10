@@ -26,8 +26,8 @@ jobs:
           debug: true
           switches: -avzr --delete
           path: dist/
-          remote_path: /opt/stacks/dong-site/dist/ # ex: /var/www/html/
-          remote_host: ${{ secrets.DEPLOY_HOST }} # ex: example.com
-          remote_port: ${{ secrets.DEPLOY_SSH_PORT }} # ex: 22
-          remote_user: ${{ secrets.DEPLOY_USER }} # ex: ubuntu
+          remote_path: /opt/stacks/dong-site/dist/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
           remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
