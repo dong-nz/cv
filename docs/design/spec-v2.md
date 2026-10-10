@@ -17,11 +17,13 @@
 | `specs/v2/spec-v2-router-v8.md` | React Router v7 → v8 | ✅ Done |
 ## Overview
 
-v2 bao gồm 6 tính năng, mỗi tính năng có spec riêng trong `specs/`:
+v2 bao gồm 7 tính năng, mỗi tính năng có spec riêng trong `specs/`:
 
 | File | Feature | Priority | Est. | Status |
 |------|---------|----------|------|--------|
-| `specs/v2/spec-v2-resume.md` | Resume download | P1 | ~15 min | ✅ Done |
+| `specs/v2/spec-v2-resume.md` | Resume download (UI) | P1 | ~15 min | ✅ Done |
+| `specs/v2/pdf-resume/spec-v2-resume-playwright.md` | Resume PDF (Playwright) | P1 | ~4 hours | |
+| `specs/v2/pdf-resume/spec-v2-resume-puppeteer.md` | Resume PDF (Puppeteer) | P1 | ~4 hours | |
 | `specs/v2/spec-v2-hero-carousel.md` | Hero visual carousel | P1 | ~1 hour | |
 | `specs/v2/spec-v2-seo.md` | SEO (metadata, OG, sitemap) | P1 | ~1 hour | |
 | `specs/v2/spec-v2-blog.md` | Blog (MDX, articles, syntax highlight) | P1 | ~4 hours | |
@@ -29,7 +31,7 @@ v2 bao gồm 6 tính năng, mỗi tính năng có spec riêng trong `specs/`:
 | `specs/v2/spec-v2-testing.md` | Testing (Vitest + E2E) | P5 | ~3 hours | |
 | `specs/v2/spec-v2-cicd.md` | CI/CD (GitHub Actions) | P5 | ~1 hour | |
 
-**Implementation order:** ~~Resume~~ → Hero Carousel → SEO → Blog → Analytics → Testing → CI/CD
+**Implementation order:** ~~Resume~~ → ~~Resume PDF (choose one)~~ → Hero Carousel → SEO → Blog → Analytics → Testing → CI/CD
 
 ---
 
@@ -40,7 +42,6 @@ v2 bao gồm 6 tính năng, mỗi tính năng có spec riêng trong `specs/`:
 - Interactive diagrams / simulations (Phase 5+)
 - Search functionality (Phase 5+)
 - Contact form with backend (Phase 5+)
-- Resume PDF generation (user uploads manually)
 
 ---
 
