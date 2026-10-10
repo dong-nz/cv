@@ -43,8 +43,8 @@ jobs:
         uses: burnett01/rsync-deployments@v9
         with:
           switches: -avzr --delete
-          path: src/
-          remote_path: /opt/static-site/.incoming/ # ex: /var/www/html/
+          path: dist/
+          remote_path: /opt/stacks/dong-site/dist/ # ex: /var/www/html/
           remote_host: ${{ secrets.DEPLOY_HOST }} # ex: example.com
           remote_port: ${{ secrets.DEPLOY_SSH_PORT }} # ex: 22
           remote_user: ${{ secrets.DEPLOY_USER }} # ex: ubuntu
