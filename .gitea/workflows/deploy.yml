@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build and deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -15,11 +15,59 @@ jobs:
           cache: true
           version: ^12.0.0
           runtime: node@24
-      - run: node --version
       - run: pnpm build
-      - name: List files in dist
-        run: |
-          ls ${{ gitea.workspace }}/dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: static-site
+          path: dist/
+          retention-days: 5
+
+  generate-resume:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v3
+        with:
+          cache: true
+          version: ^12.0.0
+          runtime: node@24
+
+      # Cache Playwright browser — download once, reuse
+      - name: Cache Playwright browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - run: pnpm install --frozen-lockfile
+      - run: npx playwright install chromium
+      - run: npx playwright install-deps chromium
+      - run: pnpm tsx scripts/generate-resume.ts
+
+      # Upload PDF artifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: resume-pdf
+          path: dist/resume.pdf
+          retention-days: 30
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, generate-resume]
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: static-site
+          path: dist/
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: resume-pdf
+          path: dist/
+
       - name: rsync deployments
         uses: burnett01/rsync-deployments@v9
         with:

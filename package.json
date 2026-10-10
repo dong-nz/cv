@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:resume": "pnpm tsx scripts/generate-resume.ts",
     "lint": "oxlint",
     "preview": "vite preview"
   },
