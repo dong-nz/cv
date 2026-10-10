@@ -17,28 +17,9 @@ jobs:
           runtime: node@24
       - run: node --version
       - run: pnpm build
-#      - uses: GuillaumeFalourd/setup-rsync@v1.2
-#      - run: rsync --version
-      - name: List files in the repository
-        run: |
-          ls ${{ gitea.workspace }}
       - name: List files in dist
         run: |
           ls ${{ gitea.workspace }}/dist
-#      - name: Install SSH key
-#        uses: webfactory/ssh-agent@v0.10.0
-#        with:
-#          ssh-private-key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-#
-#      - name: Add VPS to known_hosts
-#        run: |
-#          mkdir -p ~/.ssh
-#
-#          ssh-keyscan \
-#            -p "${{ secrets.DEPLOY_SSH_PORT }}" \
-#            "${{ secrets.DEPLOY_HOST }}" \
-#            >> ~/.ssh/known_hosts
-
       - name: rsync deployments
         uses: burnett01/rsync-deployments@v9
         with:
@@ -50,10 +31,3 @@ jobs:
           remote_port: ${{ secrets.DEPLOY_SSH_PORT }} # ex: 22
           remote_user: ${{ secrets.DEPLOY_USER }} # ex: ubuntu
           remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-
-#      - name: Upload build
-#        run: |
-#          rsync -az --delete \
-#            -e "ssh -p ${{ secrets.DEPLOY_SSH_PORT }}" \
-#            dist/ \
-#            "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/opt/static-site/.incoming/"
