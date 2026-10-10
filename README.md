@@ -44,7 +44,10 @@ In a VPS server, create the deployment user
 
 ```bash
 sudo adduser gitea-deployer
-sudo install -d -m 700 -o deploy -g deploy /home/gitea-deployer/.ssh
+sudo usermod -aG docker gitea-deployer
+# test user can run docker
+sudo -u gitea-deployer docker ps
+sudo install -d -m 700 -o gitea-deployer -g gitea-deployer /home/gitea-deployer/.ssh
 ```
 
 Because no ssh-copy-id is available on Windows, you need to copy the public key to the server manually.
@@ -59,4 +62,11 @@ Test ssh connected with a private key
 ssh gitea-deployer@112.213.91.239 -p 2212 -i "$HOME\.ssh\gitea_deploy_key" -o IdentitiesOnly=yes
 ```
 
+Get content of private key
+
+```powershell
+Get-Content -Raw "$HOME\.ssh\gitea_deploy_key"
+```
+
+In Gitea, create action secrets `DEPLOY_HOST`, `DEPLOY_SSH_PORT`, `DEPLOY_USER`, `DEPLOY_SSH_PRIVATE_KEY` for deployment.
 

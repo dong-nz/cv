@@ -84,6 +84,12 @@ src/
 
 - Deployment is triggered automatically by gitea workflow `.gitea/workflows/deploy.yml`setup in the repository.
 
+```
+.gitea/
+└── workflows/
+    └── deploy.yml
+```
+
 ## Known Issues & Gotchas
 
 1. **React Router v8 routing:** Use `<Layout><Routes>...</Routes></Layout>`, NOT `<Route element={<Layout />}>` with nested routes — the latter doesn't pass `children` correctly
