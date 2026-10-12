@@ -769,15 +769,68 @@ will show because `/resume.pdf` exists on the server.
 
 ---
 
-## Future Enhancements
 
+## Download Resume UI
+
+### Component: `DownloadResume`
+
+Single download button with dropdown menu on desktop, 2 separate buttons on mobile.
+
+**Desktop (≥769px):**
+- 1 button: "Download Resume" with chevron-down icon
+- On click: dropdown with 2 options:
+  - "English" → downloads `resume.pdf`
+  - "Tiếng Việt" → downloads `resume-vi.pdf`
+- Dropdown uses native `<details>` element (no JS state)
+
+```html
+<details class="download-resume-dropdown">
+  <summary>Download Resume ▾</summary>
+  <div class="dropdown-options">
+    <a href="/resume.pdf" download class="dropdown-option">English</a>
+    <a href="/resume-vi.pdf" download class="dropdown-option">Tiếng Việt</a>
+  </div>
+</details>
+```
+
+**Mobile (<769px):**
+- 2 separate buttons (current layout):
+  - "Download Resume (EN)" → `resume.pdf`
+  - "Download Resume (VI)" → `resume-vi.pdf`
+- No dropdown, direct download links
+
+### Component: Hero CTA
+
+**Desktop (≥769px):**
+- Same dropdown pattern as `DownloadResume`
+- Single "Download Resume" button with dropdown
+
+**Mobile (<769px):**
+- 2 separate buttons (current layout)
+- "Download Resume (EN)" and "Download Resume (VI)"
+
+### CSS Breakpoint
+
+Use `@media (min-width: 769px)` for desktop dropdown layout, `@media (max-width: 768px)` for mobile 2-button layout.
+
+### Implementation Notes
+
+- Use native `<details>`/`<summary>` for dropdown — no React state needed
+- `download` attribute on `<a>` triggers browser download
+- Dropdown should close when an option is clicked (native `<details>` behavior)
+- Mobile: keep existing 2-button layout in `DownloadResume.tsx` using `resumeLanguages.map()`
+- Desktop: wrap in `<details>` dropdown, render only "Download Resume" as summary
+
+---
+
+## Future Enhancements
 Deferred items are tracked in [`spec-v2-resume-future.md`](./spec-v2-resume-future.md):
 
 | # | Enhancement | Status |
 |---|-------------|--------|
 | 1 | PDF Metadata (title/author) | Deferred |
-| 2 | Version Stamping (footer date) | Deferred |
+| 2 | Version Stamping (footer date) | ✅ Implemented |
 | 3 | Conditional Content (placeholder detection) | Deferred |
 | 4 | Project Sections (render text/diagram/metrics/code) | Deferred |
-| 5 | Multiple Language Versions (EN + VI) | Deferred |
+| 5 | Multiple Language Versions (EN + VI) | ✅ Implemented |
 
