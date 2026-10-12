@@ -38,3 +38,10 @@ Do not start coding based only on the user's description.
 
 It costs so much time for you to complete the verifying by headless browser.
 I will verify the result in a real browser and tell you if the change works.
+
+## 6. Never auto-commit or auto-push
+
+**NEVER** run `git commit` or `git push` without explicit user approval.
+
+After completing a task, report results and **ask the user** if they want to commit/push.
+Only proceed with `git commit` / `git push` when the user explicitly confirms.
