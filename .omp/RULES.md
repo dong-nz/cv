@@ -27,10 +27,14 @@ Do not start coding based only on the user's description.
 
 1. **Investigate** — research the issue using the steps in Section 2.
 2. **Report** — present findings: root cause, affected files, proposed fix.
-3. **Confirm** — wait for user approval before applying any code changes.
+3. **Confirm** — wait for user approval before applying any changes (code, config, docs, spec, or any file).
 4. **Execute** — apply the approved change, verify, then report results.
 
 ## 4. Conversation language
 
 **IMPORTANT:** All responses are in Vietnamese. Source code and docs are in English.
-## 5. Don't run the headless browser to verify. It costs so times to complete. I will verify the result in real browser and tell you if the change works.
+
+## 5. Don't run the headless browser to verify.
+
+It costs so much time for you to complete the verifying by headless browser.
+I will verify the result in a real browser and tell you if the change works.

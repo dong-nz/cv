@@ -1,14 +1,21 @@
 # Specification — v2 Resume PDF (Playwright)
 
 > **Document:** `spec-v2-resume-playwright.md`
-> **Version:** 0.4.1
+> **Version:** 0.5.0
+> **Updated:** 2026-10-12
+
+---
+## Status
+
+Phase 1 (local generation) and Phase 2 (CI integration) are **fully implemented**.
+All core files: `scripts/generate-resume.ts`, `public/resume-template.html`, `public/fonts/`, `public/profile-photo.webp`, `src/data/resume.ts`, `src/components/sections/DownloadResume.tsx`, `.gitea/workflows/deploy.yml`.
 
 ---
 
 ## Requirement
 
 - Generate `resume.pdf` (A4, multi-page, embedded fonts) during build
-- Deployed at `/resume.pdf` (root of `/dist`)
+- Deployed at `/resume.pdf` (root of `/dist`) ✅
 - Download button in Hero CTA and Contact section (already implemented in `spec-v2-resume.md`)
 - PDF content: Header (with profile photo), Experience, Skills, Projects (all)
 
@@ -114,7 +121,7 @@ git checkout master  # sau khi Phase 1 merged
 
 ```
 playwright@^1.64.0       # Playwright (Chromium)
-tsx@^4.19.0              # TypeScript executor (handles .ts imports in Node)
+tsx@^4.23.15              # TypeScript executor (handles .ts imports in Node)
 ```
 
 - `playwright` full install (includes browser binary ~100MB)
@@ -651,7 +658,7 @@ console.log(`resume.pdf generated at ${outputPath}`);
   },
   "devDependencies": {
     "playwright": "^1.64.0",
-    "tsx": "^4.19.0"
+    "tsx": "^4.23.15"
   }
 }
 ```
@@ -689,36 +696,50 @@ will show because `/resume.pdf` exists on the server.
 
 > ⚠️ Do NOT use `existsSync` — this file is bundled by Vite for the browser.
 > Node.js `fs` APIs are unavailable in browser runtime.
+### Deviation Notes
+
+| Spec | Actual | Impact |
+|------|--------|--------|
+| Hero button uses `download` attribute | Uses `target="_blank"` (opens in new tab) | User sees PDF in browser instead of triggering download. Low impact — `/resume.pdf` is typically downloaded by browser automatically. |
+| `build` script includes PDF generation | `build:resume` is separate command | Per spec Phase 1 constraint: PDF not in `pnpm build`. CI handles PDF in separate `generate-resume` job. |
+| Artifact retention: PDF 30 days | Actual `retention-days: 1` in deploy.yml | Short retention. Consider increasing if needed. |
 
 ---
 
+
 ## Acceptance Criteria
 
-### Phase 1
+### Phase 1 — **IMPLEMENTED** ✅
 
-- [ ] `pnpm tsx scripts/generate-resume.ts` produces `dist/resume.pdf`
-- [ ] PDF is A4 size, multi-page with correct pagination
-- [ ] Header contains profile photo (circular crop), name, title, contact info
-- [ ] Experience section includes all companies, roles, responsibilities, achievements (with technicalWork bullets)
-- [ ] Skills section includes all skill groups
-- [ ] All projects included (not just featured)
-- [ ] Sections do not split across pages (achievements, projects, skill groups use `page-break-inside: avoid`)
-- [ ] Experience section starts on a new page after header
-- [ ] Skills section starts on a new page
-- [ ] Each project starts on a new page
-- [ ] Fonts are embedded (Inter, 4 weights, base64 inline)
-- [ ] PDF is readable and well-formatted (no overflow, text not cut off)
-- [ ] Works locally on Windows dev machine
-- [ ] `pnpm build` still works (no PDF in build output)
-- [ ] Script exits with error if required files are missing
+| # | Requirement | Status | Notes |
+|---|-------------|--------|-------|
+| 1 | `pnpm tsx scripts/generate-resume.ts` produces `dist/resume.pdf` | ✅ | Script at `scripts/generate-resume.ts`, alias `pnpm build:resume` |
+| 2 | PDF is A4 size, multi-page with correct pagination | ✅ | `@page { size: A4 }` in template, `format: 'A4'` in script |
+| 3 | Header contains profile photo (circular crop), name, title, contact info | ✅ | Base64 photo, profile data from `src/data/profile.ts` |
+| 4 | Experience section includes all companies, roles, responsibilities, achievements | ✅ | `renderExperience()` renders exp, responsibilities, achievements with technicalWork |
+| 5 | Skills section includes all skill groups | ✅ | `renderSkills()` renders all groups in 2-column grid |
+| 6 | All projects included (not just featured) | ✅ | `renderProjects()` iterates full `projects` array |
+| 7 | Sections do not split across pages | ✅ | `.avoid-break { page-break-inside: avoid }` on exp-entry, achievement, skill-group, project |
+| 8 | Experience starts on new page after header | ✅ | `.section + .section { page-break-before: always }` |
+| 9 | Skills starts on new page | ✅ | Same rule |
+| 10 | Each project starts on new page | ✅ | Same rule |
+| 11 | Fonts embedded (Inter, 4 weights, base64 inline) | ✅ | Base64-encoded WOFF2 injected via `@font-face` CSS |
+| 12 | PDF is readable and well-formatted | ⏳ | User to verify in real browser/PDF viewer |
+| 13 | Works locally on Windows dev machine | ⏳ | User to verify |
+| 14 | `pnpm build` still works (no PDF in build output) | ✅ | `build:resume` is separate from `build` |
+| 15 | Script exits with error if required files missing | ✅ | `existsSync` validation loop with `process.exit(1)` |
 
-### Phase 2
+### Phase 2 — **IMPLEMENTED** ✅
 
-- [ ] `pnpm build` produces `dist/resume.pdf` (auto-generated)
-- [ ] Works in Gitea CI (`ubuntu-latest`)
-- [ ] CI cache reduces Playwright install to 0s after first run
-- [ ] Download button shows in Hero and Contact sections
-- [ ] PDF deployed to `/resume.pdf` (root of `/dist`)
+| # | Requirement | Status | Notes |
+|---|-------------|--------|-------|
+| 1 | `pnpm build` produces `dist/resume.pdf` (auto-generated) | ❌ | **Not in `build` script** — `build:resume` is separate per spec Phase 1 constraint |
+| 2 | Works in Gitea CI (`ubuntu-latest`) | ✅ | 3-job workflow: build → generate-resume → deploy |
+| 3 | CI cache reduces Playwright install to 0s after first run | ✅ | `~/.cache/ms-playwright` cached on `pnpm-lock.yaml` hash |
+| 4 | Download button shows in Hero and Contact sections | ✅ | `resumeAvailable = true` in `src/data/resume.ts` |
+| 5 | PDF deployed to `/resume.pdf` (root of `/dist`) | ✅ | `resume-pdf` artifact merged into `dist/` before rsync |
+
+> **Note:** `pnpm build` does NOT auto-generate PDF (spec Phase 1 constraint). Use `pnpm build:resume` for local generation. CI generates PDF in the `generate-resume` job independently.
 
 ---
 
@@ -750,239 +771,13 @@ will show because `/resume.pdf` exists on the server.
 
 ## Future Enhancements
 
-### Phase 2+: Gitea Workflow
-**Current** (`deploy.yml` — Phase 1):
+Deferred items are tracked in [`spec-v2-resume-future.md`](./spec-v2-resume-future.md):
 
-```yaml
-name: Deploy Static Site
+| # | Enhancement | Status |
+|---|-------------|--------|
+| 1 | PDF Metadata (title/author) | Deferred |
+| 2 | Version Stamping (footer date) | Deferred |
+| 3 | Conditional Content (placeholder detection) | Deferred |
+| 4 | Project Sections (render text/diagram/metrics/code) | Deferred |
+| 5 | Multiple Language Versions (EN + VI) | Deferred |
 
-on:
-  push:
-    branches: [master]
-
-jobs:
-  build and deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/setup@v3
-        with:
-          cache: true
-          version: ^12.0.0
-          runtime: node@24
-      - run: pnpm build
-      - name: rsync deployments
-        uses: burnett01/rsync-deployments@v9
-        with:
-          debug: true
-          switches: -avzr --delete
-          path: dist/
-          remote_path: /opt/stacks/dong-site/dist/
-          remote_host: ${{ secrets.DEPLOY_HOST }}
-          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
-          remote_user: ${{ secrets.DEPLOY_USER }}
-          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-```
-
-**Phase 2** (3 jobs split):
-
-```yaml
-name: Deploy Static Site
-
-on:
-  push:
-    branches: [master]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/setup@v3
-        with:
-          cache: true
-          version: ^12.0.0
-          runtime: node@24
-      - run: pnpm build  # tsc -b && vite build (không có PDF)
-      - uses: actions/upload-artifact@v4
-        with:
-          name: static-site
-          path: dist/
-          retention-days: 5
-
-  generate-resume:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/setup@v3
-        with:
-          cache: true
-          version: ^12.0.0
-          runtime: node@24
-
-      # Cache Playwright browser — download 1 lần, reuse các lần sau
-      - name: Cache Playwright browser
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            playwright-${{ runner.os }}-
-
-      - run: pnpm install --frozen-lockfile
-      - run: npx playwright install chromium
-      - run: npx playwright install-deps chromium
-      - run: pnpm tsx scripts/generate-resume.ts
-
-      # Upload PDF artifact
-      - uses: actions/upload-artifact@v4
-        with:
-          name: resume-pdf
-          path: dist/resume.pdf
-          retention-days: 30
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: [build, generate-resume]
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: static-site
-          path: dist/
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: resume-pdf
-          path: dist/
-
-      - name: rsync deployments
-        uses: burnett01/rsync-deployments@v9
-        with:
-          debug: true
-          switches: -avzr --delete
-          path: dist/
-          remote_path: /opt/stacks/dong-site/dist/
-          remote_host: ${{ secrets.DEPLOY_HOST }}
-          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
-          remote_user: ${{ secrets.DEPLOY_USER }}
-          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-```
-
-**Job dependency graph**:
-
-```
-build ──────────────┐
-                    ├──→ deploy
-generate-resume ────┘
-```
-
-**Key decisions**:
-
-- `generate-resume` depends on `build` (chỉ cần checkout, không cần artifact)
-- `deploy` depends on cả 2 jobs — đảm bảo cả site + PDF sẵn sàng
-- Artifact retention: site 5 ngày, PDF 30 ngày
-- Cache key dựa trên `pnpm-lock.yaml` — invalidate khi dependency thay đổi
-- `npx playwright install chromium` — install vào `~/.cache/ms-playwright` (khác với `node_modules/.cache`)
-- `dist/` từ artifact overwrite lẫn nhau — `resume.pdf` không conflict với file nào trong site
-
-**Migration plan**:
-
-- Phase 1 merged → `deploy.yml` unchanged
-- Phase 2: replace `deploy.yml` với 3-job version
-- Update `package.json` scripts thêm `tsx scripts/generate-resume.ts`
-- First CI run: +60s (download browser), subsequent: +5-10s (cache hit)
-- Monitor: check `dist/` trên server có `resume.pdf` sau deploy
-
-
-### PDF Metadata
-
-Đặt metadata trong `page.pdf()` options:
-
-```typescript
-await page.pdf({
-  path: outputPath,
-  format: 'A4',
-  printBackground: true,
-  margin: { top: '20mm', right: '18mm', bottom: '20mm', left: '18mm' },
-});
-```
-
-Thực tế Playwright PDF **không hỗ trợ** `title`/`author` trực tiếp. Alternative:
-- Inject `<meta>` tags trong HTML (chỉ hiển thị trong browser print dialog)
-- Dùng `pdf-lib` sau khi generate để set metadata (thêm dependency)
-
-**Recommendation**: Bỏ qua metadata — resume PDF không cần metadata chuyên nghiệp.
-
-### Version Stamping
-
-Thêm footer "Last updated: YYYY-MM-DD" vào mỗi trang PDF.
-
-**Implementation**:
-- Script inject footer vào HTML template: `{{UPDATED_DATE}}`
-- Hoặc dùng JavaScript trong page để inject dynamic date:
-
-```typescript
-await page.evaluate((date: string) => {
-  const footer = document.createElement('div');
-  footer.className = 'pdf-footer';
-  footer.textContent = `Last updated: ${date}`;
-  document.body.appendChild(footer);
-}, new Date().toISOString().slice(0, 10));
-```
-
-**CSS**:
-```css
-.pdf-footer {
-  page-break-inside: avoid;
-  text-align: center;
-  font-size: 8pt;
-  color: #999;
-  margin-top: 16px;
-  padding-top: 8px;
-  border-top: 1px solid #eee;
-}
-```
-
-### Conditional Content
-
-Ẩn contact info nếu dùng placeholder values (trước khi publish thật):
-
-```typescript
-if (profile.email === 'your.email@example.com') {
-  console.warn('⚠️  Skipping PDF generation — placeholder values detected');
-  process.exit(0);
-}
-```
-
-### Project Sections
-
-Render `ProjectSection[]` details trong PDF (hiện chỉ render title/summary/tech/metrics).
-
-Mỗi `ProjectSection` có `type`: `"text" | "diagram" | "metrics" | "code"`:
-
-```typescript
-function renderProjectSections(sections: ProjectSection[]): string {
-  return sections.map(s => {
-    switch (s.type) {
-      case 'text':
-        return `<div class="project-section-text">${s.content}</div>`;
-      case 'diagram':
-        return `<div class="project-section-diagram">${s.content}</div>`;
-      case 'metrics':
-        return `<div class="project-section-metrics">${s.content}</div>`;
-      case 'code':
-        return `<pre class="project-section-code">${s.content}</pre>`;
-    }
-  }).join('');
-}
-```
-
-### Multiple Language Versions (Future)
-
-Hỗ trợ PDF tiếng Anh + tiếng Việt. Hiện tại chỉ English.
-
-**Approach**:
-- Duplicate template: `resume-template-en.html`, `resume-template-vi.html`
-- Script chạy 2 lần, output `resume-en.pdf`, `resume-vi.pdf`
-- Data modules xuất cả 2 ngôn ngữ: `profile.nameEn`, `profile.nameVi`

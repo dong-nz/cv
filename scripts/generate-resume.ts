@@ -5,7 +5,14 @@ import { profile } from '../src/data/profile.js';
 import { experiences } from '../src/data/experience.js';
 import { skillGroups } from '../src/data/skills.js';
 import { projects } from '../src/data/projects.js';
+import type { Language } from '../src/types/index.js';
+
 const ROOT = resolve(import.meta.dirname, '..');
+
+// --- CLI args ---
+const args = process.argv.slice(2);
+const langArg = (args.find(a => a.startsWith('--lang=')) || '').replace('--lang=', '') as Language;
+const lang: Language = (langArg === 'en' || langArg === 'vi') ? langArg : 'en';
 
 // --- Validate required files ---
 const requiredFiles = [
@@ -52,23 +59,45 @@ const fontFaces = Object.entries(fonts).map(([key, b64]) => {
 }`;
 }).join('\n');
 
+// --- Version stamp date ---
+const updatedDate = new Date().toISOString().slice(0, 10);
+
+// --- Language-specific label map ---
+const labels: Record<Language, Record<string, string>> = {
+  en: {
+    EXPERIENCE: 'Experience',
+    SKILLS: 'Skills',
+    PROJECTS: 'Projects',
+  },
+  vi: {
+    EXPERIENCE: 'Kinh nghiệm',
+    SKILLS: 'Kỹ năng',
+    PROJECTS: 'Dự án',
+  },
+};
+
+// --- Resolve bilingual field ---
+function resolveField<T>(en?: T, vi?: T): T {
+  return lang === 'en' && en !== undefined ? en : (vi !== undefined ? vi : en as T);
+}
+
 // --- Render HTML helpers ---
 function renderExperience(exps: typeof experiences): string {
   return exps.map(exp => `
     <div class="exp-entry avoid-break">
       <div class="exp-header">
-        <span class="exp-title">${exp.title}</span>
+        <span class="exp-title">${resolveField(exp.titleEn, exp.title)}</span>
         <span class="exp-duration">${exp.duration}</span>
       </div>
       <div class="exp-company">${exp.company}</div>
       ${exp.location ? `<div class="exp-location">${exp.location}</div>` : ''}
       <ul class="exp-responsibilities">
-        ${exp.responsibilities.map(r => `<li>${r}</li>`).join('')}
+        ${resolveField(exp.responsibilitiesEn, exp.responsibilities).map(r => `<li>${r}</li>`).join('')}
       </ul>
       ${exp.achievements?.map(ach => `
         <div class="achievement avoid-break">
-          <div class="achievement-title">${ach.title}</div>
-          <div class="achievement-context">${ach.context}</div>
+          <div class="achievement-title">${resolveField(ach.titleEn, ach.title)}</div>
+          <div class="achievement-context">${resolveField(ach.contextEn, ach.context)}</div>
           ${ach.technicalWork?.length ? `
             <ul class="achievement-technical">
               ${ach.technicalWork.map(t => `<li>${t}</li>`).join('')}
@@ -77,7 +106,7 @@ function renderExperience(exps: typeof experiences): string {
           <div class="achievement-tech">
             ${ach.technologies.map(t => `<span>${t}</span>`).join('')}
           </div>
-          ${ach.impact ? `<div class="achievement-impact">${ach.impact}</div>` : ''}
+          ${ach.impact ? `<div class="achievement-impact">${resolveField(ach.impactEn, ach.impact)}</div>` : ''}
           ${ach.metrics?.length ? `<div class="achievement-metrics">${ach.metrics.join(', ')}</div>` : ''}
         </div>
       `).join('')}
@@ -88,7 +117,7 @@ function renderExperience(exps: typeof experiences): string {
 function renderSkills(groups: typeof skillGroups): string {
   return groups.map(group => `
     <div class="avoid-break">
-      <div class="skill-group-title">${group.title}</div>
+      <div class="skill-group-title">${resolveField(group.titleEn, group.title)}</div>
       <div class="skill-list">${group.skills.join(' · ')}</div>
     </div>
   `).join('');
@@ -97,9 +126,9 @@ function renderSkills(groups: typeof skillGroups): string {
 function renderProjects(projs: typeof projects): string {
   return projs.map(project => `
     <div class="project avoid-break">
-      <div class="project-title">${project.title}</div>
+      <div class="project-title">${resolveField(project.titleEn, project.title)}</div>
       <div class="project-role">${project.role}</div>
-      <div class="project-summary">${project.summary}</div>
+      <div class="project-summary">${resolveField(project.summaryEn, project.summary)}</div>
       <div class="project-tech">
         ${project.technologies.map(t => `<span>${t}</span>`).join('')}
       </div>
@@ -111,12 +140,19 @@ function renderProjects(projs: typeof projects): string {
 // --- Assemble HTML ---
 const html = template
   .replace('{{NAME}}', profile.name)
-  .replace('{{TITLE}}', profile.title)
+  .replace('{{TITLE}}', resolveField(profile.titleEn, profile.title))
+  .replace('{{TAGLINE}}', resolveField(profile.taglineEn, profile.tagline))
+  .replace('{{BIO}}', resolveField(profile.bioEn, profile.bio))
   .replace('{{EMAIL}}', profile.email)
   .replace('{{GITHUB}}', profile.githubUrl.replace('https://', 'github.com/'))
   .replace('{{LINKEDIN}}', profile.linkedinUrl.replace('https://', 'linkedin.com/in/'))
   .replace('{{PHOTO_BASE64}}', photoBase64)
   .replace('{{FONT_FACES}}', fontFaces)
+  .replace('{{UPDATED_DATE}}', updatedDate)
+  .replace('{{LANG}}', lang)
+  .replace('{{EXPERIENCE_LABEL}}', labels[lang].EXPERIENCE)
+  .replace('{{SKILLS_LABEL}}', labels[lang].SKILLS)
+  .replace('{{PROJECTS_LABEL}}', labels[lang].PROJECTS)
   .replace('{{EXPERIENCE}}', renderExperience(experiences))
   .replace('{{SKILLS}}', renderSkills(skillGroups))
   .replace('{{PROJECTS}}', renderProjects(projects));
@@ -126,13 +162,17 @@ const browser = await chromium.launch();
 const page = await browser.newPage();
 await page.setContent(html);  // No waitUntil needed — all resources inline
 
-const outputPath = join(ROOT, 'dist/resume.pdf');
+const langSuffix = lang === 'en' ? '' : `-${lang}`;
+const outputPath = join(ROOT, `dist/resume${langSuffix}.pdf`);
 await page.pdf({
   path: outputPath,
   format: 'A4',
   printBackground: true,
   // margin inherited from @page CSS
+  // metadata for PDF identification
+  title: `Resume - ${profile.name} (${lang === 'en' ? 'English' : 'Vietnamese'})`,
+  author: profile.name,
 });
 
 await browser.close();
-console.log(`resume.pdf generated at ${outputPath}`);
+console.log(`resume${langSuffix}.pdf generated at ${outputPath} [${lang}]`);

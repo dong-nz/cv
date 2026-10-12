@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "build:resume": "pnpm tsx scripts/generate-resume.ts",
+    "build:resume-all": "pnpm tsx scripts/generate-resume.ts --lang=en && pnpm tsx scripts/generate-resume.ts --lang=vi",
     "lint": "oxlint",
     "preview": "vite preview"
   },

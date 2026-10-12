@@ -1,6 +1,6 @@
 import { motion, useScroll, useTransform } from "motion/react"
 import { InView } from "@/components/ui/InView"
-import { resumeAvailable } from "@/data/resume"
+import { resumeAvailable, resumeLanguages, resumeUrlFor } from "@/data/resume"
 import { Button } from "@/components/ui/Button"
 import { SocialLinks } from "@/components/ui/SocialLinks"
 import { profile } from "@/data/profile"
@@ -94,9 +94,13 @@ export function Hero() {
             View Projects
           </Button>
           {resumeAvailable && (
-            <Button href="/resume.pdf" variant="secondary" target="_blank">
-              Download Resume
-            </Button>
+            <>
+              {resumeLanguages.map(lang => (
+                <Button key={lang} href={resumeUrlFor(lang)} variant="secondary" target="_blank">
+                  Download Resume ({lang === 'en' ? 'EN' : 'VI'})
+                </Button>
+              ))}
+            </>
           )}
           <Button href="/contact" variant="secondary">
             Contact Me

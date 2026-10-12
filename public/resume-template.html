@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{LANG}}">
 <head>
   <meta charset="UTF-8">
   <title>Resume - Dong Nguyen</title>
@@ -244,6 +244,17 @@
 
     /* Page break helpers */
     .avoid-break { page-break-inside: avoid; }
+
+    /* Version stamp footer */
+    .pdf-footer {
+      page-break-inside: avoid;
+      text-align: center;
+      font-size: 8pt;
+      color: #999;
+      margin-top: 16px;
+      padding-top: 8px;
+      border-top: 1px solid #eee;
+    }
   </style>
 </head>
 <body>
@@ -263,13 +274,13 @@
 
   <!-- Experience -->
   <div class="section">
-    <div class="section-title">Experience</div>
+    <div class="section-title">{{EXPERIENCE_LABEL}}</div>
     {{EXPERIENCE}}
   </div>
 
   <!-- Skills -->
   <div class="section">
-    <div class="section-title">Skills</div>
+    <div class="section-title">{{SKILLS_LABEL}}</div>
     <div class="skills-grid">
       {{SKILLS}}
     </div>
@@ -277,8 +288,13 @@
 
   <!-- Projects -->
   <div class="section">
-    <div class="section-title">Projects</div>
+    <div class="section-title">{{PROJECTS_LABEL}}</div>
     {{PROJECTS}}
+  </div>
+
+  <!-- Version stamp footer -->
+  <div class="pdf-footer">
+    Last updated: {{UPDATED_DATE}}
   </div>
 </body>
 </html>
