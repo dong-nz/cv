@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform } from "motion/react"
 import { InView } from "@/components/ui/InView"
 import { resumeAvailable, resumeLanguages, resumeUrlFor } from "@/data/resume"
@@ -7,22 +8,42 @@ const langLabels: Record<Language, string> = {
   en: 'EN',
   vi: 'VI',
 }
-
 function HeroDownloadDropdown() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const listener = (e: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', listener)
+    document.addEventListener('touchstart', listener)
+    return () => {
+      document.removeEventListener('mousedown', listener)
+      document.removeEventListener('touchstart', listener)
+    }
+  }, [open])
+
   return (
-    <details className="download-resume-dropdown hero-download-dropdown">
-      <summary className="download-resume-summary hero-download-summary">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2v-4" />
-          <polyline points="7 10 12 15 17 10" />
-          <line x1="12" y1="15" x2="12" y2="3" />
+    <div ref={ref} className="download-resume-dropdown hero-download-dropdown">
+      <button
+        className={`download-resume-summary hero-download-summary ${open ? 'open' : ''}`}
+        onClick={() => setOpen(!open)}
+        type="button"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+          <path d="M12 3v10m0 0l-3-3m3 3l3-3" />
+          <path d="M3 17h18" />
         </svg>
         <span>Download Resume</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" className="chevron">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14" className="chevron">
           <polyline points="6 9 12 15 18 9" />
         </svg>
-      </summary>
-      <div className="download-resume-options">
+      </button>
+      <div className={`download-resume-options ${open ? 'open' : ''}`}>
         {resumeLanguages.map(lang => (
           <a
             key={lang}
@@ -35,7 +56,7 @@ function HeroDownloadDropdown() {
           </a>
         ))}
       </div>
-    </details>
+    </div>
   )
 }
 
@@ -52,6 +73,8 @@ function HeroDownloadButton({ lang }: { lang: Language }) {
   )
 }
 import { Button } from "@/components/ui/Button"
+import { Typewriter } from '@/components/ui/Typewriter'
+import { HeroParticles } from '@/components/sections/HeroParticles'
 import { SocialLinks } from "@/components/ui/SocialLinks"
 import { profile } from "@/data/profile"
 
@@ -102,6 +125,8 @@ export function Hero() {
       transition={{ duration: 0.3 }}
       aria-labelledby="hero-heading"
     >
+      <div className="hero-bg-grid" />
+      <HeroParticles />
       <motion.div
         className="hero-content"
         style={{ opacity }}
@@ -109,6 +134,16 @@ export function Hero() {
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15 }}
+        >
+          <span className="hero-greeting">
+            <span className="greeting-dot" />
+            Hi, I'm
+          </span>
+        </motion.div>
         <motion.h1
           id="hero-heading"
           className="hero-name"
@@ -116,7 +151,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          {profile.name}
+          <span className="name-highlight">{profile.firstName}{" "}{profile.lastName}</span>
         </motion.h1>
         <motion.p
           className="hero-title"
@@ -124,7 +159,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          {profile.title}
+          <Typewriter texts={profile.roles} />
         </motion.p>
         <motion.p
           className="hero-tagline"
@@ -143,6 +178,9 @@ export function Hero() {
           <Button href="/projects" variant="primary">
             View Projects
           </Button>
+          <Button href="/contact" variant="primary">
+            Contact Me
+          </Button>
           {resumeAvailable && (
             <>
               <div className="hero-download-desktop">
@@ -155,12 +193,15 @@ export function Hero() {
               </div>
             </>
           )}
-          <Button href="/contact" variant="primary">
-            Contact Me
-          </Button>
-        </motion.div>
         <SocialLinks links={socialLinks} />
+        </motion.div>
       </motion.div>
+      <div className="scroll-indicator" aria-hidden="true">
+        <div className="scroll-mouse">
+          <div className="scroll-wheel" />
+        </div>
+        <span>Scroll</span>
+      </div>
       <motion.div
         className="hero-visual"
         style={{ y }}

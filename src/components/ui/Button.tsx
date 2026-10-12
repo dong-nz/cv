@@ -10,6 +10,7 @@ type ButtonSize = "sm" | "md" | "lg"
 interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   variant?: ButtonVariant
   size?: ButtonSize
+  icon?: React.ReactNode
   href?: string
   download?: boolean
   target?: string
@@ -36,6 +37,7 @@ export const Button = forwardRef<
       variant = "primary",
       size = "md",
       href,
+      icon,
       className = "",
       children,
       ...props
@@ -63,7 +65,10 @@ export const Button = forwardRef<
               keyof ButtonProps | "to"
             >)}
           >
-            {children}
+            {icon ? (<>
+              {children}
+              <span className="btn-icon">{icon}</span>
+            </>) : children}
           </MotionLink>
         )
       }
@@ -76,7 +81,10 @@ export const Button = forwardRef<
           whileTap={{ scale: 0.95 }}
           {...(props as Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonProps>)}
         >
-          {children}
+          {icon ? (<>
+            {children}
+            <span className="btn-icon">{icon}</span>
+          </>) : children}
         </motion.a>
       )
     }
@@ -88,7 +96,10 @@ export const Button = forwardRef<
         whileTap={{ scale: 0.95 }}
         {...(props as Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonProps>)}
       >
-        {children}
+        {icon ? (<>
+          {children}
+          <span className="btn-icon">{icon}</span>
+        </>) : children}
       </motion.button>
     )
   }

@@ -1,12 +1,11 @@
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { profile } from '@/data/profile'
 
 export function EngineeringPage() {
   return (
     <section className="section container-content" aria-labelledby="engineering-heading">
-      <h2 id="engineering-heading" style={{ marginBottom: '24px' }}>
-        Engineering
-      </h2>
+      <SectionHeading title="Engineering" tag="05 - Engineering" />
 
       {['Architecture', 'AI / ML', 'Experiments'].map((category) => (
         <div key={category} style={{ marginBottom: '48px' }}>

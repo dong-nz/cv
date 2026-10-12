@@ -27,7 +27,6 @@ export function SocialLinks({ links, className = "" }: SocialLinksProps) {
           whileTap={{ scale: 0.9 }}
         >
           {link.icon}
-          <span>{link.label}</span>
         </motion.a>
       ))}
     </div>

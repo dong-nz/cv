@@ -1,6 +1,8 @@
 import type { Profile } from "@/types";
 
 export const profile: Profile = {
+  firstName: "Dong",
+  lastName: "Nguyen",
   name: "Dong Nguyen",
   title: "Senior Software Engineer",
   titleEn: "Senior Software Engineer",
@@ -20,6 +22,12 @@ export const profile: Profile = {
     "LLM",
     "Computer Vision",
     "High-performance systems",
+  ],
+  roles: [
+    "Full-Stack Developer",
+    "System Architect",
+    "AI/ML Engineer",
+    "Open Source Contributor",
   ],
   philosophy: [
     {

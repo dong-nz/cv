@@ -18,7 +18,7 @@ export function Contact() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title="Contact" />
+        <SectionHeading title="Contact" tag="06 - Contact" />
         <div style={{ maxWidth: '700px' }}>
         <div className="contact-links">
           <motion.a

@@ -7,7 +7,7 @@ export function About() {
   return (
     <InView>
     <section className="section container-wide" aria-labelledby="about-heading">
-      <SectionHeading title="About Me" />
+      <SectionHeading title="About Me" tag="01 - About" />
       <div style={{ maxWidth: '700px' }}>
         <p style={{ fontSize: '18px', marginBottom: '32px' }}>
           {profile.bio}

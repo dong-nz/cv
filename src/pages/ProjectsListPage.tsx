@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Badge } from '@/components/ui/Badge'
 import { projects } from '@/data/projects'
 
@@ -13,6 +14,7 @@ const categoryLabels: Record<string, string> = {
 export function ProjectsListPage() {
   return (
     <section className="section container-wide" aria-labelledby="projects-heading">
+      <SectionHeading title="Projects" tag="04 - Projects" />
       <div className="projects-grid">
         {projects.map((project) => (
           <a

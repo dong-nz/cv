@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { motion } from "motion/react"
 import { experiences } from "@/data/experience"
 import { InView } from "@/components/ui/InView"
@@ -19,16 +20,7 @@ export function Experience() {
           },
         }}
       >
-        <motion.h2
-          id="experience-heading"
-          style={{ marginBottom: "48px" }}
-          variants={{
-            hidden: { opacity: 0, y: 30 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-          }}
-        >
-          Experience
-        </motion.h2>
+        <SectionHeading title="Experience" tag="03 - Experience" />
         <div style={{ maxWidth: '700px' }}>
         <div className="timeline">
           {experiences.map((exp, i) => (

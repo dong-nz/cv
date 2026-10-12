@@ -1,3 +1,4 @@
+import { AnimatedSection } from '@/components/ui/AnimatedSection'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { profile } from '@/data/profile'
@@ -6,10 +7,12 @@ import { skillGroups } from '@/data/skills'
 export function AboutPage() {
   return (
     <>
+    <AnimatedSection>
       <section className="section container-content" aria-labelledby="about-heading">
         <SectionHeading
           title="About Me"
           subtitle="Senior Software Engineer with deep expertise in distributed systems, logistics technology, and practical AI applications."
+          tag="01 - About"
         />
         <div style={{ maxWidth: '700px' }}>
           <p style={{ fontSize: '18px', marginBottom: '32px' }}>
@@ -45,7 +48,9 @@ export function AboutPage() {
           </div>
         </div>
       </section>
+    </AnimatedSection>
 
+    <AnimatedSection>
       <section className="section container-wide" aria-labelledby="expertise-heading">
         <SectionHeading title="Core Expertise" />
         <div className="expertise-grid">
@@ -63,6 +68,7 @@ export function AboutPage() {
           ))}
         </div>
       </section>
+    </AnimatedSection>
     </>
   )
 }

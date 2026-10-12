@@ -1,3 +1,4 @@
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Link } from "react-router"
 import { motion } from "motion/react"
 import { Badge } from "@/components/ui/Badge"
@@ -33,28 +34,13 @@ export function Projects() {
           },
         }}
       >
-        <motion.div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "baseline",
-            marginBottom: "48px",
-          }}
-          variants={{
-            hidden: { opacity: 0, y: 30 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-          }}
+        <SectionHeading title="Featured Projects" tag="04 - Projects" />
+        <Link
+          to="/projects"
+          style={{ fontSize: "14px", fontWeight: 500, color: "var(--accent)", display: "block", marginBottom: "24px" }}
         >
-          <h2 id="projects-heading">Featured Projects</h2>
-          <MotionLink
-            to="/projects"
-            style={{ fontSize: "14px", fontWeight: 500, color: "var(--accent)" }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            View All →
-          </MotionLink>
-        </motion.div>
+          View All →
+        </Link>
         <div className="projects-grid">
           {featured.map((project, i) => (
             <MotionLink
@@ -72,30 +58,32 @@ export function Projects() {
               whileHover={{ scale: 1.02, y: -4 }}
               whileTap={{ scale: 0.98 }}
             >
-              <div className="project-card-header">
-                <h3>{project.title}</h3>
-                <Badge variant="outline">
-                  {categoryLabels[project.category] || project.category}
-                </Badge>
-              </div>
-              <p className="project-card-summary">{project.summary}</p>
-              <div className="project-card-techs">
-                {project.technologies.slice(0, 4).map((tech) => (
-                  <span key={tech} className="tag">
-                    {tech}
-                  </span>
-                ))}
-              </div>
-              {project.metrics && project.metrics.length > 0 && (
-                <div className="project-card-metrics">
-                  {project.metrics.map((m) => (
-                    <span key={m} className="achievement-metric">
-                      {m}
+              <div className="project-card-content">
+                <div className="project-card-header">
+                  <h3>{project.title}</h3>
+                  <Badge variant="outline">
+                    {categoryLabels[project.category] || project.category}
+                  </Badge>
+                </div>
+                <p className="project-card-summary">{project.summary}</p>
+                <div className="project-card-techs">
+                  {project.technologies.slice(0, 4).map((tech) => (
+                    <span key={tech} className="tag">
+                      {tech}
                     </span>
                   ))}
                 </div>
-              )}
-              <span className="project-card-cta">View Details →</span>
+                {project.metrics && project.metrics.length > 0 && (
+                  <div className="project-card-metrics">
+                    {project.metrics.map((m) => (
+                      <span key={m} className="achievement-metric">
+                        {m}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <span className="project-card-cta">View Details →</span>
+              </div>
             </MotionLink>
           ))}
         </div>

@@ -79,6 +79,8 @@ export interface PhilosophyPoint {
 
 export interface Profile {
   name: string;
+  firstName: string;
+  lastName: string;
   title: string;
   titleEn?: string;
   tagline: string;
@@ -90,5 +92,6 @@ export interface Profile {
   linkedinUrl: string;
   resumeUrl?: string;
   currentInterests: string[];
+  roles: string[];
   philosophy: PhilosophyPoint[];
 }

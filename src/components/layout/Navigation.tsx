@@ -37,7 +37,9 @@ export function Navigation() {
       <nav className="nav" role="navigation" aria-label="Main navigation">
         <div className="nav-container">
           <Link to="/" className="nav-logo">
-            Portfolio
+            <span className="logo-bracket">&#123;</span>
+            <span className="logo-text">CV</span>
+            <span className="logo-bracket">&#125;</span>
           </Link>
 
           <ul className="nav-menu">

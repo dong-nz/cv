@@ -1,12 +1,11 @@
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { DownloadResume } from '@/components/sections/DownloadResume'
 import { profile } from '@/data/profile'
 
 export function ContactPage() {
   return (
     <section className="section container-content" aria-labelledby="contact-heading">
-      <h2 id="contact-heading" style={{ marginBottom: '32px' }}>
-        Contact
-      </h2>
+      <SectionHeading title="Contact" tag="06 - Contact" />
       <div className="contact-links">
         <a href={`mailto:${profile.email}`} className="contact-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="24" height="24">

@@ -1,7 +1,8 @@
 # Specification - v3 UI Enhancements
 
-> **Document:** `spec-v3-ui-enhancements.md`
-> **Version:** 0.1.0
+  firstName: "Dong",
+  lastName: "Nguyen",
+  name: "Dong Nguyen",
 > **Parent:** `spec-v2-homepage-enhancements.md`
 > **Status:** Draft — not yet implemented
 
@@ -15,21 +16,21 @@ Enhance the portfolio UI with visual effects inspired by modern developer portfo
 
 | # | Feature | Status | File(s) |
 |---|---------|--------|---------|
-| 1 | Section headers (numbered tags) | ⬜ Pending | `SectionHeading.tsx`, `index.css`, `data/*.ts` |
-| 2 | Hero: greeting + animated dot | ⬜ Pending | `Hero.tsx`, `App.css` |
-| 3 | Hero: gradient name highlight | ⬜ Pending | `Hero.tsx`, `App.css` |
-| 4 | Hero: background grid | ⬜ Pending | `Hero.tsx`, `App.css` |
-| 5 | Hero: typewriter effect | ⬜ Pending | `Typewriter.tsx`, `Hero.tsx`, `profile.ts`, `index.css` |
-| 6 | Hero: floating particles | ⬜ Pending | `HeroParticles.tsx`, `Hero.tsx`, `index.css` |
-| 7 | Hero: scroll indicator | ⬜ Pending | `Hero.tsx`, `App.css` |
-| 8 | Button: gradient + outline + icon slide | ⬜ Pending | `App.css` |
-| 9 | Social links: circular + glow | ⬜ Pending | `SocialLinks.tsx`, `Footer.tsx`, `App.css` |
-| 10 | Scroll animations: AnimatedSection | ⬜ Pending | `AnimatedSection.tsx`, `About.tsx`, `Hero.tsx` |
-| 11 | Custom cursor | ⬜ Pending | `CustomCursor.tsx`, `Layout.tsx`, `App.css` |
-| 12 | Projects: overlay + gradients | ⬜ Pending | `Projects.tsx`, `App.css` |
-| 13 | Footer: back to top | ⬜ Pending | `Footer.tsx`, `App.css` |
-| 14 | Logo: bracket format | ⬜ Pending | `Navigation.tsx`, `App.css` |
-
+| 0 | Prerequisites: types + data | ✅ Done | `types/index.ts`, `data/profile.ts`, `SectionHeading.tsx`, `App.css` |
+| 1 | Section headers (numbered tags) | ✅ Done | `SectionHeading.tsx`, `App.css`, pages/sections |
+| 2 | Hero: greeting + animated dot | ✅ Done | `Hero.tsx`, `App.css` |
+| 3 | Hero: gradient name highlight | ✅ Done | `Hero.tsx`, `App.css` |
+| 4 | Hero: background grid | ✅ Done | `Hero.tsx`, `App.css` |
+| 5 | Hero: typewriter effect | ✅ Done | `Typewriter.tsx`, `Hero.tsx`, `App.css` |
+| 6 | Hero: floating particles | ✅ Done | `HeroParticles.tsx`, `Hero.tsx`, `App.css` |
+| 7 | Hero: scroll indicator | ✅ Done | `Hero.tsx`, `App.css` |
+| 8 | Button: gradient + outline + icon slide | ✅ Done | `Button.tsx`, `App.css` |
+| 9 | Scroll animations: AnimatedSection | ✅ Done | `AnimatedSection.tsx`, `AboutPage.tsx` |
+| 10 | Logo: bracket format | ✅ Done | `Navigation.tsx`, `App.css` |
+| 11 | Build + verify | ✅ Done | type-check + lint pass (build locked by dev server) |
+| 12 | Download resume: click outside to close | ✅ Done | `DownloadResume.tsx`, `Hero.tsx`, `App.css`, `hooks/useClickOutside.ts` |
+| 13 | Download resume: FontAwesome-style icon | ✅ Done | `DownloadResume.tsx`, `Hero.tsx` |
+| 14 | Mobile: hero section responsive fixes | ✅ Done | `App.css` |
 ---
 
 ## Prerequisites (Type/Data Changes)
@@ -78,20 +79,24 @@ export const profile: Profile = {
     "Open Source Contributor",
   ],
 }
-```
-
-### 3. SectionHeading Type — Add `tag` prop
-
-**File:** `src/components/ui/SectionHeading.tsx`
-
-```tsx
-interface SectionHeadingProps {
-  title: string
-  subtitle?: string
-  tag?: string           // NEW — e.g. "01 — About"
-  id?: string
+export interface Profile {
+  name: string;
+  firstName: string;
+  lastName: string;
+  title: string;
+  titleEn?: string;
+  tagline: string;
+  taglineEn?: string;
+  bio: string;
+  bioEn?: string;
+  email: string;
+  githubUrl: string;
+  linkedinUrl: string;
+  resumeUrl?: string;
+  currentInterests: string[];
+  roles: string[];
+  philosophy: PhilosophyPoint[];
 }
-```
 
 ---
 
@@ -549,14 +554,14 @@ export function SectionHeading({ title, subtitle, tag, id }: SectionHeadingProps
 ```
 
 **Usage per section:**
-| Section | Tag | Component |
-|---------|-----|-----------|
-| About | `"01 — About"` | `AboutPage.tsx` |
-| Expertise | `"02 — Expertise"` | `Expertise.tsx` |
-| Experience | `"03 — Experience"` | `ExperiencePage.tsx` |
-| Projects | `"04 — Projects"` | `ProjectsListPage.tsx` |
-| Engineering | `"05 — Engineering"` | `EngineeringPage.tsx` |
-| Contact | `"06 — Contact"` | `ContactPage.tsx` |
+| Section | Tag | Component | Current Pattern | Change |
+|---------|-----|-----------|----------------|--------|
+| About | `"01 — About"` | `AboutPage.tsx`, `About.tsx` | `SectionHeading` | Add `tag` prop |
+| Expertise | `"02 — Expertise"` | `Expertise.tsx`, AboutPage.tsx | `SectionHeading` | Add `tag` prop |
+| Experience | `"03 — Experience"` | `ExperiencePage.tsx`, `Experience.tsx` | `<h2>` inline | Replace with `SectionHeading` |
+| Projects | `"04 — Projects"` | `ProjectsListPage.tsx`, `Projects.tsx` | No heading / `<h2>` inline | Add `SectionHeading` |
+| Engineering | `"05 — Engineering"` | `EngineeringPage.tsx` | `<h2>` inline | Replace with `SectionHeading` |
+| Contact | `"06 — Contact"` | `ContactPage.tsx`, `Contact.tsx` | `SectionHeading` | Add `tag` prop |
 
 **CSS:**
 ```css
@@ -572,73 +577,26 @@ export function SectionHeading({ title, subtitle, tag, id }: SectionHeadingProps
 ```
 
 **Files:**
-- `src/components/ui/SectionHeading.tsx`
-- `src/App.css`
-- `src/pages/AboutPage.tsx` (add tag)
-- `src/components/sections/Expertise.tsx` (add tag)
-- `src/pages/ExperiencePage.tsx` (add tag)
-- `src/pages/ProjectsListPage.tsx` (add tag)
-- `src/pages/EngineeringPage.tsx` (add tag)
-- `src/pages/ContactPage.tsx` (add tag)
+- `src/components/ui/SectionHeading.tsx` (add `tag` prop)
+- `src/App.css` (add `.section-tag` styles)
+- `src/pages/AboutPage.tsx` (add `tag` to 2x `SectionHeading`)
+- `src/components/sections/About.tsx` (add `tag` to `SectionHeading`)
+- `src/components/sections/Expertise.tsx` (add `tag` to `SectionHeading`)
+- `src/pages/ExperiencePage.tsx` (replace `<h2>` with `SectionHeading`)
+- `src/components/sections/Experience.tsx` (replace `<h2>` with `SectionHeading`)
+- `src/pages/ProjectsListPage.tsx` (add `SectionHeading` before grid)
+- `src/components/sections/Projects.tsx` (replace `<h2>` with `SectionHeading`)
+- `src/pages/EngineeringPage.tsx` (replace `<h2>` with `SectionHeading`)
+- `src/pages/ContactPage.tsx` (add `tag` to `SectionHeading`)
+- `src/components/sections/Contact.tsx` (add `tag` to `SectionHeading`)
 
 ---
 
-## 4. Social Links
-
-### 4.1 Circular Social Links
-
-**Effect:** Social icons become circular with border, glow on hover.
-
-**Implementation:**
-- Update `.social-link` in both `SocialLinks.tsx` and `Footer.tsx`:
-  - Width/height: `48px`
-  - Border: `1.5px solid rgba(255, 255, 255, 0.15)`
-  - Border radius: `50%`
-  - Remove `<span>` label text (icons only)
-  - Hover: `border-color: var(--accent)`, `color: var(--accent)`, `transform: translateY(-3px)`, `box-shadow: 0 0 30px rgba(96, 165, 250, 0.15)`
-
-**CSS:**
-```css
-.social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
-  border-radius: 50%;
-  color: var(--text-secondary);
-  transition: color var(--transition-fast), border-color var(--transition-fast),
-              transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-.social-link:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  transform: translateY(-3px);
-  box-shadow: 0 0 30px rgba(96, 165, 250, 0.15);
-}
-.social-link svg {
-  width: 20px;
-  height: 20px;
-}
-/* Hide label text */
-.social-link span {
-  display: none;
-}
-```
-
-**SocialLinks.tsx changes:** Remove `<span>{link.label}</span>` from JSX.
-
-**Files:**
-- `src/components/ui/SocialLinks.tsx`
-- `src/components/layout/Footer.tsx`
-- `src/App.css`
-
 ---
 
-## 5. Scroll Animations
+## 4. Scroll Animations
 
-### 5.1 Unified Animation Wrapper
+### 4.1 Unified Animation Wrapper
 
 **Effect:** Sections animate in on scroll with configurable direction and delay.
 
@@ -722,258 +680,11 @@ export function AnimatedSection({
 
 ---
 
-## 6. Custom Cursor (Desktop Only)
 
-### 6.1 Dot + Follower Cursor
 
-**Effect:** Small dot follows mouse exactly; larger circle follows with lag. Both expand on hover over interactive elements. Disabled on mobile.
+## 5. Footer Enhancements
 
-**Implementation:**
-- New component: `src/components/ui/CustomCursor.tsx`
-- Two `div` elements: `.cursor` (8px dot) and `.cursor-follower` (40px circle)
-- Mouse move listener updates dot position immediately
-- `requestAnimationFrame` loop interpolates follower position (lerp factor 0.1)
-- Hover detection on `a, button, .project-card, .skill-tag, .filter-btn, .social-link`
-- Active state: scale dot to 3x, reduce follower opacity to 0.5
-- `mix-blend-mode: difference` for dot
-- Hidden on `≤768px` via CSS media query
-- Rendered once in `Layout.tsx` (NOT in App.tsx — ensures single instance across routes)
-
-**CSS:**
-```css
-.cursor {
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 10000;
-  transition: transform 0.1s ease, opacity 0.1s ease;
-  mix-blend-mode: difference;
-}
-.cursor-follower {
-  width: 40px;
-  height: 40px;
-  border: 1.5px solid var(--accent);
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 10000;
-  transition: transform 0.3s ease, opacity 0.3s ease, width 0.3s ease, height 0.3s ease;
-  transform: translate(-50%, -50%);
-}
-.cursor.active {
-  transform: scale(3);
-  opacity: 0.5;
-}
-.cursor-follower.active {
-  width: 60px;
-  height: 60px;
-  opacity: 0.5;
-}
-@media (max-width: 768px) {
-  .cursor, .cursor-follower { display: none !important; }
-}
-```
-
-**CustomCursor.tsx:**
-```tsx
-import { useEffect, useRef } from 'react'
-
-export function CustomCursor() {
-  const cursorRef = useRef<HTMLDivElement>(null)
-  const followerRef = useRef<HTMLDivElement>(null)
-  const mouseX = useRef(0)
-  const mouseY = useRef(0)
-  const followerX = useRef(0)
-  const followerY = useRef(0)
-  const rafId = useRef<number>(0)
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || window.innerWidth <= 768) return
-
-    const handleMouseMove = (e: MouseEvent) => {
-      mouseX.current = e.clientX
-      mouseY.current = e.clientY
-      if (cursorRef.current) {
-        cursorRef.current.style.left = e.clientX + 'px'
-        cursorRef.current.style.top = e.clientY + 'px'
-      }
-    }
-
-    const animate = () => {
-      followerX.current += (mouseX.current - followerX.current) * 0.1
-      followerY.current += (mouseY.current - followerY.current) * 0.1
-      if (followerRef.current) {
-        followerRef.current.style.left = followerX.current + 'px'
-        followerRef.current.style.top = followerY.current + 'px'
-      }
-      rafId.current = requestAnimationFrame(animate)
-    }
-
-    const interactiveSelectors = 'a, button, .project-card, .skill-tag, .filter-btn, .social-link'
-    const handleMouseEnter = () => {
-      cursorRef.current?.classList.add('active')
-      followerRef.current?.classList.add('active')
-    }
-    const handleMouseLeave = () => {
-      cursorRef.current?.classList.remove('active')
-      followerRef.current?.classList.remove('active')
-    }
-
-    document.addEventListener('mousemove', handleMouseMove)
-    rafId.current = requestAnimationFrame(animate)
-    document.addEventListener('mouseenter', handleMouseEnter, true)
-    document.addEventListener('mouseleave', handleMouseLeave, true)
-
-    return () => {
-      cancelAnimationFrame(rafId.current)
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseenter', handleMouseEnter, true)
-      document.removeEventListener('mouseleave', handleMouseLeave, true)
-    }
-  }, [])
-
-  return (
-    <>
-      <div ref={cursorRef} className="cursor" aria-hidden="true" />
-      <div ref={followerRef} className="cursor-follower" aria-hidden="true" />
-    </>
-  )
-}
-```
-
-**Layout.tsx changes:** Add `<CustomCursor />` after `<main>`:
-```tsx
-<main id="main-content">
-  <Routes>...</Routes>
-</main>
-<CustomCursor />
-```
-
-**Files:**
-- `src/components/ui/CustomCursor.tsx` (new)
-- `src/components/layout/Layout.tsx`
-- `src/App.css`
-
----
-
-## 7. Projects Enhancements
-
-### 7.1 Project Card Overlay
-
-**Effect:** On hover, project cards show overlay with live demo / source code links.
-
-**Implementation:**
-- Add `<div className="project-overlay">` inside each project card
-- Overlay: full coverage, semi-transparent background, center-aligned links
-- Links: circular icons for GitHub and external link
-- Overlay fades in on card hover: `opacity: 0 → 1`
-- Link icons slide up from bottom: `transform: translateY(10px) → 0`
-
-**CSS:**
-```css
-.project-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity var(--transition-base);
-  border-radius: inherit;
-}
-.project-card:hover .project-overlay {
-  opacity: 1;
-}
-.project-links {
-  display: flex;
-  gap: 16px;
-}
-.project-link {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent);
-  border-radius: 50%;
-  color: white;
-  transform: translateY(10px);
-  transition: transform var(--transition-base), background var(--transition-fast);
-  text-decoration: none;
-}
-.project-card:hover .project-link {
-  transform: translateY(0);
-}
-.project-link:hover {
-  background: var(--accent-hover);
-}
-```
-
-**Projects.tsx changes:** Wrap card content with overlay:
-```tsx
-<div className="project-card">
-  {/* existing card content (image, title, summary, tags) */}
-  <div className="project-overlay">
-    <div className="project-links">
-      {project.demoUrl && (
-        <a href={project.demoUrl} target="_blank" rel="noopener noreferrer" className="project-link" aria-label="Live Demo">
-          <svg>...</svg>
-        </a>
-      )}
-      {project.githubUrl && (
-        <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="project-link" aria-label="Source Code">
-          <svg>...</svg>
-        </a>
-      )}
-    </div>
-  </div>
-</div>
-```
-
-**Files:**
-- `src/components/sections/Projects.tsx`
-- `src/App.css`
-
-### 7.2 Gradient Card Placeholders
-
-**Effect:** Project cards without images use unique gradient backgrounds.
-
-**Implementation:**
-- Use CSS `nth-child` selectors with different gradient pairs
-- Each gradient uses `--accent`-family colors for theme consistency
-
-**Gradients:**
-| Card | Dark Theme | Light Theme |
-|------|-----------|-------------|
-| 1 | `linear-gradient(135deg, #60a5fa, #818cf8)` | `linear-gradient(135deg, #2563eb, #4f46e5)` |
-| 2 | `linear-gradient(135deg, #ec4899, #f43f5e)` | `linear-gradient(135deg, #db2777, #e11d48)` |
-| 3 | `linear-gradient(135deg, #06b6d4, #3b82f6)` | `linear-gradient(135deg, #0891b2, #2563eb)` |
-| 4 | `linear-gradient(135deg, #f59e0b, #ef4444)` | `linear-gradient(135deg, #d97706, #dc2626)` |
-| 5 | `linear-gradient(135deg, #10b981, #059669)` | `linear-gradient(135deg, #059669, #047857)` |
-| 6 | `linear-gradient(135deg, #8b5cf6, #60a5fa)` | `linear-gradient(135deg, #7c3aed, #2563eb)` |
-
-**CSS:**
-```css
-.project-card:nth-child(1) { background: linear-gradient(135deg, #60a5fa, #818cf8); }
-.project-card:nth-child(2) { background: linear-gradient(135deg, #ec4899, #f43f5e); }
-.project-card:nth-child(3) { background: linear-gradient(135deg, #06b6d4, #3b82f6); }
-.project-card:nth-child(4) { background: linear-gradient(135deg, #f59e0b, #ef4444); }
-.project-card:nth-child(5) { background: linear-gradient(135deg, #10b981, #059669); }
-.project-card:nth-child(6) { background: linear-gradient(135deg, #8b5cf6, #60a5fa); }
-```
-
-**Files:**
-- `src/App.css`
-
----
-
-## 8. Footer Enhancements
-
-### 8.1 Back to Top Button
+### 5.1 Back to Top Button
 
 **Effect:** Floating button appears after scrolling, smoothly scrolls to top.
 
@@ -1057,9 +768,9 @@ export function Footer() {
 
 ---
 
-## 9. Logo Enhancement
+## 6. Logo Enhancement
 
-### 9.1 Bracket Logo
+### 6.1 Bracket Logo
 
 **Effect:** Navigation logo uses `{Name}` format with bracket styling.
 
@@ -1103,6 +814,175 @@ export function Footer() {
 - `src/data/profile.ts` (import `profile`)
 
 ---
+## 7. Download Resume Dropdown — Click Outside to Close
+
+### 7.1 Controlled Dropdown with Outside Click Close
+
+**Effect:** Replace HTML `<details>` toggle with controlled React state. Click outside the dropdown to close (instead of clicking the button again).
+
+**Current state:**
+- `DownloadDropdown` (Contact page) and `HeroDownloadDropdown` (Hero section) use `<details>` element
+- Toggles open/close on summary click
+- Native `<details>` behavior — no external click handling
+
+**Implementation:**
+- Replace `<details>` with controlled `<div>` + React state
+- Add `mousedown` + `touchstart` listener on `document` when dropdown is open
+- Click outside the dropdown ref → `setOpen(false)`
+- Replace `<summary>` with `<button>` (proper accessibility)
+- Add `.open` class to options container when open (CSS controls visibility)
+- Add `.open` class to summary for chevron rotation
+
+**DownloadResume.tsx changes:**
+```tsx
+import { useState, useRef, useEffect } from 'react'
+
+function DownloadDropdown() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const listener = (e: MouseEvent | TouchEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', listener)
+    document.addEventListener('touchstart', listener)
+    return () => {
+      document.removeEventListener('mousedown', listener)
+      document.removeEventListener('touchstart', listener)
+    }
+  }, [open])
+
+  return (
+    <div ref={ref} className="download-resume-dropdown">
+      <button
+        className="download-resume-summary"
+        onClick={() => setOpen(!open)}
+        type="button"
+      >
+        {/* icon + label + chevron */}
+      </button>
+      <div className={`download-resume-options ${open ? 'open' : ''}`}>
+        {/* language options */}
+      </div>
+    </div>
+  )
+}
+```
+
+**Hero.tsx changes:** Same pattern for `HeroDownloadDropdown`.
+
+**CSS changes (App.css):**
+```css
+/* Hide options by default, show when .open class present */
+.download-resume-dropdown .download-resume-options {
+  display: none;
+}
+.download-resume-dropdown .download-resume-options.open {
+  display: block;
+}
+
+/* Rotate chevron when summary has .open class */
+.download-resume-dropdown .download-resume-summary.open .chevron {
+  transform: rotate(180deg);
+}
+```
+
+**Removed:** `.download-resume-dropdown[open]` pseudo-class selectors (no longer needed).
+
+**Files:**
+- `src/components/sections/DownloadResume.tsx` (controlled dropdown)
+- `src/components/sections/Hero.tsx` (controlled dropdown)
+- `src/App.css` (CSS for `.open` class visibility)
+- `src/hooks/useClickOutside.ts` (reusable hook, created but logic inlined)
+## 8. Mobile Responsive Fixes
+
+### 8.1 Download Resume Icon — FontAwesome Style
+
+**Effect:** Replace Material Design download icon with FontAwesome-style outline icon (document + arrow).
+
+**Implementation:**
+- Update SVG path in `DownloadResume.tsx` and `Hero.tsx`
+- New icon: FontAwesome download style with document outline and downward arrow
+
+**Files:**
+- `src/components/sections/DownloadResume.tsx`
+- `src/components/sections/Hero.tsx`
+
+### 8.2 Hero Section — Mobile Layout
+
+**Issues fixed:**
+1. Hero height using `100vh` on mobile includes browser UI (address bar), causing content to be clipped
+2. Scroll indicator positioned outside visible viewport due to overflow clipping
+3. Social links not centered on mobile
+4. Hero text (greeting, title, tagline, social links) invisible in light mode on dark overlay
+
+**Implementation:**
+
+**Hero height:**
+```css
+@media (max-width: 768px) {
+  .hero {
+    min-height: 100dvh;  /* Changed from 100vh */
+    overflow: hidden;
+  }
+}
+```
+
+**Scroll indicator positioning:**
+```css
+@media (max-width: 768px) {
+  .scroll-indicator {
+    position: absolute;
+    bottom: 20px;       /* Changed from 40px */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;        /* Above hero-content (z-index: 1) */
+    color: #ffffff;     /* White text on dark overlay */
+  }
+  .scroll-mouse {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+  .hero .scroll-indicator span {
+    display: block !important;
+    color: #ffffff !important;
+    opacity: 1 !important;
+  }
+}
+```
+
+**Social links centering:**
+```css
+@media (max-width: 768px) {
+  .social-links {
+    justify-content: center;
+  }
+  .social-link {
+    color: #ffffff;  /* White on dark overlay */
+  }
+}
+```
+
+**Hero text colors (light/dark mode consistency):**
+```css
+@media (max-width: 768px) {
+  .hero-name {
+    color: #ffffff;
+  }
+  .hero-title,
+  .hero-tagline,
+  .hero-greeting {
+    color: #e0e0e0;  /* Same color for title, tagline, greeting */
+  }
+}
+```
+
+**Files:**
+- `src/App.css` (mobile media query overrides)
+
 
 ## Implementation Order
 
@@ -1117,15 +997,15 @@ export function Footer() {
 | 6 | Hero: floating particles | — | 15m |
 | 7 | Hero: scroll indicator | — | 10m |
 | 8 | Button: gradient + outline + icon slide | — | 10m |
-| 9 | Social links: circular + glow | — | 10m |
-| 10 | Scroll animations: AnimatedSection | — | 20m |
-| 11 | Custom cursor | — | 20m |
-| 12 | Projects: overlay + gradients | — | 15m |
-| 13 | Footer: back to top | — | 10m |
-| 14 | Logo: bracket format | Step 0 | 5m |
-| 15 | Build + verify | All | 10m |
+| 9 | Scroll animations: AnimatedSection | — | 20m |
+| 10 | Logo: bracket format | Step 0 | 5m |
+| 11 | Build + verify | All | 10m |
+| 12 | Download resume: click outside to close | — | 15m |
+| 13 | Download resume: FontAwesome-style icon | — | 5m |
+| 14 | Mobile: hero section responsive fixes | — | 15m |
 
-**Total:** ~4h 10m
+**Total:** ~4h 35m
+
 
 ---
 
@@ -1141,21 +1021,23 @@ export function Footer() {
 1. [ ] Typewriter cycles through `profile.roles` with cursor blink
 2. [ ] Greeting dot pulses continuously
 3. [ ] Background grid visible on hero, faded at edges
-3. [ ] Particles float upward, 30 desktop / 15 mobile
-4. [ ] Scroll indicator with mouse animation at hero bottom
-5. [ ] Name uses gradient text fill (lastName only)
-6. [ ] Primary buttons: gradient bg, glow shadow, pill shape, lift on hover
-7. [ ] Secondary buttons: outline style, glow on hover, lift
-8. [ ] Button icons slide right on hover
-9. [ ] Section headers have numbered tags
-10. [ ] Social links: circular, glow on hover, no text labels
+4. [ ] Particles float upward, 30 desktop / 15 mobile
+5. [ ] Scroll indicator with mouse animation at hero bottom
+6. [ ] Name uses gradient text fill (lastName only)
+7. [ ] Primary buttons: gradient bg, glow shadow, pill shape, lift on hover
+8. [ ] Secondary buttons: outline style, glow on hover, lift
+9. [ ] Button icons slide right on hover
+10. [ ] Section headers have numbered tags
 11. [ ] All sections animate in on scroll with direction control
-12. [ ] Custom cursor: dot + follower, expands on interactive hover, hidden on mobile
-13. [ ] Project cards: overlay on hover with links, gradient placeholders
-14. [ ] Back to top button: appears after scroll, smooth scroll to top
-15. [ ] Logo: `{FirstName LastName}` bracket format
-16. [ ] No new dependencies added
-17. [ ] All features work in dark/light themes
-18. [ ] No breaking changes to existing layout
-19. [ ] `pnpm build` passes (type-check + build)
-20. [ ] `pnpm lint` passes
+12. [ ] Logo: `{FirstName LastName}` bracket format
+13. [ ] Download resume dropdown: click outside to close (instead of toggle on button click)
+14. [ ] No new dependencies added
+15. [ ] All features work in dark/light themes
+16. [ ] No breaking changes to existing layout
+17. [ ] `pnpm build` passes (type-check + build)
+18. [ ] `pnpm lint` passes
+19. [ ] Download resume icon uses FontAwesome-style SVG
+20. [ ] Hero section uses `100dvh` on mobile (no clipping)
+21. [ ] Scroll indicator visible and centered on mobile
+22. [ ] Social links centered on mobile
+23. [ ] All hero text (greeting, title, tagline, social links) visible in both dark/light modes on mobile

@@ -20,7 +20,7 @@ export function Expertise() {
           },
         }}
       >
-        <SectionHeading title="Core Expertise" />
+        <SectionHeading title="Core Expertise" tag="02 - Expertise" />
         <div className="expertise-grid">
           {skillGroups.map((group, i) => (
             <motion.div

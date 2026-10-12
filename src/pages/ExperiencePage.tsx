@@ -1,11 +1,10 @@
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { experiences } from '@/data/experience'
 
 export function ExperiencePage() {
   return (
     <section className="section container-content" aria-labelledby="experience-heading">
-      <h2 id="experience-heading" style={{ marginBottom: '48px' }}>
-        Experience
-      </h2>
+      <SectionHeading title="Experience" tag="03 - Experience" />
       <div className="timeline">
         {experiences.map((exp) => (
           <div key={exp.id} className="timeline-entry">

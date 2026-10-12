@@ -13,7 +13,7 @@
   --shadow: rgba(0, 0, 0, 0.3);
   --code-bg: #1a1a2e;
   --success: #34d399;
-  --error: #f87171;
+  --grid-color: rgba(96, 165, 250, 0.04);
 
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
   --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
@@ -56,6 +56,7 @@
   --code-bg: #f0f0ff;
   --success: #059669;
   --error: #dc2626;
+  --grid-color: rgba(37, 99, 235, 0.08);
 }
 
 /* System theme */
@@ -75,6 +76,7 @@
     --code-bg: #1a1a2e;
     --success: #34d399;
     --error: #f87171;
+    --grid-color: rgba(96, 165, 250, 0.04);
   }
 }
 
@@ -94,6 +96,7 @@
     --code-bg: #f0f0ff;
     --success: #059669;
     --error: #dc2626;
+    --grid-color: rgba(37, 99, 235, 0.08);
   }
 }
 
