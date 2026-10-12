@@ -45,7 +45,7 @@ function HeroDownloadButton({ lang }: { lang: Language }) {
       href={resumeUrlFor(lang)}
       download
       target="_blank"
-      className="btn btn-secondary hero-download-mobile-btn"
+      className="btn btn-primary hero-download-mobile-btn"
     >
       Download Resume ({langLabels[lang]})
     </a>
@@ -155,7 +155,7 @@ export function Hero() {
               </div>
             </>
           )}
-          <Button href="/contact" variant="secondary">
+          <Button href="/contact" variant="primary">
             Contact Me
           </Button>
         </motion.div>

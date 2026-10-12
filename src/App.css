@@ -448,6 +448,7 @@
   }
   .hero-cta {
     flex-direction: column;
+    gap: 16px;
   }
 
   .hero-cta .btn {
@@ -575,9 +576,15 @@
     display: none;
   }
 
-  .download-resume-mobile,
+  .download-resume-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
   .hero-download-mobile {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 }
 
