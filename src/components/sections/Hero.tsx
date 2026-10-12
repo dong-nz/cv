@@ -1,6 +1,56 @@
 import { motion, useScroll, useTransform } from "motion/react"
 import { InView } from "@/components/ui/InView"
 import { resumeAvailable, resumeLanguages, resumeUrlFor } from "@/data/resume"
+import type { Language } from '@/types'
+
+const langLabels: Record<Language, string> = {
+  en: 'EN',
+  vi: 'VI',
+}
+
+function HeroDownloadDropdown() {
+  return (
+    <details className="download-resume-dropdown hero-download-dropdown">
+      <summary className="download-resume-summary hero-download-summary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2 2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        <span>Download Resume</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14" className="chevron">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </summary>
+      <div className="download-resume-options">
+        {resumeLanguages.map(lang => (
+          <a
+            key={lang}
+            href={resumeUrlFor(lang)}
+            download
+            target="_blank"
+            className="download-resume-option"
+          >
+            {langLabels[lang]}
+          </a>
+        ))}
+      </div>
+    </details>
+  )
+}
+
+function HeroDownloadButton({ lang }: { lang: Language }) {
+  return (
+    <a
+      href={resumeUrlFor(lang)}
+      download
+      target="_blank"
+      className="btn btn-secondary hero-download-mobile-btn"
+    >
+      Download Resume ({langLabels[lang]})
+    </a>
+  )
+}
 import { Button } from "@/components/ui/Button"
 import { SocialLinks } from "@/components/ui/SocialLinks"
 import { profile } from "@/data/profile"
@@ -95,11 +145,14 @@ export function Hero() {
           </Button>
           {resumeAvailable && (
             <>
-              {resumeLanguages.map(lang => (
-                <Button key={lang} href={resumeUrlFor(lang)} variant="secondary" target="_blank">
-                  Download Resume ({lang === 'en' ? 'EN' : 'VI'})
-                </Button>
-              ))}
+              <div className="hero-download-desktop">
+                <HeroDownloadDropdown />
+              </div>
+              <div className="hero-download-mobile">
+                {resumeLanguages.map(lang => (
+                  <HeroDownloadButton key={lang} lang={lang} />
+                ))}
+              </div>
             </>
           )}
           <Button href="/contact" variant="secondary">

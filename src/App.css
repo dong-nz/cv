@@ -478,6 +478,107 @@
   }
 }
 
+/* ===== Download Resume Dropdown ===== */
+.download-resume-dropdown {
+  position: relative;
+  width: 100%;
+}
+
+.download-resume-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  list-style: none;
+  color: var(--text-primary);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 500;
+  user-select: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.download-resume-summary::-webkit-details-marker {
+  display: none;
+}
+
+.download-resume-summary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.download-resume-summary .chevron {
+  margin-left: auto;
+  transition: transform 0.2s;
+}
+
+.download-resume-dropdown[open] .download-resume-summary .chevron {
+  transform: rotate(180deg);
+}
+
+.download-resume-options {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.download-resume-option {
+  display: block;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.download-resume-option:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Hero-specific overrides */
+.hero-download-dropdown .download-resume-summary {
+  font-size: 13px;
+}
+
+.hero-download-option {
+  font-size: 13px;
+}
+
+/* Desktop: show dropdown, hide mobile buttons */
+.download-resume-desktop,
+.hero-download-desktop {
+  display: block;
+}
+
+.download-resume-mobile,
+.hero-download-mobile {
+  display: none;
+}
+
+/* Mobile: show 2 buttons, hide dropdown */
+@media (max-width: 768px) {
+  .download-resume-desktop,
+  .hero-download-desktop {
+    display: none;
+  }
+
+  .download-resume-mobile,
+  .hero-download-mobile {
+    display: block;
+  }
+}
+
 /* ===== Expertise Grid ===== */
 .expertise-grid {
   display: grid;
