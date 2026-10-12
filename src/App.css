@@ -488,17 +488,19 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  cursor: pointer;
-  list-style: none;
-  color: var(--text-primary);
-  background: var(--surface);
-  font-size: 14px;
+  padding: 12px 24px;
+  font-size: 16px;
   font-weight: 500;
+  font-family: inherit;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--accent);
+  list-style: none;
   user-select: none;
-  transition: border-color 0.2s, color 0.2s;
 }
 
 .download-resume-summary::-webkit-details-marker {
@@ -507,7 +509,8 @@
 
 .download-resume-summary:hover {
   border-color: var(--accent);
-  color: var(--accent);
+  background: var(--accent);
+  color: #ffffff;
 }
 
 .download-resume-summary .chevron {
@@ -524,7 +527,7 @@
   top: calc(100% + 4px);
   left: 0;
   width: 100%;
-  background: var(--surface);
+  background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -546,14 +549,6 @@
   color: #fff;
 }
 
-/* Hero-specific overrides */
-.hero-download-dropdown .download-resume-summary {
-  font-size: 13px;
-}
-
-.hero-download-option {
-  font-size: 13px;
-}
 
 /* Desktop: show dropdown, hide mobile buttons */
 .download-resume-desktop,
