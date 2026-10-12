@@ -1,7 +1,7 @@
 # Specification — v2 Resume PDF (Playwright)
 
 > **Document:** `spec-v2-resume-playwright.md`
-> **Version:** 0.5.0
+> **Version:** 0.6.0
 > **Updated:** 2026-10-12
 
 ---
@@ -770,7 +770,7 @@ will show because `/resume.pdf` exists on the server.
 ---
 
 
-## Download Resume UI
+## Download Resume UI ✅ Implemented
 
 ### Component: `DownloadResume`
 
@@ -823,14 +823,8 @@ Use `@media (min-width: 769px)` for desktop dropdown layout, `@media (max-width:
 
 ---
 
-## Future Enhancements
-Deferred items are tracked in [`spec-v2-resume-future.md`](./spec-v2-resume-future.md):
 
-| # | Enhancement | Status |
-|---|-------------|--------|
-| 1 | PDF Metadata (title/author) | Deferred |
-| 2 | Version Stamping (footer date) | ✅ Implemented |
-| 3 | Conditional Content (placeholder detection) | Deferred |
-| 4 | Project Sections (render text/diagram/metrics/code) | Deferred |
-| 5 | Multiple Language Versions (EN + VI) | ✅ Implemented |
+## Future Enhancements
+
+All enhancements are implemented. No deferred items remain.
 
