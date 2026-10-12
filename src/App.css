@@ -463,10 +463,17 @@
   .hero-content {
     position: absolute;
     z-index: 1;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(0, 0, 0, 0.75);
     padding: 32px 24px;
     backdrop-filter: blur(4px);
     width: 100%;
+  }
+  .hero-name {
+    color: #ffffff;
+  }
+  .hero-title,
+  .hero-tagline {
+    color: #e0e0e0;
   }
 
 }
