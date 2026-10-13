@@ -6,7 +6,7 @@
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(12px);
-  transition: background var(--transition-normal);
+  transition: none;
 }
 
 .nav-container {

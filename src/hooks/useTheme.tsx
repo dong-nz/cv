@@ -35,14 +35,17 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const resolvedTheme = resolveTheme(theme)
 
+  // Set data-theme during render so it's available before paint
+  document.documentElement.setAttribute('data-theme', resolvedTheme)
+
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', resolvedTheme)
     try {
       localStorage.setItem(STORAGE_KEY, theme)
     } catch {
       // localStorage unavailable
     }
-  }, [resolvedTheme, theme])
+  }, [theme])
+
 
   const setTheme = useCallback((newTheme: Theme) => {
     setThemeState(newTheme)
