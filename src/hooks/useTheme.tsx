@@ -14,7 +14,7 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 const STORAGE_KEY = 'portfolio-theme'
 
 function getSystemTheme(): 'dark' | 'light' {
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'dark' : 'light'
 }
 
 function getStoredTheme(): Theme {
