@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 
-type Theme = 'dark' | 'light' | 'system'
+type Theme = 'dark' | 'light'
 
 interface ThemeContextValue {
   theme: Theme
@@ -13,28 +13,25 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined)
 
 const STORAGE_KEY = 'portfolio-theme'
 
-function getSystemTheme(): 'dark' | 'light' {
-  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'dark' : 'light'
-}
-
-function getStoredTheme(): Theme {
+function getInitialTheme(): 'dark' | 'light' {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'dark' || stored === 'light' || stored === 'system') {
+    if (stored === 'dark' || stored === 'light') {
       return stored
     }
   } catch {
     // localStorage unavailable
   }
-  return 'system'
+  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
+  return prefersLight ? 'light' : 'dark'
 }
 
 function resolveTheme(theme: Theme): 'dark' | 'light' {
-  return theme === 'system' ? getSystemTheme() : theme
+  return theme
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(getStoredTheme)
+  const [theme, setThemeState] = useState<Theme>(getInitialTheme)
 
   const resolvedTheme = resolveTheme(theme)
 
@@ -52,14 +49,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const cycleTheme = useCallback(() => {
-    setThemeState((prev) => {
-      if (prev === 'system') {
-        return getSystemTheme() === 'dark' ? 'light' : 'dark'
-      }
-      if (prev === 'dark') return 'light'
-      if (prev === 'light') return 'system'
-      return 'dark'
-    })
+    setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }, [])
 
   return (
