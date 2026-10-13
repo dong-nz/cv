@@ -2,7 +2,7 @@
 
 ## Project
 
-Personal engineering portfolio — multi-page SPA built with React + TypeScript + Vite. Data-driven content from `src/data/`, styled with CSS variables supporting dark/light/system themes.
+Personal engineering portfolio — multi-page SPA built with React + TypeScript + Vite. Data-driven content from `src/data/`, styled with CSS variables supporting dark/light themes. Motion animations via `motion/react`. Bilingual resume generation (EN/VI).
 
 ## Tech Stack
 
@@ -12,7 +12,9 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 | Language | TypeScript 6 (bundler mode, `verbatimModuleSyntax`, `noEmit`) |
 | Bundler | Vite 8 |
 | Router | React Router v8 (`react-router` package, pinned `8.4.0`) |
+| Animation | motion ^14.0.0 (`motion/react` ESM entrypoint) |
 | Linter | Oxlint 1 (`plugins: react, typescript, oxc`) |
+| Resume generation | playwright ^1.64.0, tsx ^4.23.15 |
 | Package manager | pnpm |
 
 ## Commands
@@ -21,6 +23,8 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 |---------|-------------|
 | `pnpm dev` | Start dev server with HMR |
 | `pnpm build` | Type-check (`tsc -b`) then build for production |
+| `pnpm build:resume` | Generate resume PDF (default EN) via Playwright |
+| `pnpm build:resume-all` | Generate bilingual resume PDFs (EN + VI) |
 | `pnpm lint` | Run Oxlint |
 | `pnpm preview` | Preview production build locally |
 
@@ -46,9 +50,9 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 ## Theming
 
 - `src/hooks/useTheme.tsx` — `ThemeProvider` + `useTheme` hook
-- State machine: `dark` ↔ `light` ↔ `system`
-- **Critical:** `cycleTheme` skips `system` when prev is `system` (goes to opposite theme instead)
-- `data-theme` attribute on `<html>` set by `useEffect`
+- Simple toggle: `'dark'` ↔ `'light'` (no `system` variant)
+- `resolvedTheme` — runtime resolved value (always `'dark'` or `'light'`)
+- `data-theme` attribute set on `<html>` during render (before paint)
 - Stored in `localStorage` key `portfolio-theme`
 
 ## Data Layer
@@ -57,6 +61,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 - `src/data/skills.ts` — skill groups → skills
 - `src/data/experience.ts` — work history entries
 - `src/data/projects.ts` — project cards with categories
+- `src/data/resume.ts` — resume availability, supported languages, URL generation
 
 ## Component Structure
 
@@ -64,13 +69,47 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 src/
   components/
     layout/     — Layout.tsx, Navigation.tsx, Footer.tsx
-    sections/   — Hero, About, Expertise, Experience, Projects, Contact (used in HomePage)
-    ui/         — Badge, Button, Card, SectionHeading, SocialLinks, Tag
+    sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume
+    ui/         — Badge, Button, Card, SectionHeading, SocialLinks, Tag, Typewriter, AnimatedSection, InView, RollingTextLink, BackToTop
     index.ts    — barrel export
-  data/         — profile, skills, experience, projects (TS modules)
-  hooks/        — useTheme.tsx
+  data/         — profile, skills, experience, projects, resume (TS modules)
+  hooks/        — useTheme.tsx, useClickOutside.ts
   pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, EngineeringPage, ContactPage, index.ts
   types/        — shared TypeScript interfaces
+```
+
+## Motion & Animation
+
+- `motion/react` v14 — ESM-first entrypoint (NOT `framer-motion`)
+- `AnimatedSection.tsx` — scroll-triggered motion animation wrapper
+- `InView.tsx` — viewport intersection observer motion component
+- `RollingTextLink.tsx` — animated text-scrolling navigation link
+- `BackToTop.tsx` — scroll-to-top floating button with AnimatePresence
+- `HeroParticles.tsx` — decorative particle background (uses AnimatePresence)
+
+## External Assets
+
+- `public/fonts/` — Inter font (Regular, Medium, SemiBold, Bold) in woff2
+- `public/icons.svg` — SVG sprite for icons
+- `public/resume-template.html` — HTML template for resume PDF generation
+- `public/profile-photo.webp` — profile photo
+
+## Scripts
+
+- `scripts/generate-resume.ts` — Playwright-based PDF resume generator (bilingual en/vi)
+
+## Deployment
+
+- Deployment is triggered automatically by gitea workflow `.gitea/workflows/deploy.yml`
+- `nginx.conf` — production Nginx SPA routing + caching config
+- `docker-compose.yaml` — Docker service for local nginx deployment
+
+```
+.gitea/
+└── workflows/
+    └── deploy.yml
+nginx.conf
+docker-compose.yaml
 ```
 
 ## CSS Architecture
@@ -80,23 +119,12 @@ src/
 - No CSS library — plain CSS with variables for theming
 - `#main-content` in Layout has `style={{ flex: 1 }}` (parent `#root` is `display: flex; flex-direction: column`)
 
-## Deployment
-
-- Deployment is triggered automatically by gitea workflow `.gitea/workflows/deploy.yml`setup in the repository.
-
-```
-.gitea/
-└── workflows/
-    └── deploy.yml
-```
-
 ## Known Issues & Gotchas
 
 1. **React Router v8 routing:** Use `<Layout><Routes>...</Routes></Layout>`, NOT `<Route element={<Layout />}>` with nested routes — the latter doesn't pass `children` correctly
 2. **Import path:** All router imports use `react-router` (not `react-router-dom`) — e.g., `import { Link, useLocation } from 'react-router'`
-3. **Theme cycle:** `cycleTheme` dependency array must be `[]` (empty), NOT `[setTheme]` — `setTheme` is not used inside `cycleTheme`
-4. **Theme from system:** When stored theme is `'system'`, `cycleTheme` must skip to opposite theme on first click (not go to `'dark'` which resolves to same visual)
-5. **Footer/Nav links:** Must use `<Link to>`, not `<a href>` for client-side navigation
+3. **Animation imports:** Use `motion/react` (v14 ESM), NOT `framer-motion` — e.g., `import { motion, AnimatePresence } from 'motion/react'`
+4. **Footer/Nav links:** Must use `<Link to>`, not `<a href>` for client-side navigation
 
 ## Design Specs
 
@@ -109,6 +137,7 @@ All specification documents are in `docs/design/`:
 | `spec-v2.md` | v2 index — overview, implementation order, feature list |
 | `specs/ui/spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
 | `specs/v2/spec-v2-*.md` | v2 feature specs (resume, seo, blog, analytics, testing, cicd) |
+| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, UI enhancements) |
 
 Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 
