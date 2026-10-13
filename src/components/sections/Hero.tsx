@@ -123,7 +123,6 @@ const socialLinks = [
 export function Hero() {
   const { scrollY } = useScroll()
   const y = useTransform(scrollY, [0, 300], [0, -80])
-  const opacity = useTransform(scrollY, [0, 200], [1, 0.3])
   return (
     <InView>
     <motion.section
@@ -137,7 +136,6 @@ export function Hero() {
       <HeroParticles />
       <motion.div
         className="hero-content"
-        style={{ opacity }}
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
