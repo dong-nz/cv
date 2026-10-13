@@ -1,19 +1,20 @@
 /* Theme variables — Dark mode (default) */
 :root {
-  --bg-primary: #0a0a0a;
-  --bg-surface: #141414;
-  --bg-elevated: #1a1a1a;
-  --text-primary: #f0f0f0;
-  --text-secondary: #a0a0a0;
-  --text-muted: #666666;
+  --bg-primary: #0f1117;
+  --bg-surface: #161922;
+  --bg-elevated: #1c2030;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --text-muted: #6b7280;
   --accent: #60a5fa;
   --accent-hover: #93c5fd;
   --accent-active: #3b82f6;
-  --border: #2a2a2a;
-  --shadow: rgba(0, 0, 0, 0.3);
-  --code-bg: #1a1a2e;
+  --border: #2a3040;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --code-bg: #1a1e2e;
   --success: #34d399;
-  --grid-color: rgba(96, 165, 250, 0.04);
+  --error: #f87171;
+  --grid-color: rgba(96, 165, 250, 0.03);
 
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
   --mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
@@ -42,8 +43,8 @@
 
 /* Light mode */
 :root[data-theme='light'] {
-  --bg-primary: #ffffff;
-  --bg-surface: #f5f5f5;
+  --bg-primary: #ececee;
+  --bg-surface: #e0e0e3;
   --bg-elevated: #ffffff;
   --text-primary: #0a0a0a;
   --text-secondary: #404040;
@@ -56,34 +57,31 @@
   --code-bg: #f0f0ff;
   --success: #059669;
   --error: #dc2626;
-  --grid-color: rgba(37, 99, 235, 0.08);
 }
 
 /* System theme */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg-primary: #0a0a0a;
-    --bg-surface: #141414;
-    --bg-elevated: #1a1a1a;
-    --text-primary: #f0f0f0;
-    --text-secondary: #a0a0a0;
-    --text-muted: #666666;
+    --bg-primary: #0f1117;
+    --bg-surface: #161922;
+    --bg-elevated: #1c2030;
+    --text-primary: #e8eaed;
+    --text-secondary: #9aa0a6;
+    --text-muted: #6b7280;
     --accent: #60a5fa;
     --accent-hover: #93c5fd;
     --accent-active: #3b82f6;
-    --border: #2a2a2a;
-    --shadow: rgba(0, 0, 0, 0.3);
-    --code-bg: #1a1a2e;
+    --border: #2a3040;
+    --shadow: rgba(0, 0, 0, 0.4);
+    --code-bg: #1a1e2e;
     --success: #34d399;
-    --error: #f87171;
-    --grid-color: rgba(96, 165, 250, 0.04);
   }
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
-    --bg-primary: #ffffff;
-    --bg-surface: #f5f5f5;
+    --bg-primary: #ececee;
+    --bg-surface: #e0e0e3;
     --bg-elevated: #ffffff;
     --text-primary: #0a0a0a;
     --text-secondary: #404040;
@@ -96,7 +94,6 @@
     --code-bg: #f0f0ff;
     --success: #059669;
     --error: #dc2626;
-    --grid-color: rgba(37, 99, 235, 0.08);
   }
 }
 
