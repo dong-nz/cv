@@ -56,31 +56,39 @@ function DownloadDropdown() {
 
   return (
     <div ref={ref} className="download-resume-dropdown">
-      <button
-        className={`download-resume-summary ${open ? 'open' : ''}`}
-        onClick={() => setOpen(!open)}
-        type="button"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
-          <path d="M12 3v10m0 0l-3-3m3 3l3-3" />
-          <path d="M3 17h18" />
-        </svg>
-        <span>Download Resume</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="chevron">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </button>
-      <div className={`download-resume-options ${open ? 'open' : ''}`}>
-        {resumeLanguages.map(lang => (
-          <a
-            key={lang}
-            href={resumeUrlFor(lang)}
-            download
-            className="download-resume-option"
-          >
-            {langLabels[lang]}
-          </a>
-        ))}
+      <div className="download-resume-shared-wrapper">
+        <div className="download-resume-lazer-wrapper">
+          <div className="download-resume-lazer-border" />
+          <div className="download-resume-lazer-glow" />
+          <div className="download-resume-lazer-inner">
+            <button
+              className={`download-resume-summary ${open ? 'open' : ''}`}
+              onClick={() => setOpen(!open)}
+              type="button"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="20" height="20">
+                <path d="M12 3v10m0 0l-3-3m3 3l3-3" />
+                <path d="M3 17h18" />
+              </svg>
+              <span>Download Resume</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="16" height="16" className="chevron">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div className={`download-resume-options ${open ? 'open' : ''}`}>
+          {resumeLanguages.map(lang => (
+            <a
+              key={lang}
+              href={resumeUrlFor(lang)}
+              download
+              className="download-resume-option"
+            >
+              {langLabels[lang]}
+            </a>
+          ))}
+        </div>
       </div>
     </div>
   )

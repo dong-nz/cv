@@ -691,7 +691,7 @@
 /* ===== Download Resume Dropdown ===== */
 .download-resume-dropdown {
   position: relative;
-  width: 100%;
+  width: fit-content;
 }
 
 .download-resume-summary {
@@ -706,8 +706,8 @@
   cursor: pointer;
   text-decoration: none;
   transition: all var(--transition-fast);
-  border: 1px solid var(--border);
-  background: transparent;
+  border: none;
+  width: 100%;
   color: var(--accent);
   list-style: none;
   user-select: none;
@@ -745,7 +745,7 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  width: 100%;
+  width: fit-content;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -766,6 +766,72 @@
 .download-resume-option:hover {
   background: var(--accent);
   color: #fff;
+}
+/* Shared wrapper for lazer + dropdown positioning context */
+.download-resume-shared-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* ===== Download Resume Lazer Border ===== */
+.download-resume-lazer-wrapper {
+  position: relative;
+  padding: 2px;
+  width: fit-content;
+  overflow: hidden;
+  border-radius: calc(var(--radius-md) + 2px);
+}
+
+.download-resume-lazer-border {
+  position: absolute;
+  inset: -200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 60%,
+    var(--accent) 80%,
+    var(--accent-hover) 95%,
+    transparent 100%
+  );
+  animation: download-resume-lazer-spin 4s linear infinite;
+  pointer-events: none;
+}
+
+.download-resume-lazer-glow {
+  position: absolute;
+  inset: -200%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 60%,
+    var(--accent) 80%,
+    var(--accent-hover) 95%,
+    transparent 100%
+  );
+  animation: download-resume-lazer-spin 4s linear infinite;
+  pointer-events: none;
+  filter: blur(12px);
+  opacity: 0.4;
+}
+
+.download-resume-lazer-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+}
+
+@keyframes download-resume-lazer-spin {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .download-resume-lazer-border,
+  .download-resume-lazer-glow {
+    animation: none;
+  }
 }
 
 
