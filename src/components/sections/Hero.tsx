@@ -1,10 +1,11 @@
 import {motion, useScroll, useTransform} from "motion/react"
 import {InView} from "@/components/ui/InView"
-import {resumeAvailable, resumeLanguages} from "@/data/resume"
+import {resumeAvailable, resumeLanguages, resumeUrlFor, resumeLanguageLabels} from "@/data/resume"
+import type {Language} from '@/types'
 import {useLanguage} from '@/hooks/useLanguage'
 import {strings} from '@/i18n/strings'
 import {useField} from '@/i18n/useField'
-import {DownloadButton, DownloadResumeDropdown} from '@/components/sections/DownloadResume'
+import {DownloadResumeDropdown} from '@/components/sections/DownloadResume'
 
 
 import {Button} from "@/components/ui/Button"
@@ -12,6 +13,20 @@ import {Typewriter} from '@/components/ui/Typewriter'
 import {HeroParticles} from '@/components/sections/HeroParticles'
 import {SocialLinks} from "@/components/ui/SocialLinks"
 import {profile} from "@/data/profile"
+
+function HeroDownloadButton({lang}: { lang: Language }) {
+    const {lang: currentLang} = useLanguage()
+    return (
+        <a
+            href={resumeUrlFor(lang)}
+            download
+            target="_blank"
+            className="btn btn-primary hero-download-mobile-btn"
+        >
+            {strings.common.resumeDownload[currentLang]} ({resumeLanguageLabels[lang]})
+        </a>
+    )
+}
 
 const socialLinks = [
     {
@@ -125,7 +140,7 @@ export function Hero() {
                                 </div>
                                 <div className="hero-download-mobile">
                                     {resumeLanguages.map(lang => (
-                                        <DownloadButton key={lang} lang={lang}/>
+                                        <HeroDownloadButton lang={lang} />
                                     ))}
                                 </div>
                             </>
