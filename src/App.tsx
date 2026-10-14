@@ -9,7 +9,7 @@ import {
   ExperiencePage,
   ProjectsListPage,
   ProjectDetailPage,
-  EngineeringPage,
+  PhilosophyPage,
   ContactPage,
 } from '@/pages'
 
@@ -25,7 +25,7 @@ function App() {
               <Route path="/experience" element={<ExperiencePage />} />
               <Route path="/projects" element={<ProjectsListPage />} />
               <Route path="/projects/:id" element={<ProjectDetailPage />} />
-              <Route path="/engineering" element={<EngineeringPage />} />
+              <Route path="/philosophy" element={<PhilosophyPage />} />
               <Route path="/contact" element={<ContactPage />} />
           </Routes>
         </Layout>

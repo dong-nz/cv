@@ -20,7 +20,7 @@
 | `src/components/sections/Projects.tsx` | 32 | `tag="04 - Projects"` | `tag={strings.projects.featured[lang]}` |
 | `src/pages/ProjectsListPage.tsx` | 13 | `tag="04 - Projects"` | `tag={strings.projects.all[lang]}` |
 | `src/pages/AboutPage.tsx` | 19 | `tag="About"` | `tag={strings.about.heading[lang]}` |
-| `src/pages/EngineeringPage.tsx` | 12 | `tag="Engineering"` | `tag={strings.engineering.heading[lang]}` |
+| `../../src/pages/PhilosophyPage.tsx` | 12 | `tag="Engineering"` | `tag={strings.engineering.heading[lang]}` |
 
 ### Đã đúng (reference)
 

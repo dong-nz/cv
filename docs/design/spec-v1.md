@@ -36,7 +36,7 @@ v1 implements **Phase 1 (Foundation)** and **Phase 2 (Core Portfolio)** from `sp
 | `/experience` | Experience | `ExperiencePage` | Done |
 | `/projects` | Projects List | `ProjectsListPage` | Done |
 | `/projects/:id` | Project Detail | `ProjectDetailPage` | Done |
-| `/engineering` | Engineering | `EngineeringPage` | Done (placeholder content) |
+| `/philosophy` | Engineering | `PhilosophyPage` | Done (placeholder content) |
 | `/contact` | Contact | `ContactPage` | Done |
 
 ### 3. Layout Components
@@ -119,7 +119,7 @@ App.tsx
                  │    ├── ExperiencePage
                  │    ├── ProjectsListPage
                  │    ├── ProjectDetailPage
-                 │    ├── EngineeringPage
+                 │    ├── PhilosophyPage
                  │    └── ContactPage
                  └── Footer
 ```

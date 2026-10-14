@@ -4,7 +4,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
 import { RollingTextLink } from '@/components/ui/RollingTextLink'
-const navPaths = ['/', '/about', '/experience', '/projects', '/engineering', '/contact'] as const
+const navPaths = ['/', '/about', '/experience', '/projects', '/contact', '/philosophy'] as const
 export function Navigation() {
   const { cycleTheme, resolvedTheme } = useTheme()
   const { lang, toggleLang } = useLanguage()

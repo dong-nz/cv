@@ -38,7 +38,7 @@ Add full English/Vietnamese bilingual support to the portfolio. Users can toggle
 | 14 | Update `ExperiencePage.tsx` (heading, responsibilities, achievements) | 1 | ✅ Completed |
 | 15 | Update `ProjectsListPage.tsx` (heading, categories, view details) | 1 | ✅ Completed |
 | 16 | Update `ProjectDetailPage.tsx` (categories, back link, headers) | 1 | ✅ Completed |
-| 17 | Update `EngineeringPage.tsx` (heading, categories, coming soon) | 1 | ✅ Completed |
+| 17 | Update `PhilosophyPage.tsx` (heading, categories, coming soon) | 1 | ✅ Completed |
 | 18 | Update `ContactPage.tsx` (heading, labels) | 1 | ✅ Completed |
 | 19 | Update `profile.ts` (fix tagline to VI) | 1 | ✅ Completed |
 | 20 | Update `skills.ts` (add `titleEn` to skillGroups) | 1 | ✅ Completed |
@@ -81,7 +81,7 @@ All previously hardcoded strings have been migrated to `src/i18n/strings.ts`:
 | `Projects.tsx` | headings, categories, summary |
 | `ProjectsListPage.tsx` | heading, categories, view details |
 | `ProjectDetailPage.tsx` | categories, back link, headers |
-| `EngineeringPage.tsx` | heading, categories, coming soon |
+| `PhilosophyPage.tsx` | heading, categories, coming soon |
 | `Contact.tsx` | heading, social labels |
 | `ContactPage.tsx` | heading, labels |
 | `Layout.tsx` | skip link |

@@ -560,7 +560,7 @@ export function SectionHeading({ title, subtitle, tag, id }: SectionHeadingProps
 | Expertise | `"02 — Expertise"` | `Expertise.tsx`, AboutPage.tsx | `SectionHeading` | Add `tag` prop |
 | Experience | `"03 — Experience"` | `ExperiencePage.tsx`, `Experience.tsx` | `<h2>` inline | Replace with `SectionHeading` |
 | Projects | `"04 — Projects"` | `ProjectsListPage.tsx`, `Projects.tsx` | No heading / `<h2>` inline | Add `SectionHeading` |
-| Engineering | `"05 — Engineering"` | `EngineeringPage.tsx` | `<h2>` inline | Replace with `SectionHeading` |
+| Engineering | `"05 — Engineering"` | `PhilosophyPage.tsx` | `<h2>` inline | Replace with `SectionHeading` |
 | Contact | `"06 — Contact"` | `ContactPage.tsx`, `Contact.tsx` | `SectionHeading` | Add `tag` prop |
 
 **CSS:**
@@ -586,7 +586,7 @@ export function SectionHeading({ title, subtitle, tag, id }: SectionHeadingProps
 - `src/components/sections/Experience.tsx` (replace `<h2>` with `SectionHeading`)
 - `src/pages/ProjectsListPage.tsx` (add `SectionHeading` before grid)
 - `src/components/sections/Projects.tsx` (replace `<h2>` with `SectionHeading`)
-- `src/pages/EngineeringPage.tsx` (replace `<h2>` with `SectionHeading`)
+- `../../../../src/pages/PhilosophyPage.tsx` (replace `<h2>` with `SectionHeading`)
 - `src/pages/ContactPage.tsx` (add `tag` to `SectionHeading`)
 - `src/components/sections/Contact.tsx` (add `tag` to `SectionHeading`)
 

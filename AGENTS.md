@@ -44,7 +44,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 | `/experience` | `ExperiencePage` | Timeline |
 | `/projects` | `ProjectsListPage` | All projects grid |
 | `/projects/:id` | `ProjectDetailPage` | Single project |
-| `/engineering` | `EngineeringPage` | Engineering philosophy |
+| `/philosophy` | `PhilosophyPage` | Engineering philosophy |
 | `/contact` | `ContactPage` | Contact info |
 
 ## Theming
@@ -74,7 +74,7 @@ src/
     index.ts    — barrel export
   data/         — profile, skills, experience, projects, resume (TS modules)
   hooks/        — useTheme.tsx, useClickOutside.ts
-  pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, EngineeringPage, ContactPage, index.ts
+  pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage, index.ts
   types/        — shared TypeScript interfaces
 ```
 
