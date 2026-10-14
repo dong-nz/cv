@@ -139,13 +139,13 @@ function renderProjects(projs: typeof projects): string {
 
 // --- Assemble HTML ---
 const html = template
-  .replace('{{NAME}}', profile.name)
+  .replace('{{NAME}}', resolveField(profile.nameEn, profile.name))
   .replace('{{TITLE}}', resolveField(profile.titleEn, profile.title))
   .replace('{{TAGLINE}}', resolveField(profile.taglineEn, profile.tagline))
   .replace('{{BIO}}', resolveField(profile.bioEn, profile.bio))
   .replace('{{EMAIL}}', profile.email)
-  .replace('{{GITHUB}}', profile.githubUrl.replace('https://', 'github.com/'))
-  .replace('{{LINKEDIN}}', profile.linkedinUrl.replace('https://', 'linkedin.com/in/'))
+  .replace('{{GITHUB}}', profile.githubUrl)
+  .replace('{{LINKEDIN}}', profile.linkedinUrl)
   .replace('{{PHOTO_BASE64}}', photoBase64)
   .replace('{{FONT_FACES}}', fontFaces)
   .replace('{{UPDATED_DATE}}', updatedDate)
