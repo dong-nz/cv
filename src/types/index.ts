@@ -79,6 +79,7 @@ export interface PhilosophyPoint {
 
 export interface Profile {
   name: string;
+  nameEn: string;
   firstName: string;
   lastName: string;
   title: string;

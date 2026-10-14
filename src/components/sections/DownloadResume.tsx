@@ -81,6 +81,7 @@ function DownloadButton({ lang }: { lang: Language }) {
       style={{
         display: 'flex',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: '12px',
         padding: '12px 20px',
         borderRadius: '8px',
@@ -92,10 +93,7 @@ function DownloadButton({ lang }: { lang: Language }) {
       <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
         <path d="M12 2a1 1 0 0 1 1 1v9.586l2.707-2.707a1 1 0 1 1 1.414 1.414l-4.5 4.5a1 1 0 0 1-1.414 0l-4.5-4.5a1 1 0 0 1 1.414-1.414L11 12.586V3a1 1 0 0 1 1-1zm-7 16a1 1 0 1 1 0 2h14a1 1 0 1 1 0-2H5z" />
       </svg>
-      <div>
-        <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{strings.common.resumeDownload[currentLang]}</div>
-        <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>{resumeLanguageLabels[lang]}</div>
-      </div>
+      <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{strings.common.resumeDownload[currentLang]} {resumeLanguageLabels[lang]}</div>
     </a>
   )
 }
@@ -114,4 +112,4 @@ export function DownloadResume() {
   )
 }
 
-export { DownloadResumeDropdown }
+export { DownloadResumeDropdown , DownloadButton}
