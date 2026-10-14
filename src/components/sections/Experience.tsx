@@ -4,6 +4,7 @@ import { experiences } from "@/data/experience"
 import { InView } from "@/components/ui/InView"
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
+import { useField, useFieldArray } from '@/i18n/useField'
 
 export function Experience() {
   const { lang } = useLanguage()
@@ -23,7 +24,7 @@ export function Experience() {
           },
         }}
       >
-        <SectionHeading title={strings.experience.heading[lang]} tag="03 - Experience" />
+        <SectionHeading title={strings.experience.heading[lang]} tag={strings.experience.heading[lang]} />
         <div style={{ maxWidth: '700px' }}>
         <div className="timeline">
           {experiences.map((exp, i) => (
@@ -43,7 +44,7 @@ export function Experience() {
             >
               <div className="timeline-marker" />
               <div className="timeline-header">
-                <div className="timeline-title">{lang === 'vi' ? exp.title : exp.titleEn}</div>
+                <div className="timeline-title">{useField(exp.title, exp.titleEn)}</div>
                 <div className="timeline-company">{exp.company}</div>
                 <div className="timeline-duration">{exp.duration}</div>
                 {exp.location && (
@@ -51,7 +52,7 @@ export function Experience() {
                 )}
               </div>
               <ul className="timeline-responsibilities">
-                {(lang === 'vi' ? exp.responsibilities : exp.responsibilitiesEn ?? []).map((r) => (
+                {useFieldArray(exp.responsibilities, exp.responsibilitiesEn).map((r) => (
                   <li key={r}>{r}</li>
                 ))}
               </ul>
@@ -61,7 +62,7 @@ export function Experience() {
                     {achievement.title}
                   </div>
                   <div className="achievement-context">
-                    {lang === 'vi' ? achievement.context : achievement.contextEn}
+                    {useField(achievement.context, achievement.contextEn)}
                   </div>
                   <div
                     style={{
@@ -70,7 +71,7 @@ export function Experience() {
                       marginBottom: "8px",
                     }}
                   >
-                    {lang === 'vi' ? achievement.impact : achievement.impactEn}
+                    {useField(achievement.impact, achievement.impactEn)}
                   </div>
                   {achievement.metrics &&
                     achievement.metrics.length > 0 && (

@@ -4,6 +4,7 @@ import { skillGroups } from "@/data/skills"
 import { InView } from "@/components/ui/InView"
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
+import { useField } from '@/i18n/useField'
 
 export function Expertise() {
   const { lang } = useLanguage()
@@ -23,7 +24,7 @@ export function Expertise() {
           },
         }}
       >
-        <SectionHeading title={strings.expertise.heading[lang]} tag="02 - Expertise" />
+        <SectionHeading title={strings.expertise.heading[lang]} tag={strings.expertise.heading[lang]} />
         <div className="expertise-grid">
           {skillGroups.map((group, i) => (
             <motion.div
@@ -40,7 +41,7 @@ export function Expertise() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <h3>{lang === 'vi' ? group.title : group.titleEn}</h3>
+              <h3>{useField(group.title, group.titleEn)}</h3>
               <ul className="expertise-skills">
                 {group.skills.map((skill) => (
                   <li key={skill} className="expertise-skill">

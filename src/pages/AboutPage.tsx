@@ -16,7 +16,7 @@ export function AboutPage() {
         <SectionHeading
           title={strings.about.heading[lang]}
           subtitle={strings.about.subtitle[lang]}
-          tag="About"
+          tag={strings.about.heading[lang]}
         />
         <div style={{ maxWidth: '700px' }}>
           <p style={{ fontSize: '18px', marginBottom: '32px' }}>
@@ -59,7 +59,7 @@ export function AboutPage() {
         <div className="expertise-grid">
           {skillGroups.map((group) => (
             <div key={group.title} className="expertise-card">
-              <h3>{lang === 'vi' ? group.title : group.titleEn}</h3>
+              <h3>{useField(group.title, group.titleEn)}</h3>
               <ul className="expertise-skills">
                 {group.skills.map((skill: string) => (
                   <li key={skill} className="expertise-skill">

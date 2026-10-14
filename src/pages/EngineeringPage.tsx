@@ -9,7 +9,7 @@ export function EngineeringPage() {
   const { lang } = useLanguage()
   return (
     <section className="section container-content" aria-labelledby="engineering-heading">
-      <SectionHeading title={strings.engineering.heading[lang]} tag="Engineering" />
+      <SectionHeading title={strings.engineering.heading[lang]} tag={strings.engineering.heading[lang]} />
 
       {engineeringCategoryKeys.map((catKey) => (
         <div key={catKey} style={{ marginBottom: '48px' }}>

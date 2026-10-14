@@ -1,75 +1,11 @@
-import { useState, useRef, useEffect } from 'react'
 import { motion, useScroll, useTransform } from "motion/react"
 import { InView } from "@/components/ui/InView"
-import { resumeAvailable, resumeLanguages, resumeUrlFor } from "@/data/resume"
+import { resumeAvailable, resumeLanguages, resumeUrlFor, resumeLanguageLabels } from "@/data/resume"
 import type { Language } from '@/types'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
 import { useField } from '@/i18n/useField'
-const langLabels: Record<Language, string> = {
-  en: 'English',
-  vi: 'Tiếng Việt',
-}
-function HeroDownloadDropdown() {
-  const { lang } = useLanguage()
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const listener = (e: MouseEvent | TouchEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', listener)
-    document.addEventListener('touchstart', listener)
-    return () => {
-      document.removeEventListener('mousedown', listener)
-      document.removeEventListener('touchstart', listener)
-    }
-  }, [open])
-
-  return (
-    <div ref={ref} className="download-resume-dropdown hero-download-dropdown">
-      <div className="download-resume-shared-wrapper">
-        <div className="download-resume-lazer-wrapper">
-          <div className="download-resume-lazer-border" />
-          <div className="download-resume-lazer-glow" />
-          <div className="download-resume-lazer-inner">
-            <button
-              className={`download-resume-summary hero-download-summary ${open ? 'open' : ''}`}
-              onClick={() => setOpen(!open)}
-              type="button"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
-                <path d="M12 3v10m0 0l-3-3m3 3l3-3" />
-                <path d="M3 17h18" />
-              </svg>
-              <span>{strings.common.resumeDownload[lang]}</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14" className="chevron">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div className={`download-resume-options ${open ? 'open' : ''}`}>
-          {resumeLanguages.map(lang => (
-            <a
-              key={lang}
-              href={resumeUrlFor(lang)}
-              download
-              target="_blank"
-              className="download-resume-option"
-            >
-              {langLabels[lang]}
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
+import { DownloadResumeDropdown } from '@/components/sections/DownloadResume'
 
 function HeroDownloadButton({ lang }: { lang: Language }) {
   return (
@@ -79,7 +15,7 @@ function HeroDownloadButton({ lang }: { lang: Language }) {
       target="_blank"
       className="btn btn-primary hero-download-mobile-btn"
     >
-      Download Resume ({langLabels[lang]})
+      Download Resume ({resumeLanguageLabels[lang]})
     </a>
   )
 }
@@ -194,7 +130,7 @@ export function Hero() {
           {resumeAvailable && (
             <>
               <div className="hero-download-desktop">
-                <HeroDownloadDropdown />
+                <DownloadResumeDropdown className="hero-download-dropdown" wrapperClassName="hero-download-summary" targetBlank />
               </div>
               <div className="hero-download-mobile">
                 {resumeLanguages.map(lang => (

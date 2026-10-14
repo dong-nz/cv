@@ -2,6 +2,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { experiences } from '@/data/experience'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
+import { useField, useFieldArray } from '@/i18n/useField'
 
 export function ExperiencePage() {
   const { lang } = useLanguage()
@@ -13,7 +14,7 @@ export function ExperiencePage() {
           <div key={exp.id} className="timeline-entry">
             <div className="timeline-marker" />
             <div className="timeline-header">
-              <div className="timeline-title">{lang === 'vi' ? exp.title : exp.titleEn}</div>
+              <div className="timeline-title">{useField(exp.title, exp.titleEn)}</div>
               <div className="timeline-company">{exp.company}</div>
               <div className="timeline-duration">{exp.duration}</div>
               {exp.location && (
@@ -21,16 +22,16 @@ export function ExperiencePage() {
               )}
             </div>
             <ul className="timeline-responsibilities">
-              {(lang === 'vi' ? exp.responsibilities : exp.responsibilitiesEn ?? []).map((r) => (
+              {useFieldArray(exp.responsibilities, exp.responsibilitiesEn).map((r) => (
                 <li key={r}>{r}</li>
               ))}
             </ul>
             {exp.achievements?.map((achievement) => (
               <div key={achievement.id} className="achievement">
                 <div className="achievement-title">{achievement.title}</div>
-                <div className="achievement-context">{lang === 'vi' ? achievement.context : achievement.contextEn}</div>
+                <div className="achievement-context">{useField(achievement.context, achievement.contextEn)}</div>
                 <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                  {lang === 'vi' ? achievement.impact : achievement.impactEn}
+                  {useField(achievement.impact, achievement.impactEn)}
                 </div>
                 {achievement.metrics && achievement.metrics.length > 0 && (
                   <div style={{ marginBottom: '8px' }}>

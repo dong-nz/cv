@@ -4,6 +4,7 @@ import { Tag } from '@/components/ui/Tag'
 import { projects } from '@/data/projects'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
+import { useField } from '@/i18n/useField'
 
 
 export function ProjectDetailPage() {
@@ -34,7 +35,7 @@ export function ProjectDetailPage() {
       </div>
 
       <p style={{ fontSize: '18px', color: 'var(--text-secondary)', marginBottom: '32px' }}>
-        {lang === 'vi' ? project.summary : project.summaryEn}
+        {useField(project.summary, project.summaryEn)}
       </p>
 
       {project.metrics && project.metrics.length > 0 && (
@@ -69,8 +70,8 @@ export function ProjectDetailPage() {
           <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'var(--text-primary)' }}>{strings.projectDetail.experiments[lang]}</h3>
           {project.sections.map((section, idx) => (
             <div key={idx} style={{ marginBottom: '16px', padding: '16px', background: 'var(--bg-surface)', borderRadius: '8px' }}>
-              <h4 style={{ fontSize: '14px', marginBottom: '4px', color: 'var(--text-primary)' }}>{lang === 'vi' ? section.title : section.titleEn}</h4>
-              <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{lang === 'vi' ? section.content : section.contentEn}</p>
+              <h4 style={{ fontSize: '14px', marginBottom: '4px', color: 'var(--text-primary)' }}>{useField(section.title, section.titleEn)}</h4>
+              <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{useField(section.content, section.contentEn)}</p>
               <Tag accent>{section.type}</Tag>
             </div>
           ))}

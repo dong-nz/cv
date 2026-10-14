@@ -10,7 +10,7 @@ export function About() {
   return (
     <InView>
     <section className="section container-wide" aria-labelledby="about-heading">
-      <SectionHeading title={strings.about.heading[lang]} tag="01 - About" />
+      <SectionHeading title={strings.about.heading[lang]} tag={strings.about.heading[lang]} />
       <div style={{ maxWidth: '700px' }}>
         <p style={{ fontSize: '18px', marginBottom: '32px' }}>
           {useField(profile.bio, profile.bioEn)}

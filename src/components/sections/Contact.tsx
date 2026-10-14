@@ -20,7 +20,8 @@ export function Contact() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title={strings.contact.heading[lang]} tag={`06 - ${strings.common.contactTag[lang]}`} />
+
+        <SectionHeading title={strings.contact.heading[lang]} tag={strings.common.contactTag[lang]} />
         <div style={{ maxWidth: '700px' }}>
         <div className="contact-links">
           <motion.a
