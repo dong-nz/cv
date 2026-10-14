@@ -140,7 +140,7 @@ export function Hero() {
                                 </div>
                                 <div className="hero-download-mobile">
                                     {resumeLanguages.map(lang => (
-                                        <HeroDownloadButton lang={lang} />
+                                        <HeroDownloadButton key={lang} lang={lang} />
                                     ))}
                                 </div>
                             </>
