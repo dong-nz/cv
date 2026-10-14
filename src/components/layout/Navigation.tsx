@@ -1,19 +1,13 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useTheme } from '@/hooks/useTheme'
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
 import { RollingTextLink } from '@/components/ui/RollingTextLink'
-
-const navItems = [
-  { label: 'Home', path: '/' },
-  { label: 'About', path: '/about' },
-  { label: 'Experience', path: '/experience' },
-  { label: 'Projects', path: '/projects' },
-  { label: 'Engineering', path: '/engineering' },
-  { label: 'Contact', path: '/contact' },
-]
-
+const navPaths = ['/', '/about', '/experience', '/projects', '/engineering', '/contact'] as const
 export function Navigation() {
   const { cycleTheme, resolvedTheme } = useTheme()
+  const { lang, toggleLang } = useLanguage()
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
 
@@ -43,16 +37,20 @@ export function Navigation() {
           </Link>
 
           <ul className="nav-menu">
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <RollingTextLink
-                  to={item.path}
-                  className={item.path === location.pathname ? 'nav-link active' : 'nav-link'}
-                >
-                  {item.label}
-                </RollingTextLink>
-              </li>
-            ))}
+            {navPaths.map((path) => {
+              const navKey = path === '/' ? 'home' : path.replace('/', '') as keyof typeof strings.nav
+              const label = strings.nav[navKey][lang]
+              return (
+                <li key={path}>
+                  <RollingTextLink
+                    to={path}
+                    className={path === location.pathname ? 'nav-link active' : 'nav-link'}
+                  >
+                    {label}
+                  </RollingTextLink>
+                </li>
+              )
+            })}
           </ul>
 
           <div className="nav-actions">
@@ -75,6 +73,14 @@ export function Navigation() {
             </button>
 
             <button
+              className="lang-toggle"
+              onClick={toggleLang}
+              aria-label="Switch language"
+              title={`Switch to ${lang === 'en' ? 'Tiếng Việt' : 'English'}`}
+            >
+              {lang === 'en' ? 'VI' : 'EN'}
+            </button>
+            <button
               className="mobile-menu-btn"
               onClick={() => setMobileOpen(!mobileOpen)}
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
@@ -96,17 +102,21 @@ export function Navigation() {
 
       <div className={`mobile-menu ${mobileOpen ? 'open' : ''}`} role="dialog" aria-label="Mobile navigation">
         <ul className="mobile-menu-list">
-          {navItems.map((item) => (
-            <li key={item.path}>
-              <RollingTextLink
-                to={item.path}
-                className={item.path === location.pathname ? 'mobile-menu-link active' : 'mobile-menu-link'}
-                onClick={() => setMobileOpen(false)}
-              >
-                {item.label}
-              </RollingTextLink>
-            </li>
-          ))}
+            {navPaths.map((path) => {
+              const navKey = path === '/' ? 'home' : path.replace('/', '') as keyof typeof strings.nav
+              const label = strings.nav[navKey][lang]
+              return (
+                <li key={path}>
+                  <RollingTextLink
+                    to={path}
+                    className={path === location.pathname ? 'mobile-menu-link active' : 'mobile-menu-link'}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {label}
+                  </RollingTextLink>
+                </li>
+              )
+            })}
         </ul>
       </div>
     </>

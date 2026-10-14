@@ -3,12 +3,15 @@ import { motion, useScroll, useTransform } from "motion/react"
 import { InView } from "@/components/ui/InView"
 import { resumeAvailable, resumeLanguages, resumeUrlFor } from "@/data/resume"
 import type { Language } from '@/types'
-
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
+import { useField } from '@/i18n/useField'
 const langLabels: Record<Language, string> = {
   en: 'English',
   vi: 'Tiếng Việt',
 }
 function HeroDownloadDropdown() {
+  const { lang } = useLanguage()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -43,7 +46,7 @@ function HeroDownloadDropdown() {
                 <path d="M12 3v10m0 0l-3-3m3 3l3-3" />
                 <path d="M3 17h18" />
               </svg>
-              <span>Download Resume</span>
+              <span>{strings.common.resumeDownload[lang]}</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14" className="chevron">
                 <polyline points="6 9 12 15 18 9" />
               </svg>
@@ -122,6 +125,7 @@ const socialLinks = [
 
 export function Hero() {
   const { scrollY } = useScroll()
+  const { lang } = useLanguage()
   const y = useTransform(scrollY, [0, 300], [0, -80])
   return (
     <InView>
@@ -147,7 +151,7 @@ export function Hero() {
         >
           <span className="hero-greeting">
             <span className="greeting-dot" />
-            Hi, I'm
+            {strings.hero.greeting[lang]}
           </span>
         </motion.div>
         <motion.h1
@@ -173,7 +177,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          {profile.tagline}
+          {useField(profile.tagline, profile.taglineEn)}
         </motion.p>
         <motion.div
           className="hero-cta"
@@ -182,10 +186,10 @@ export function Hero() {
           transition={{ duration: 0.5, delay: 0.6 }}
         >
           <Button href="/projects" variant="primary">
-            View Projects
+            {strings.hero.ctaProjects[lang]}
           </Button>
           <Button href="/contact" variant="primary">
-            Contact Me
+            {strings.hero.ctaContact[lang]}
           </Button>
           {resumeAvailable && (
             <>
@@ -206,7 +210,7 @@ export function Hero() {
         <div className="scroll-mouse">
           <div className="scroll-wheel" />
         </div>
-        <span>Scroll</span>
+        <span>{strings.hero.scroll[lang]}</span>
       </div>
       <motion.div
         className="hero-visual"

@@ -3,24 +3,28 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { profile } from '@/data/profile'
 import { skillGroups } from '@/data/skills'
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
+import { useField } from '@/i18n/useField'
 
 export function AboutPage() {
+  const { lang } = useLanguage()
   return (
     <>
     <AnimatedSection>
       <section className="section container-content" aria-labelledby="about-heading">
         <SectionHeading
-          title="About Me"
-          subtitle="Senior Software Engineer with deep expertise in distributed systems, logistics technology, and practical AI applications."
-          tag="01 - About"
+          title={strings.about.heading[lang]}
+          subtitle={strings.about.subtitle[lang]}
+          tag="About"
         />
         <div style={{ maxWidth: '700px' }}>
           <p style={{ fontSize: '18px', marginBottom: '32px' }}>
-            {profile.bio}
+            {useField(profile.bio, profile.bioEn)}
           </p>
 
           <h3 style={{ fontSize: '20px', marginBottom: '16px', color: 'var(--text-primary)' }}>
-            How I Think About Engineering
+            {strings.about.engineeringTitle[lang]}
           </h3>
           <div className="philosophy-grid">
             {profile.philosophy.map((point) => (
@@ -37,7 +41,7 @@ export function AboutPage() {
           </div>
 
           <h3 style={{ fontSize: '20px', marginTop: '32px', marginBottom: '12px', color: 'var(--text-primary)' }}>
-            What I'm Currently Exploring
+            {strings.about.exploringTitlePage[lang]}
           </h3>
           <div className="interests-list">
             {profile.currentInterests.map((interest) => (
@@ -49,14 +53,13 @@ export function AboutPage() {
         </div>
       </section>
     </AnimatedSection>
-
     <AnimatedSection>
       <section className="section container-wide" aria-labelledby="expertise-heading">
-        <SectionHeading title="Core Expertise" />
+        <SectionHeading title={strings.about.expertise[lang]} />
         <div className="expertise-grid">
-          {skillGroups.map((group: { title: string; skills: string[] }) => (
+          {skillGroups.map((group) => (
             <div key={group.title} className="expertise-card">
-              <h3>{group.title}</h3>
+              <h3>{lang === 'vi' ? group.title : group.titleEn}</h3>
               <ul className="expertise-skills">
                 {group.skills.map((skill: string) => (
                   <li key={skill} className="expertise-skill">

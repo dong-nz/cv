@@ -3,6 +3,7 @@ import type { SkillGroup } from "@/types";
 export const skillGroups: SkillGroup[] = [
   {
     title: "Software Engineering",
+    titleEn: "Software Engineering",
     skills: [
       "Java",
       "Go",
@@ -14,6 +15,7 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: "System Architecture",
+    titleEn: "System Architecture",
     skills: [
       "System Design",
       "Integration Architecture",
@@ -24,6 +26,7 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: "Logistics Technology",
+    titleEn: "Logistics Technology",
     skills: [
       "Sortation",
       "Warehouse / Facility Operations",
@@ -34,6 +37,7 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: "AI / ML",
+    titleEn: "AI / ML",
     skills: [
       "Computer Vision",
       "Object Detection",
@@ -45,10 +49,12 @@ export const skillGroups: SkillGroup[] = [
   },
   {
     title: "Infrastructure",
+    titleEn: "Infrastructure",
     skills: ["Docker", "Linux", "CI/CD", "Networking", "Middleware"],
   },
   {
     title: "Engineering Practices",
+    titleEn: "Engineering Practices",
     skills: [
       "Agile / Scrum",
       "Technical Documentation",

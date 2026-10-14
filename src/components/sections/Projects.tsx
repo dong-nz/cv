@@ -4,18 +4,13 @@ import { motion } from "motion/react"
 import { Badge } from "@/components/ui/Badge"
 import { projects } from "@/data/projects"
 import { InView } from "@/components/ui/InView"
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
+
 const MotionLink = motion.create(Link)
 
-const categoryLabels: Record<string, string> = {
-  "software-engineering": "Software Engineering",
-  logistics: "Logistics",
-  "ai-ml": "AI / ML",
-  "computer-vision": "Computer Vision",
-  architecture: "Architecture",
-  experiment: "Experiment",
-}
-
 export function Projects() {
+  const { lang } = useLanguage()
   const featured = projects.filter((p) => p.featured).slice(0, 4)
 
   return (
@@ -34,12 +29,12 @@ export function Projects() {
           },
         }}
       >
-        <SectionHeading title="Featured Projects" tag="04 - Projects" />
+        <SectionHeading title={strings.projects.featured[lang]} tag="04 - Projects" />
         <Link
           to="/projects"
           style={{ fontSize: "14px", fontWeight: 500, color: "var(--accent)", display: "block", marginBottom: "24px" }}
         >
-          View All →
+          {strings.projects.viewAll[lang]} →
         </Link>
         <div className="projects-grid">
           {featured.map((project, i) => (
@@ -62,10 +57,10 @@ export function Projects() {
                 <div className="project-card-header">
                   <h3>{project.title}</h3>
                   <Badge variant="outline">
-                    {categoryLabels[project.category] || project.category}
+                    {strings.projects.categories[project.category][lang]}
                   </Badge>
                 </div>
-                <p className="project-card-summary">{project.summary}</p>
+                <p className="project-card-summary">{lang === 'vi' ? project.summary : project.summaryEn}</p>
                 <div className="project-card-techs">
                   {project.technologies.slice(0, 4).map((tech) => (
                     <span key={tech} className="tag">
@@ -82,7 +77,7 @@ export function Projects() {
                     ))}
                   </div>
                 )}
-                <span className="project-card-cta">View Details →</span>
+                <span className="project-card-cta">{strings.projects.viewDetails[lang]} →</span>
               </div>
             </MotionLink>
           ))}

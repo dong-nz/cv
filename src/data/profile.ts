@@ -7,14 +7,14 @@ export const profile: Profile = {
   title: "Senior Software Engineer",
   titleEn: "Senior Software Engineer",
   tagline:
-    "Building scalable software systems,\nintelligent logistics solutions,\nand practical AI applications.",
+    "Xây dựng hệ thống phần mềm có khả năng mở rộng,\ngiải pháp logistics thông minh,\nvà ứng dụng AI thực tiễn.",
   taglineEn:
     "Building scalable software systems,\nintelligent logistics solutions,\nand practical AI applications.",
   bio: "Senior Software Engineer với kinh nghiệm xây dựng hệ thống phân tán, logistics technology, và ứng dụng AI/ML vào bài toán thực tế. Tập trung vào system architecture, integration, và production-grade solutions.",
   bioEn: "Senior Software Engineer with experience building distributed systems, logistics technology, and AI/ML applications for real-world problems. Focused on system architecture, integration, and production-grade solutions.",
-  email: "your.email@example.com",
-  githubUrl: "https://github.com/yourusername",
-  linkedinUrl: "https://linkedin.com/in/yourusername",
+  email: "nguyendong_bkdn@yahoo.com",
+  githubUrl: "https://github.com/dong-nz",
+  linkedinUrl: "https://www.linkedin.com/in/dong-nz",
   currentInterests: [
     "AI in logistics",
     "Digital twins",

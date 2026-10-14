@@ -2,21 +2,23 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { InView } from '@/components/ui/InView'
 import { Tag } from '@/components/ui/Tag'
 import { profile } from '@/data/profile'
-
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
+import { useField } from '@/i18n/useField'
 export function About() {
+  const { lang } = useLanguage()
   return (
     <InView>
     <section className="section container-wide" aria-labelledby="about-heading">
-      <SectionHeading title="About Me" tag="01 - About" />
+      <SectionHeading title={strings.about.heading[lang]} tag="01 - About" />
       <div style={{ maxWidth: '700px' }}>
         <p style={{ fontSize: '18px', marginBottom: '32px' }}>
-          {profile.bio}
+          {useField(profile.bio, profile.bioEn)}
         </p>
 
         <h3 style={{ fontSize: '20px', marginBottom: '16px', color: 'var(--text-primary)' }}>
-          How I Think About Engineering
+          {strings.about.engineeringTitle[lang]}
         </h3>
-
         <div className="philosophy-grid">
           {profile.philosophy.map((point) => (
             <div key={point.title} className="philosophy-card">
@@ -32,7 +34,7 @@ export function About() {
         </div>
 
         <h3 style={{ fontSize: '20px', marginTop: '32px', marginBottom: '12px', color: 'var(--text-primary)' }}>
-          What I'm Exploring
+          {strings.about.exploringTitle[lang]}
         </h3>
         <div className="interests-list">
           {profile.currentInterests.map((interest) => (

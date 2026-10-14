@@ -2,8 +2,11 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { motion } from "motion/react"
 import { experiences } from "@/data/experience"
 import { InView } from "@/components/ui/InView"
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
 
 export function Experience() {
+  const { lang } = useLanguage()
   return (
     <InView>
       <motion.section
@@ -20,7 +23,7 @@ export function Experience() {
           },
         }}
       >
-        <SectionHeading title="Experience" tag="03 - Experience" />
+        <SectionHeading title={strings.experience.heading[lang]} tag="03 - Experience" />
         <div style={{ maxWidth: '700px' }}>
         <div className="timeline">
           {experiences.map((exp, i) => (
@@ -40,7 +43,7 @@ export function Experience() {
             >
               <div className="timeline-marker" />
               <div className="timeline-header">
-                <div className="timeline-title">{exp.title}</div>
+                <div className="timeline-title">{lang === 'vi' ? exp.title : exp.titleEn}</div>
                 <div className="timeline-company">{exp.company}</div>
                 <div className="timeline-duration">{exp.duration}</div>
                 {exp.location && (
@@ -48,7 +51,7 @@ export function Experience() {
                 )}
               </div>
               <ul className="timeline-responsibilities">
-                {exp.responsibilities.map((r) => (
+                {(lang === 'vi' ? exp.responsibilities : exp.responsibilitiesEn ?? []).map((r) => (
                   <li key={r}>{r}</li>
                 ))}
               </ul>
@@ -58,7 +61,7 @@ export function Experience() {
                     {achievement.title}
                   </div>
                   <div className="achievement-context">
-                    {achievement.context}
+                    {lang === 'vi' ? achievement.context : achievement.contextEn}
                   </div>
                   <div
                     style={{
@@ -67,7 +70,7 @@ export function Experience() {
                       marginBottom: "8px",
                     }}
                   >
-                    {achievement.impact}
+                    {lang === 'vi' ? achievement.impact : achievement.impactEn}
                   </div>
                   {achievement.metrics &&
                     achievement.metrics.length > 0 && (

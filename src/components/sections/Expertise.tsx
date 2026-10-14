@@ -2,8 +2,11 @@ import { motion } from "motion/react"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 import { skillGroups } from "@/data/skills"
 import { InView } from "@/components/ui/InView"
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
 
 export function Expertise() {
+  const { lang } = useLanguage()
   return (
     <InView>
       <motion.section
@@ -20,7 +23,7 @@ export function Expertise() {
           },
         }}
       >
-        <SectionHeading title="Core Expertise" tag="02 - Expertise" />
+        <SectionHeading title={strings.expertise.heading[lang]} tag="02 - Expertise" />
         <div className="expertise-grid">
           {skillGroups.map((group, i) => (
             <motion.div
@@ -37,7 +40,7 @@ export function Expertise() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <h3>{group.title}</h3>
+              <h3>{lang === 'vi' ? group.title : group.titleEn}</h3>
               <ul className="expertise-skills">
                 {group.skills.map((skill) => (
                   <li key={skill} className="expertise-skill">

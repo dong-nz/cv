@@ -1,31 +1,32 @@
 import { Link } from 'react-router'
 import { profile } from '@/data/profile'
-
-const footerLinks = [
-  { label: 'Home', path: '/' },
-  { label: 'About', path: '/about' },
-  { label: 'Projects', path: '/projects' },
-  { label: 'Contact', path: '/contact' },
-]
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
+const footerPaths = ['/', '/about', '/projects', '/contact'] as const
 
 export function Footer() {
   const year = new Date().getFullYear()
+  const { lang } = useLanguage()
 
   return (
     <footer className="footer" role="contentinfo">
       <div className="footer-container">
         <p className="footer-text">
-          &copy; {year} {profile.name}. All rights reserved.
+          &copy; {year} {profile.name}. {strings.footer.copyright[lang]}
         </p>
 
         <ul className="footer-links">
-          {footerLinks.map((link) => (
-            <li key={link.path}>
-              <Link to={link.path} className="footer-link">
-                {link.label}
-              </Link>
-            </li>
-          ))}
+          {footerPaths.map((path) => {
+            const key = path === '/' ? 'home' : path.replace('/', '') as keyof typeof strings.footer.links
+            const label = strings.footer.links[key][lang]
+            return (
+              <li key={path}>
+                <Link to={path} className="footer-link">
+                  {label}
+                </Link>
+              </li>
+            )
+          })}
         </ul>
 
         <div className="social-links">

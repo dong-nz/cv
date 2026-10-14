@@ -3,8 +3,10 @@ import { DownloadResume } from "@/components/sections/DownloadResume"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 import { profile } from "@/data/profile"
 import { InView } from "@/components/ui/InView"
-
+import { useLanguage } from '@/hooks/useLanguage'
+import { strings } from '@/i18n/strings'
 export function Contact() {
+  const { lang } = useLanguage()
   return (
     <InView>
       <motion.section
@@ -18,7 +20,7 @@ export function Contact() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title="Contact" tag="06 - Contact" />
+        <SectionHeading title={strings.contact.heading[lang]} tag={`06 - ${strings.common.contactTag[lang]}`} />
         <div style={{ maxWidth: '700px' }}>
         <div className="contact-links">
           <motion.a
@@ -40,7 +42,7 @@ export function Contact() {
             </svg>
             <div>
               <div style={{ fontWeight: 500, color: "var(--text-primary)" }}>
-                Email
+                {strings.contact.email[lang]}
               </div>
               <div style={{ fontSize: "14px", color: "var(--text-muted)" }}>
                 {profile.email}
@@ -65,7 +67,7 @@ export function Contact() {
             </svg>
             <div>
               <div style={{ fontWeight: 500, color: "var(--text-primary)" }}>
-                GitHub
+                {strings.contact.github[lang]}
               </div>
               <div style={{ fontSize: "14px", color: "var(--text-muted)" }}>
                 @yourusername
@@ -90,7 +92,7 @@ export function Contact() {
             </svg>
             <div>
               <div style={{ fontWeight: 500, color: "var(--text-primary)" }}>
-                LinkedIn
+                {strings.contact.linkedin[lang]}
               </div>
               <div style={{ fontSize: "14px", color: "var(--text-muted)" }}>
                 Your Name
