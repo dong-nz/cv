@@ -486,6 +486,11 @@
   background-clip: text;
 }
 
+.ok-possible {
+  font-size: clamp(32px, 5vw, 25px);
+  font-weight: 700;
+}
+
 .hero-cta {
   display: flex;
   gap: 16px;

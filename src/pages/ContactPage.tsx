@@ -25,7 +25,7 @@ export function ContactPage() {
           </svg>
           <div>
             <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{strings.contact.github[lang]}</div>
-            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>@yourusername</div>
+            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>@dong-nz</div>
           </div>
         </a>
         <a href={profile.linkedinUrl} target="_blank" rel="noopener noreferrer" className="contact-link">
@@ -34,7 +34,7 @@ export function ContactPage() {
           </svg>
           <div>
             <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{strings.contact.linkedin[lang]}</div>
-            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>Your Name</div>
+            <div style={{ fontSize: '14px', color: 'var(--text-muted)' }}>@dong-nz</div>
           </div>
         </a>
       </div>

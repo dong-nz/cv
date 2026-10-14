@@ -117,9 +117,8 @@ export function Hero() {
                         initial={{opacity: 0, y: 20}}
                         animate={{opacity: 1, y: 0}}
                         transition={{duration: 0.5, delay: 0.5}}
-                    >
-                        {useField(profile.tagline, profile.taglineEn)}
-                    </motion.p>
+                        dangerouslySetInnerHTML={{__html: useField(profile.tagline, profile.taglineEn)}}
+                    />
                     <motion.div
                         className="hero-cta"
                         initial={{opacity: 0, y: 20}}
