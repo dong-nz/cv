@@ -141,6 +141,25 @@ All specification documents are in `docs/design/`:
 
 Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 
+### Specification Rules
+
+When proposing or implementing changes, always include these 3 sections:
+
+**1. Implementation Details**
+- Describe every code step: what to write, edit, or delete
+- List new imports, functions, props, state, CSS classes
+- Identify edge cases and error handling
+
+**2. Affected Files**
+- File + line range to edit: `src/foo.ts:42-57`
+- New file to create: `src/bar.ts`
+- File to delete: `src/dead.ts`
+
+**3. Progress Tracking**
+- Update relevant spec with status: `TODO` / `IN_PROGRESS` / `DONE`
+- Record which acceptance criteria were verified
+- Format: checklist in spec or inline code comments
+
 ## Code Style & Linting
 
 - TypeScript: `verbatimModuleSyntax`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`

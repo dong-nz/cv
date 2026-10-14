@@ -7,7 +7,7 @@ export function HeroParticles() {
       Array.from({ length: count }, (_, i) => ({
         id: i,
         left: `${Math.random() * 100}%`,
-        duration: `${Math.random() * 10 + 8}s`,
+        duration: `${Math.random() * 10 + 6}s`,
         delay: `${Math.random() * 10}s`,
         size: `${Math.random() * 10 + 6}px`,
       })),
