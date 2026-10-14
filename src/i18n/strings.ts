@@ -79,12 +79,12 @@ export const strings = {
             {
                 title: {en: 'Time is priceless', vi: 'Thời gian là vô giá'},
                 details: {
-                    en: 'Time is priceless. You can’t buy it, pause it, or rewind it. Once it’s gone, it’s gone for good.\n' +
-                        'We spend so much of our lives chasing things—money, status, validation—but time is the one thing we can never earn back.\n' +
-                        ' So be mindful of how you use it. Invest it in what truly matters: the people you love, the goals that inspire you, the moments that feed your soul.',
-                    vi: 'Thời gian là vô giá. Bạn không thể mua nó bằng tiền, không thể khiến nó dừng lại, cũng chẳng thể quay ngược về quá khứ. Một khi thời gian đã trôi qua, nó sẽ mãi mãi không trở lại.\n' +
-                        'Chúng ta dành quá nhiều thời gian trong cuộc đời để theo đuổi những thứ như tiền bạc, địa vị và sự công nhận từ người khác. Nhưng thời gian là thứ duy nhất mà chúng ta không bao giờ có thể lấy lại.\n' +
-                        'Vì vậy, hãy luôn ý thức về cách bạn sử dụng thời gian của mình. Hãy dành thời gian cho những điều thực sự quan trọng: những người bạn yêu thương, những mục tiêu truyền cảm hứng cho bạn và những khoảnh khắc nuôi dưỡng tâm hồn bạn.'
+                    en: '<p>Time is priceless. You can’t buy it, pause it, or rewind it. Once it’s gone, it’s gone for good.</p>' +
+                        '<p>We spend so much of our lives chasing things—money, status, validation—but time is the one thing we can never earn back.</p>' +
+                        '<p>So be mindful of how you use it. Invest it in what truly matters: the people you love, the goals that inspire you, the moments that feed your soul.</p>',
+                    vi: '<p>Thời gian là vô giá. Bạn không thể mua nó bằng tiền, không thể khiến nó dừng lại, cũng chẳng thể quay ngược về quá khứ. Một khi thời gian đã trôi qua, nó sẽ mãi mãi không trở lại.</p>' +
+                        '<p>Chúng ta dành quá nhiều thời gian trong cuộc đời để theo đuổi những thứ như tiền bạc, địa vị và sự công nhận từ người khác. Nhưng thời gian là thứ duy nhất mà chúng ta không bao giờ có thể lấy lại.</p>' +
+                        '<p>Vì vậy, hãy luôn ý thức về cách bạn sử dụng thời gian của mình. Hãy dành thời gian cho những điều thực sự quan trọng: những người bạn yêu thương, những mục tiêu truyền cảm hứng cho bạn và những khoảnh khắc nuôi dưỡng tâm hồn bạn.</p>'
                 },
             }
         ],

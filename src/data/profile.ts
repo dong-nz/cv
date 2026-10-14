@@ -8,7 +8,7 @@ export const profile: Profile = {
     title: "Senior Software Engineer",
     titleEn: "Senior Software Engineer",
     tagline:
-        "Phần lớn thời gian tôi là Backend Software Engineer. <p> Muốn tôi là Full Stack Developer, <span class='ok-possible name-highlight'>yes</span>, có thể.</p>",
+        "Phần lớn thời gian tôi là Backend Software Engineer. Muốn tôi là Full Stack Developer, <span class='ok-possible name-highlight'>yes</span>, có thể.",
     taglineEn:
         "Building scalable software systems, intelligent logistics solutions, and practical AI applications.",
     bio: "Senior Software Engineer với kinh nghiệm xây dựng hệ thống phân tán, logistics technology, và ứng dụng AI/ML vào bài toán thực tế. Tập trung vào system architecture, integration, và production-grade solutions.",

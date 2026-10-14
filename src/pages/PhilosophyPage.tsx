@@ -14,9 +14,7 @@ export function PhilosophyPage() {
                         {quote.title[lang]}
                     </h3>
                     {/* Placeholder for expanded content */}
-                    <p style={{color: 'var(--text-secondary)'}}>
-                        {quote.details[lang]}
-                    </p>
+                    <p style={{color: 'var(--text-secondary)'}} dangerouslySetInnerHTML={{__html: quote.details[lang]}}/>
                 </div>
             ))}
         </section>
