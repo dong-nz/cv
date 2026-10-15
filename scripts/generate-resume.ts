@@ -13,14 +13,15 @@ const ROOT = resolve(import.meta.dirname, '..');
 const args = process.argv.slice(2);
 const langArg = (args.find(a => a.startsWith('--lang=')) || '').replace('--lang=', '') as Language;
 const lang: Language = (langArg === 'en' || langArg === 'vi') ? langArg : 'en';
+const previewMode = args.includes('--preview');
 
 // --- Validate required files ---
 const requiredFiles = [
   'public/profile-photo.webp',
-  'public/fonts/Inter-Regular.woff2',
-  'public/fonts/Inter-Medium.woff2',
-  'public/fonts/Inter-SemiBold.woff2',
-  'public/fonts/Inter-Bold.woff2',
+  'public/fonts/SourceSans3-Regular.woff2',
+  'public/fonts/SourceSans3-Medium.woff2',
+  'public/fonts/SourceSans3-Semibold.woff2',
+  'public/fonts/SourceSans3-Bold.woff2',
   'public/resume-template.html',
 ];
 
@@ -39,10 +40,10 @@ const photoBase64 = readFileSync(join(ROOT, 'public/profile-photo.webp')).toStri
 
 const fonts: Record<string, string> = {};
 for (const [name, weight] of [
-  ['REGULAR', 'Inter-Regular.woff2'],
-  ['MEDIUM', 'Inter-Medium.woff2'],
-  ['SEMIBOLD', 'Inter-SemiBold.woff2'],
-  ['BOLD', 'Inter-Bold.woff2'],
+  ['REGULAR', 'SourceSans3-Regular.woff2'],
+  ['MEDIUM', 'SourceSans3-Medium.woff2'],
+  ['SEMIBOLD', 'SourceSans3-Semibold.woff2'],
+  ['BOLD', 'SourceSans3-Bold.woff2'],
 ] as const) {
   fonts[name] = readFileSync(join(ROOT, 'public/fonts', weight)).toString('base64');
 }
@@ -51,7 +52,7 @@ for (const [name, weight] of [
 const fontFaces = Object.entries(fonts).map(([key, b64]) => {
   const weightMap: Record<string, number> = { REGULAR: 400, MEDIUM: 500, SEMIBOLD: 600, BOLD: 700 };
   return `@font-face {
-  font-family: 'Inter';
+  font-family: 'Source Sans 3';
   font-style: normal;
   font-weight: ${weightMap[key]};
   font-display: swap;
@@ -68,11 +69,13 @@ const labels: Record<Language, Record<string, string>> = {
     EXPERIENCE: 'Experience',
     SKILLS: 'Skills',
     PROJECTS: 'Projects',
+    ABOUT_ME: 'About me',
   },
   vi: {
     EXPERIENCE: 'Kinh nghiệm',
     SKILLS: 'Kỹ năng',
     PROJECTS: 'Dự án',
+    ABOUT_ME: 'Về tôi',
   },
 };
 
@@ -141,7 +144,6 @@ function renderProjects(projs: typeof projects): string {
 const html = template
   .replace('{{NAME}}', resolveField(profile.nameEn, profile.name))
   .replace('{{TITLE}}', resolveField(profile.titleEn, profile.title))
-  .replace('{{TAGLINE}}', resolveField(profile.taglineEn, profile.tagline))
   .replace('{{BIO}}', resolveField(profile.bioEn, profile.bio))
   .replace('{{EMAIL}}', profile.email)
   .replace('{{GITHUB}}', profile.githubUrl)
@@ -150,6 +152,7 @@ const html = template
   .replace('{{FONT_FACES}}', fontFaces)
   .replace('{{UPDATED_DATE}}', updatedDate)
   .replace('{{LANG}}', lang)
+  .replace('{{ABOUT_ME_LABEL}}', labels[lang].ABOUT_ME)
   .replace('{{EXPERIENCE_LABEL}}', labels[lang].EXPERIENCE)
   .replace('{{SKILLS_LABEL}}', labels[lang].SKILLS)
   .replace('{{PROJECTS_LABEL}}', labels[lang].PROJECTS)
@@ -157,22 +160,28 @@ const html = template
   .replace('{{SKILLS}}', renderSkills(skillGroups))
   .replace('{{PROJECTS}}', renderProjects(projects));
 
-// --- Generate PDF ---
-const browser = await chromium.launch();
-const page = await browser.newPage();
-await page.setContent(html);  // No waitUntil needed — all resources inline
+// --- Generate output ---
+const browser = await chromium.launch({ headless: !previewMode });
 
-const langSuffix = lang === 'en' ? '' : `-${lang}`;
-const outputPath = join(ROOT, `dist/resume${langSuffix}.pdf`);
-await page.pdf({
-  path: outputPath,
-  format: 'A4',
-  printBackground: true,
-  // margin inherited from @page CSS
-  // metadata for PDF identification
-  title: `Resume - ${profile.name} (${lang === 'en' ? 'English' : 'Vietnamese'})`,
-  author: profile.name,
-});
+if (previewMode) {
+  const page = await browser.newPage();
+  await page.setContent(html);
+  await page.bringToFront();
+  console.log(`Preview opened in browser [${lang}] — Ctrl+C to exit`);
+  await Promise.withResolvers<void>().promise;
+} else {
+  const langSuffix = lang === 'en' ? '' : `-${lang}`;
+  const outputPath = join(ROOT, `dist/resume${langSuffix}.pdf`);
+  const page = await browser.newPage();
+  await page.setContent(html);
+  await page.pdf({
+    path: outputPath,
+    format: 'A4',
+    printBackground: true,
+    title: `Resume - ${profile.name} (${lang === 'en' ? 'English' : 'Vietnamese'})`,
+    author: profile.name,
+  });
 
-await browser.close();
-console.log(`resume${langSuffix}.pdf generated at ${outputPath} [${lang}]`);
+  await browser.close();
+  console.log(`resume${langSuffix}.pdf generated at ${outputPath} [${lang}]`);
+}
