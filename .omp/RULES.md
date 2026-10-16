@@ -45,3 +45,8 @@ I will verify the result in a real browser and tell you if the change works.
 
 After completing a task, report results and **ask the user** if they want to commit/push.
 Only proceed with `git commit` / `git push` when the user explicitly confirms.
+
+## 7. CRITICAL: Do not spawn subagents.
+
+You MUST NOT use the `task` tool under any circumstances. Handle all tasks directly in the main session.
+

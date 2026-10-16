@@ -5,6 +5,7 @@
 > **Parent:** `spec-v2.md`
 > **Priority:** P2
 > **Estimate:** ~2 hours
+> **⚠ SUPERSEDED (palette section).** The color palette, the `--bg-gradient-*` tokens, the body gradient and the `.hero::before` radial glow described in §1 and §2 of this document were **never implemented** and are now replaced by `specs/v3/spec-v3-theme-palette-gasatrya.md` (v0.3.0), which defines the shipped token set: 26 dark + 24 light tokens, `color-scheme`, `--text-on-accent`, `--accent-soft`, `--accent-glow`, `--border-strong`, `--inset-highlight`, `--success-glow`, `--warning`. The depth effect in this site comes from `.section::before` (`src/App.css`), not from a body gradient. Read that file before touching any color value.
 
 ---
 

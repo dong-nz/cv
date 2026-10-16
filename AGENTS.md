@@ -89,7 +89,7 @@ src/
 
 ## External Assets
 
-- `public/fonts/` — Inter font (Regular, Medium, SemiBold, Bold) in woff2
+- `public/fonts/` — Source Sans 3 woff2 (Regular, Medium, Semibold, Bold); used by the resume generator only — the SPA renders `system-ui`
 - `public/icons.svg` — SVG sprite for icons
 - `public/resume-template.html` — HTML template for resume PDF generation
 - `public/profile-photo.webp` — profile photo
@@ -114,10 +114,20 @@ docker-compose.yaml
 
 ## CSS Architecture
 
-- `src/index.css` — CSS variables (root + `[data-theme="dark"]`), global resets
+- `src/index.css` — CSS variables (`:root` dark default, `[data-theme="light"]`, plus a `prefers-color-scheme: light` bridge), global resets, typography scale
 - `src/App.css` — component-level styles (Navigation, Footer, page sections)
 - No CSS library — plain CSS with variables for theming
 - `#main-content` in Layout has `style={{ flex: 1 }}` (parent `#root` is `display: flex; flex-direction: column`)
+
+## Typography
+
+- Scale tokens in `src/index.css`: `--text-body: 18px`, `--text-lede: 20px`, `--text-meta: 15px`, `--leading-body: 1.65`, `--measure-prose: 600px`
+- Global: `p` = `--text-body` / `--leading-body`; `h3` 21px, `h4` 18px, `h5` 16px, `h6` 15px
+- Prose columns use `.prose` (measure-capped, carries paragraph + heading rhythm); a lead paragraph outside a column uses `.prose-lede`; non-prose columns use `.page-body` (700px); titles inside a column use `.subheading`
+- Body copy sizes come from the tokens; 12-14px literals are reserved for chrome (tags, badges, pills, footer, duration labels)
+- Components MUST NOT set `fontSize` / `lineHeight` inline — use the classes above
+- Font stack is `system-ui`: no webfont is loaded by the SPA. The Source Sans 3 woff2 files in `public/fonts/` are consumed only by `scripts/generate-resume.ts`
+- Spec: `docs/design/specs/v3/spec-v3-typography.md`
 
 ## Known Issues & Gotchas
 

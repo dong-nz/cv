@@ -95,7 +95,6 @@ export const strings = {
     },
     common: {
         backTo: {en: 'Back to %s', vi: 'Quay lại %s'},
-        skipLink: {en: 'Skip to content', vi: 'Bỏ qua nội dung'},
         resumeDownload: {en: 'Get Resume', vi: 'Tải CV'},
         socialAriaLabels: {
             github: {en: 'View GitHub profile', vi: 'Xem hồ sơ GitHub'},
