@@ -10,9 +10,9 @@
   --accent-hover: #fca5a5;
   --accent-active: #f06060;
   --text-on-accent: #151914;
-  --accent-soft: rgba(239, 68, 68, 0.12);
+  --accent-soft: rgba(248, 113, 113, 0.12);
   --accent-tint: #2f1e1a;
-  --accent-glow: rgba(239, 68, 68, 0.3);
+  --accent-glow: rgba(248, 113, 113, 0.3);
   --border: #2a3028;
   --border-strong: #3a403a;
   --shadow: rgba(0, 0, 0, 0.45);
@@ -68,9 +68,9 @@
   --accent-hover: #a8382f;
   --accent-active: #9b3229;
   --text-on-accent: #ffffff;
-  --accent-soft: rgba(239, 68, 68, 0.1);
+  --accent-soft: rgba(176, 65, 56, 0.1);
   --accent-tint: #f5e3e1;
-  --accent-glow: rgba(239, 68, 68, 0.22);
+  --accent-glow: rgba(176, 65, 56, 0.22);
   --border: #e3e1dc;
   --border-strong: #d9d6d0;
   --shadow: rgba(21, 25, 20, 0.1);
@@ -82,6 +82,71 @@
   --warning: #b45309;
   --grid-color: rgba(21, 25, 20, 0.07);
   color-scheme: light;
+}
+
+/* Blue palette. Both selectors carry two attributes (0,3,0), so they beat
+   :root (0,1,0) and :root[data-theme='light'] (0,2,0) regardless of block order. */
+:root[data-theme='dark'][data-palette='blue'] {
+  --bg-primary: #0f1117;
+  --bg-surface: #161922;
+  --bg-elevated: #1c2030;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --text-muted: #828d9e;
+  --accent: #60a5fa;
+  --accent-hover: #93c5fd;
+  --accent-active: #3b82f6;
+  --text-on-accent: #0f1117;
+  --accent-soft: rgba(96, 165, 250, 0.12);
+  --accent-tint: #182338;
+  --accent-glow: rgba(96, 165, 250, 0.3);
+  --border: #2a3040;
+  --border-strong: #39415a;
+  --shadow: rgba(0, 0, 0, 0.45);
+  --inset-highlight: rgba(255, 255, 255, 0.05);
+  --code-bg: #1a1e2e;
+  --success: #34d399;
+  --success-glow: rgba(52, 211, 153, 0.35);
+  --error: #f87171;
+  --warning: #fbbf24;
+  --grid-color: rgba(232, 234, 237, 0.06);
+  color-scheme: dark;
+}
+
+:root[data-theme='light'][data-palette='blue'] {
+  --bg-primary: #f4f6f9;
+  --bg-surface: #fbfcfe;
+  --bg-elevated: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: #4b5563;
+  --text-muted: #5c6b82;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-active: #1e40af;
+  --text-on-accent: #ffffff;
+  --accent-soft: rgba(37, 99, 235, 0.1);
+  --accent-tint: #eef3fc;
+  --accent-glow: rgba(37, 99, 235, 0.22);
+  --border: #dfe3ea;
+  --border-strong: #d3d8e1;
+  --shadow: rgba(17, 24, 39, 0.1);
+  --inset-highlight: rgba(255, 255, 255, 0.9);
+  --code-bg: #eceff5;
+  --success: #15803d;
+  --success-glow: rgba(21, 128, 61, 0.35);
+  --error: #991b1b;
+  --warning: #b45309;
+  --grid-color: rgba(17, 24, 39, 0.07);
+  color-scheme: light;
+}
+
+/* Picker previews: fixed identity colors so a row previews its own palette,
+   not the one currently active. Never referenced outside .nav-palette-preview. */
+:root {
+  --preview-red-accent: #b04138;
+  --preview-red-bg: #f6f5f2;
+  --preview-blue-accent: #2563eb;
+  --preview-blue-bg: #f4f6f9;
 }
 
 /* Pre-hydration / no-JS: honour an OS light preference */
@@ -97,9 +162,9 @@
     --accent-hover: #a8382f;
     --accent-active: #9b3229;
     --text-on-accent: #ffffff;
-    --accent-soft: rgba(239, 68, 68, 0.1);
+    --accent-soft: rgba(176, 65, 56, 0.1);
     --accent-tint: #f5e3e1;
-    --accent-glow: rgba(239, 68, 68, 0.22);
+    --accent-glow: rgba(176, 65, 56, 0.22);
     --border: #e3e1dc;
     --border-strong: #d9d6d0;
     --shadow: rgba(21, 25, 20, 0.1);

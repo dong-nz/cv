@@ -4,6 +4,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
 import { RollingTextLink } from '@/components/ui/RollingTextLink'
+import { ThemePaletteMenu } from '@/components/layout/ThemePaletteMenu'
 const navPaths = ['/', '/about', '/experience', '/projects', '/contact', '/philosophy'] as const
 export function Navigation() {
   const { cycleTheme, resolvedTheme } = useTheme()
@@ -72,6 +73,8 @@ export function Navigation() {
               )}
             </button>
 
+            <ThemePaletteMenu variant="nav" />
+
             <button
               className="lang-toggle"
               onClick={toggleLang}
@@ -118,6 +121,8 @@ export function Navigation() {
               )
             })}
         </ul>
+
+        <ThemePaletteMenu key={location.pathname} variant="sheet" />
       </div>
     </>
   )

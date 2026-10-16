@@ -181,6 +181,189 @@
   .mobile-menu-btn {
     display: flex;
   }
+
+  .nav-palette-nav {
+    display: none;
+  }
+}
+
+/* ===== Theme palette menu ===== */
+.nav-palette {
+  position: relative;
+  display: flex;
+}
+
+.nav-palette-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.nav-palette-trigger:hover,
+.nav-palette-trigger.open {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.nav-palette-trigger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.nav-palette-swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+/* The group name is redundant in the bar (the trigger is labelled) but needed in the sheet. */
+.nav-palette-group {
+  display: none;
+}
+
+.nav-palette-trigger .chevron {
+  transition: transform 0.2s;
+}
+
+.nav-palette-trigger.open .chevron {
+  transform: rotate(180deg);
+}
+
+.nav-palette-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  width: max-content;
+  min-width: 220px;
+  padding: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 12px var(--shadow);
+  z-index: 100;
+}
+
+.nav-palette-panel.open {
+  display: block;
+}
+
+.nav-palette-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-palette-option.active {
+  border-left-color: var(--accent);
+}
+
+.nav-palette-option.active::after {
+  content: '✓';
+  margin-left: 8px;
+  color: var(--accent);
+}
+
+.nav-palette-option:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+}
+
+.nav-palette-option:hover .nav-palette-hint,
+.nav-palette-option.active:hover::after {
+  color: var(--text-on-accent);
+  opacity: 0.75;
+}
+
+.nav-palette-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.nav-palette-preview {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid;
+}
+
+.nav-palette-preview[data-preview='red'] {
+  background: var(--preview-red-accent);
+  border-color: var(--preview-red-bg);
+}
+
+.nav-palette-preview[data-preview='blue'] {
+  background: var(--preview-blue-accent);
+  border-color: var(--preview-blue-bg);
+}
+
+.nav-palette-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav-palette-hint {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Sheet variant: the options expand inline inside the mobile menu, never as a
+   second overlay. .mobile-menu is display:none unless .open, so this block is
+   already unreachable above 1024px. */
+.nav-palette-sheet {
+  display: block;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-palette-sheet .nav-palette-trigger {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 0;
+  font-size: var(--text-body);
+}
+
+.nav-palette-sheet .nav-palette-group {
+  display: inline;
+  font-size: var(--text-meta);
+  color: var(--text-muted);
+}
+
+.nav-palette-sheet .nav-palette-panel {
+  position: static;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.nav-palette-sheet .nav-palette-option {
+  border-radius: 0;
 }
 
 /* ===== Buttons ===== */

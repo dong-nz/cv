@@ -289,12 +289,14 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
 ### Step 5: Verify No Other Consumers Need Changes
 
-Check all files that import `useTheme` or reference `Theme` type. Current consumers:
-- `src/App.tsx` — uses `useTheme().theme`, `useTheme().resolvedTheme`, `useTheme().cycleTheme`, `useTheme().setTheme`
-- `src/components/layout/Navigation.tsx` — uses `useTheme().theme`, `useTheme().cycleTheme`
-- `src/components/layout/Footer.tsx` — uses `useTheme().theme`, `useTheme().cycleTheme`
+Check all files that import `useTheme` or reference the `Theme` type. Consumers, verified with `grep -rn "useTheme" src` on 2026-10-17:
+- `src/App.tsx:3` — imports `ThemeProvider` only; calls no hook method
+- `src/components/layout/Navigation.tsx:10` — `const { cycleTheme, resolvedTheme } = useTheme()`
+- `src/components/layout/ThemePaletteMenu.tsx:13` — `const { palette, setPalette } = useTheme()`, added later by `spec-v3-theme-palette-switch.md`
 
-All consumers only read `theme` and `resolvedTheme` values (`'dark' | 'light'`), no pattern matching on `'system'`. No changes needed.
+`src/components/layout/Footer.tsx` does **not** import `useTheme` and has no theme control — earlier revisions of this section claimed it did; corrected 2026-10-17.
+
+All consumers read the resolved values directly and nothing pattern-matches on `'system'`, so no consumer needed changes when `system` was removed.
 
 ---
 

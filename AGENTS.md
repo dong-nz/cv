@@ -49,11 +49,14 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 
 ## Theming
 
-- `src/hooks/useTheme.tsx` — `ThemeProvider` + `useTheme` hook
-- Simple toggle: `'dark'` ↔ `'light'` (no `system` variant)
-- `resolvedTheme` — runtime resolved value (always `'dark'` or `'light'`)
-- `data-theme` attribute set on `<html>` during render (before paint)
-- Stored in `localStorage` key `portfolio-theme`
+- Two independent axes on `<html>`: lightness (`Theme`) and color (`Palette`), both written during render before paint
+- `src/hooks/useTheme.tsx` — `ThemeProvider` + `useTheme` hook, carries both axes
+- Simple toggle: `'dark'` ↔ `'light'` (no `system` variant); `resolvedTheme` — runtime resolved value (always `'dark'` or `'light'`)
+- `data-theme` attribute + `localStorage` key `portfolio-theme`
+- `type Palette = 'red' | 'blue'` (`src/types/index.ts`), labels/hints in `src/data/palettes.ts` (`paletteIds`, `paletteMeta`); default `red`
+- `data-palette` attribute + `localStorage` key `portfolio-palette`; `index.html`'s init script writes both attributes before paint
+- Palette overrides in `src/index.css` are `:root[data-theme='dark'][data-palette='blue']` / `:root[data-theme='light'][data-palette='blue']` (specificity 0,3,0 — they beat the base blocks regardless of order); no blue variant exists in the `prefers-color-scheme` bridge, because the init script always writes `data-palette`
+- Picker: `src/components/layout/ThemePaletteMenu.tsx`, mounted twice in `Navigation.tsx` — `variant="nav"` in `.nav-actions` (>1024px) and `variant="sheet"` inside `.mobile-menu` (≤1024px, remounted closed via `key={location.pathname}`)
 
 ## Data Layer
 
@@ -68,11 +71,11 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 ```
 src/
   components/
-    layout/     — Layout.tsx, Navigation.tsx, Footer.tsx
+    layout/     — Layout.tsx, Navigation.tsx, Footer.tsx, ThemePaletteMenu.tsx
     sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume
     ui/         — Badge, Button, SectionHeading, SocialLinks, Tag, Typewriter, AnimatedSection, InView, RollingTextLink, BackToTop
     index.ts    — barrel export
-  data/         — profile, skills, experience, projects, resume (TS modules)
+  data/         — profile, skills, experience, projects, resume, palettes (TS modules)
   hooks/        — useTheme.tsx, useClickOutside.ts
   pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage, index.ts
   types/        — shared TypeScript interfaces
@@ -148,7 +151,7 @@ All specification documents are in `docs/design/`:
 | `spec-v2.md` | v2 index — overview, implementation order, feature list |
 | `specs/ui/spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
 | `specs/v2/spec-v2-*.md` | v2 feature specs (resume, seo, blog, analytics, testing, cicd) |
-| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, UI enhancements) |
+| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, theme palette switch, UI enhancements) |
 
 Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 

@@ -124,6 +124,8 @@ Every item below is reproduced from source text, not inferred. B1 and B2 are the
 | `amber-700 / amber-400` | `--warning` **(new)** | |
 | `on-surface/5` | `--grid-color` | Architectural hairline grid |
 
+> **Correction 2026-10-17.** `--accent-soft` and `--accent-glow` no longer take their hue from the third red `#ef4444`. The site now has two palettes, so both are derived from **the accent in force**: red-dark `rgba(248,113,113,0.12)` / `rgba(248,113,113,0.30)`, red-light `rgba(176,65,56,0.10)` / `rgba(176,65,56,0.22)`, blue-dark `rgba(96,165,250,0.12)` / `rgba(96,165,250,0.30)`, blue-light `rgba(37,99,235,0.1)` / `rgba(37,99,235,0.22)`. The **alpha** values in the tables below are unchanged — only the hue source moved. Record: `spec-v3-theme-palette-switch.md` §5 "Red, re-derived" and its §10 decision 1.
+
 ### 3.2 Light theme
 
 | Token | Value | Contrast on `--bg-primary` / `--bg-surface` |
@@ -138,9 +140,9 @@ Every item below is reproduced from source text, not inferred. B1 and B2 are the
 | `--accent-hover` | `#a8382f` | 5.89 / 6.15 / 6.42 |
 | `--accent-active` | `#9b3229` | 6.68 / 6.99 / 7.29 |
 | `--text-on-accent` | `#ffffff` | 5.74 on `--accent`, 6.42 on `--accent-hover`, 7.29 on `--accent-active` (AA) |
-| `--accent-soft` | `rgba(239,68,68,0.10)` | translucent fills only (`.btn-secondary:hover`, focus ring) |
+| `--accent-soft` | `rgba(176,65,56,0.10)` | translucent fills only (`.btn-secondary:hover`, focus ring). Hue re-derived 2026-10-16 from `--accent`, was `rgba(239,68,68,0.10)` |
 | `--accent-tint` | `#f5e3e1` | **opaque** panel = `--accent-soft` composited over `--bg-primary`; masks the conic lazer under `.download-resume-lazer-inner`. Accent text on it 4.63 |
-| `--accent-glow` | `rgba(239,68,68,0.22)` | colored shadows/glows |
+| `--accent-glow` | `rgba(176,65,56,0.22)` | colored shadows/glows. Hue re-derived 2026-10-16 from `--accent`, was `rgba(239,68,68,0.22)` |
 | `--border` | `#e3e1dc` | ≈ `on-surface` at 8 % over `#f6f5f2` |
 | `--border-strong` | `#d9d6d0` | ≈ 15 % alpha |
 | `--shadow` | `rgba(21,25,20,0.10)` | warm shadow, not pure black |
@@ -171,9 +173,9 @@ Inversion rule: `on-surface` becomes the canvas, `neutral` becomes the text; sur
 | `--accent-hover` | `#fca5a5` | 9.37 / 8.27 |
 | `--accent-active` | `#f06060` | 5.54 / 4.89 / 4.52 on bg / surface / elevated (press state). Was `#ef4444`: 4.17 / 3.85 → below AA |
 | `--text-on-accent` | `#151914` | 6.43 on `--accent` (AA) — dark ink on light red |
-| `--accent-soft` | `rgba(239,68,68,0.12)` | translucent fills only (`.btn-secondary:hover`, focus ring); lowered from 0.16 |
+| `--accent-soft` | `rgba(248,113,113,0.12)` | translucent fills only (`.btn-secondary:hover`, focus ring); alpha lowered from 0.16, hue re-derived 2026-10-16 from `--accent`, was `rgba(239,68,68,0.12)` |
 | `--accent-tint` | `#2f1e1a` | **opaque** panel = `--accent-soft` composited over `--bg-primary`; needed because a translucent panel cannot mask the conic lazer under `.download-resume-lazer-inner`. Accent text on it 5.74 |
-| `--accent-glow` | `rgba(239,68,68,0.30)` | |
+| `--accent-glow` | `rgba(248,113,113,0.30)` | colored shadows/glows. Hue re-derived 2026-10-16 from `--accent`, was `rgba(239,68,68,0.30)` |
 | `--border` | `#2a3028` | 1.31 vs `--bg-primary` |
 | `--border-strong` | `#3a403a` | 1.67 |
 | `--shadow` | `rgba(0,0,0,0.45)` | |
@@ -216,9 +218,9 @@ New structure: **one dark block + one light block + one media bridge** (removes 
   --accent-hover: #fca5a5;
   --accent-active: #f06060;
   --text-on-accent: #151914;
-  --accent-soft: rgba(239, 68, 68, 0.12);
+  --accent-soft: rgba(248, 113, 113, 0.12);
   --accent-tint: #2f1e1a;
-  --accent-glow: rgba(239, 68, 68, 0.30);
+  --accent-glow: rgba(248, 113, 113, 0.30);
   --border: #2a3028;
   --border-strong: #3a403a;
   --shadow: rgba(0, 0, 0, 0.45);
@@ -268,9 +270,9 @@ New structure: **one dark block + one light block + one media bridge** (removes 
   --accent-hover: #a8382f;
   --accent-active: #9b3229;
   --text-on-accent: #ffffff;
-  --accent-soft: rgba(239, 68, 68, 0.10);
+  --accent-soft: rgba(176, 65, 56, 0.10);
   --accent-tint: #f5e3e1;
-  --accent-glow: rgba(239, 68, 68, 0.22);
+  --accent-glow: rgba(176, 65, 56, 0.22);
   --border: #e3e1dc;
   --border-strong: #d9d6d0;
   --shadow: rgba(21, 25, 20, 0.10);
@@ -297,9 +299,9 @@ New structure: **one dark block + one light block + one media bridge** (removes 
     --accent-hover: #a8382f;
     --accent-active: #9b3229;
     --text-on-accent: #ffffff;
-    --accent-soft: rgba(239, 68, 68, 0.10);
+    --accent-soft: rgba(176, 65, 56, 0.10);
     --accent-tint: #f5e3e1;
-    --accent-glow: rgba(239, 68, 68, 0.22);
+    --accent-glow: rgba(176, 65, 56, 0.22);
     --border: #e3e1dc;
     --border-strong: #d9d6d0;
     --shadow: rgba(21, 25, 20, 0.10);
@@ -449,6 +451,7 @@ New structure: **one dark block + one light block + one media bridge** (removes 
 
 1. ~~Light `--accent`: `#b91c1c` or brand flag red `#CE1126`?~~ **DECIDED: `#b91c1c`** (Tailwind red-700) at the time of writing — **now superseded by decision 9**, which moved the light ramp to `#b04138 / #a8382f / #9b3229` after the user found the original too heavy. `#CE1126` stays available as a brand-only value for `public/favicon.svg` / og images (§4.4).
 2. ~~Keep the vivid `#ef4444` visible anywhere in the UI?~~ **DECIDED: no literal `#ef4444` in text or fills.** It survives only as `rgba(239,68,68,…)` inside `--accent-soft` / `--accent-glow`. Correction made during implementation: the dark press token shipped as **`#f06060`**, not `#ef4444` — measured `#ef4444` was 4.17 on `--bg-surface` and 3.85 on `--bg-elevated` (below AA); `#f06060` measures 5.54 / 4.89 / 4.52 and still reads as a pressed, more saturated red against the `#f87171` base.
+     - **Correction 2026-10-17:** the `rgba(239,68,68,…)` composites no longer survive either. Both were re-derived onto the accent in force — `rgba(248,113,113,…)` dark, `rgba(176,65,56,…)` light — so no `#ef4444` remains in any form (`spec-v3-theme-palette-switch.md` §5, decision 1 in its §10).
 3. ~~Adopt gasatrya's architectural hairline grid?~~ **DEFERRED** to a separate v3 layout spec. Keep the current 60 px `.hero-bg-grid`; only its `--grid-color` value changes.
 4. ~~Identity shift blue → red?~~ **DECIDED: full red adoption.** All 63 `--accent` consumers move onto the red ramp and every blue value is removed from `src/` (CTA gradient, `.name-highlight` gradient, blue `--grid-color`, blue glow shadows).
 5. ~~CSS default theme?~~ **DECIDED: keep dark as the `:root` default.** `useTheme.getInitialTheme()` and the §4.2 init script both resolve the OS preference, so the CSS default only governs the no-JS baseline. Zero structural churn.
@@ -488,8 +491,10 @@ New structure: **one dark block + one light block + one media bridge** (removes 
 - `pnpm exec tsc -b` → exit 0.
 - `pnpm exec vite build --outDir dist-verify` → 538 modules, `index.css` 26.11 kB (gzip 5.46 kB), built in 137 ms, no errors; temp out dir deleted after every run. `pnpm build` itself is still blocked by the `dist/` mount in `docker-compose.yaml:7`.
 - Built-CSS hex census: `#b04138`, `#a8382f`, `#9b3229`, `#f5e3e1`, `#e3e1dc`, `#d9d6d0`, `#f6f5f2`, `#fbfaf8`, `#efece6`, `#991b1b`, `#b45309`, `#15803d`, `#ffffff` all ×2 (light block + bridge); `#2f1e1a`, `#f87171`, `#fca5a5`, `#f06060`, `#b7aea0`, `#8f9a8e`, `#4ade80`, `#fbbf24`, `#3a403a`, `#2a3028`, `#272a28`, `#202423`, `#1a1e1b`, `#151914` (×4: dark ink + dark `--text-on-accent` + shadow composites) once per dark block. Alpha composites appear as 8-digit hex (`#ef44441f` = `--accent-soft` dark, `#ef444438` = `--accent-glow`, `#15191412` = light `--shadow`, `#00000073` = dark `--shadow`, `#ffffffe6` = light `--inset-highlight`). No `#b91c1c`, no `#7f1d1d`, no `#96 165 250`-family blue. The only remaining literal `#fff` / `#000` pairs belong to `src/assets/vite.svg`'s own `<style>` block, not to the theme.
+- **Correction 2026-10-17** (the census above predates the palette switch): the alpha composites are now `#f871711f` / `#f871714d` (dark `--accent-soft` / `--accent-glow`) and `#b041381a` ×2 / `#b0413838` ×2 (light soft/glow, once in the light block and once in the bridge). No `#ef4444` in any form remains, and the `#96 165 250` blue family now appears legitimately — but only inside the two `data-palette='blue'` blocks and their own preview token (`#2563eb`), never in a red block.
 - Compiled rule check: `.download-resume-lazer-inner{z-index:1;background:var(--accent-tint);border-radius:var(--radius-md);width:100%;position:relative}`.
 - Grep gate `#[0-9a-fA-F]{3,8}\b|rgba?\(|:\s*(white|black)\s*;`: `src/App.css` 0 matches; `src/index.css` matches only inside 2-109; `src/index.css:110-292` 0 matches.
+- **Gate ranges after the palette switch (2026-10-17):** `src/App.css` still 0 hex/`rgba()` matches; `src/index.css` literals are confined to `2-150` (the four palette blocks plus the preview block) and the bridge `152-180`. The new menu block `src/App.css:190-367` is token-only.
 - Contrast (WCAG relative-luminance script over the final `:root` blocks): **light min 4.60, dark min 4.52, zero AA failures**. `--text-primary` 16.31 both themes. Accent on the opaque tint 4.63 (light) / 5.74 (dark); primary ink on the tint 14.36 / 14.58; white ink on light `--accent` 5.74; dark ink on dark `--accent` 6.43.
 - Layering invariant `luminance(bg-primary) < luminance(bg-surface) < luminance(bg-elevated)`: dark 0.0091 < 0.0169 < 0.0224; light 0.9131 < 0.9566 < 1.0000.
 

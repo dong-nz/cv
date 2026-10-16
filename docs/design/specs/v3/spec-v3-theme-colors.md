@@ -5,7 +5,7 @@
 > **Parent:** `spec-v2.md`
 > **Priority:** P2
 > **Estimate:** ~2 hours
-> **⚠ SUPERSEDED (palette section).** The color palette, the `--bg-gradient-*` tokens, the body gradient and the `.hero::before` radial glow described in §1 and §2 of this document were **never implemented** and are now replaced by `specs/v3/spec-v3-theme-palette-gasatrya.md` (v0.3.0), which defines the shipped token set: 26 dark + 24 light tokens, `color-scheme`, `--text-on-accent`, `--accent-soft`, `--accent-glow`, `--border-strong`, `--inset-highlight`, `--success-glow`, `--warning`. The depth effect in this site comes from `.section::before` (`src/App.css`), not from a body gradient. Read that file before touching any color value.
+> **⚠ SUPERSEDED (palette section).** The color palette, the `--bg-gradient-*` tokens, the body gradient and the `.hero::before` radial glow described in §1 and §2 of this document were **never implemented** and are now replaced by `specs/v3/spec-v3-theme-palette-gasatrya.md` (v0.3.0), which defines the shipped token set: 26 dark + 24 light tokens, `color-scheme`, `--text-on-accent`, `--accent-soft`, `--accent-glow`, `--border-strong`, `--inset-highlight`, `--success-glow`, `--warning`. The depth effect in this site comes from `.section::before` (`src/App.css`), not from a body gradient. Read that file before touching any color value. The blue values sketched below were never measured and two of them fail WCAG AA — the implemented, measured blue palette is `specs/v3/spec-v3-theme-palette-switch.md` §5 (shipped as `data-palette="blue"`, selectable from the navigation).
 
 ---
 
@@ -68,7 +68,7 @@ Replace with a deep gray palette with slight warmth:
 **Contrast check:**
 - `#e8eaed` on `#0f1117` -> ~13.5:1 (AAA pass)
 - `#9aa0a6` on `#0f1117` -> ~6.8:1 (AA pass)
-- `#6b7280` on `#0f1117` -> ~4.8:1 (AA pass)
+- `#6b7280` on `#0f1117` -> **3.90:1 (AA FAIL)** — the claim in earlier revisions of this document ("~4.8:1, AA pass") was never measured. Measured with WCAG relative luminance on 2026-10-17. The measured replacement is `#828d9e` on `#0f1117` = 5.62:1, shipped in the blue-dark block of `spec-v3-theme-palette-switch.md` §5
 
 ### 2. Gradient Background
 
@@ -180,7 +180,7 @@ Light theme gradient variables set to `#ffffff` (no visible gradient). Only dark
 - [X] `body` has 180deg gradient (top to bottom)
 - [X] Hero has radial glow overlay above
 - [X] `.hero` has `position: relative` for stacking context
-- [X] WCAG AA contrast ratio >= 4.5:1 for all text on backgrounds
+- [X] WCAG AA contrast ratio >= 4.5:1 for all text on backgrounds — **not true of the values in this document**: `#6b7280` on `#0f1117` measures 3.90:1. It is true of the shipped token set (`spec-v3-theme-palette-gasatrya.md`) and of both palettes in `spec-v3-theme-palette-switch.md` §5
 - [X] No layout shift or overflow
 - [X] System dark mode (`prefers-color-scheme: dark`) is in sync
 - [X] Linter (`pnpm lint`) passes

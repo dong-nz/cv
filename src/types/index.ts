@@ -1,5 +1,7 @@
 export type Language = 'en' | 'vi';
 
+export type Palette = 'red' | 'blue';
+
 export type ProjectCategory =
   | "software-engineering"
   | "logistics"

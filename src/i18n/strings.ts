@@ -6,6 +6,8 @@ export const strings = {
         projects: {en: 'Projects', vi: 'Dự án'},
         philosophy: {en: 'Philosophy', vi: 'Triết lý'},
         contact: {en: 'Contact', vi: 'Liên hệ'},
+        palette: {en: 'Theme color', vi: 'Màu giao diện'},
+        paletteAria: {en: 'Switch theme color', vi: 'Đổi màu giao diện'},
     },
     footer: {
         copyright: {en: 'All rights reserved', vi: 'Bảo lưu mọi quyền'},

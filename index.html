@@ -12,9 +12,12 @@
           var theme = stored === 'dark' || stored === 'light'
             ? stored
             : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')
+          var storedPalette = localStorage.getItem('portfolio-palette')
           document.documentElement.setAttribute('data-theme', theme)
+          document.documentElement.setAttribute('data-palette', storedPalette === 'blue' ? 'blue' : 'red')
         } catch (e) {
           document.documentElement.setAttribute('data-theme', 'dark')
+          document.documentElement.setAttribute('data-palette', 'red')
         }
       })();
     </script>
