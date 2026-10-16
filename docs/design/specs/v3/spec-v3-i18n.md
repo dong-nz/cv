@@ -58,7 +58,7 @@ Add full English/Vietnamese bilingual support to the portfolio. Users can toggle
 |------|-----------------|--------|
 | `profile.ts` | `bio`, `bioEn`, `tagline`, `taglineEn`, `philosophy[].title`, `titleEn`, `description`, `descriptionEn` | ✅ Ready |
 | `skills.ts` | `skillGroups[].title`, `titleEn` (added) | ✅ Ready |
-| `experience.ts` | `title`, `titleEn`, `responsibilities`, `responsibilitiesEn`, `achievements[].title`, `titleEn`, `context`, `contextEn`, `impact`, `impactEn` | ✅ Ready |
+| `experience.ts` | `title`, `titleEn`, `responsibilities`, `responsibilitiesEn` | ✅ Ready — 2026-10-16: `achievements` dropped from the data (the type keeps it for the resume generator); new `relax-gap` career-break entry; optional `variant: 'current' \| 'gap'` |
 | `projects.ts` | `title`, `titleEn`, `summary`, `summaryEn`, `sections[].title`, `titleEn`, `content`, `contentEn` | ✅ Ready |
 | `resume.ts` | `resumeLanguages: ['en', 'vi']` | ✅ Already working |
 
@@ -76,8 +76,8 @@ All previously hardcoded strings have been migrated to `src/i18n/strings.ts`:
 | `About.tsx` | headings, bio |
 | `AboutPage.tsx` | headings, subtitle, expertise |
 | `Expertise.tsx` | section heading |
-| `Experience.tsx` | heading, responsibilities, achievements |
-| `ExperiencePage.tsx` | heading, responsibilities, achievements |
+| `Experience.tsx` | heading, responsibilities; 2026-10-16: `experience.tldr` + `experience.tldrText` added for the TLDR terminal node (achievements strings no longer rendered in the SPA) |
+| `ExperiencePage.tsx` | heading, responsibilities; 2026-10-16: same TLDR strings (achievements strings no longer rendered in the SPA) |
 | `Projects.tsx` | headings, categories, summary |
 | `ProjectsListPage.tsx` | heading, categories, view details |
 | `ProjectDetailPage.tsx` | categories, back link, headers |

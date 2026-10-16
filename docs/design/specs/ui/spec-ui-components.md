@@ -81,36 +81,7 @@ Badge
 
 ## Card
 
-### Structure
-
-```
-Card
-├── Header (optional)
-│   ├── Title
-│   └── Meta
-├── Body
-│   └── Content
-└── Footer (optional)
-    ├── Actions
-    └── Meta
-```
-
-### Variants
-
-| Variant | Border | Background | Shadow |
-|---|---|---|---|
-| Default | 1px border | Surface | None |
-| Elevated | None | Elevated | Subtle shadow |
-| Featured | 4px accent top | Surface | Subtle shadow |
-
-### States
-
-| State | Style |
-|---|---|
-| Default | Variant style |
-| Hover | Shadow + lift 2px |
-| Clickable | Cursor pointer |
-| Focus | Visible outline |
+**Removed 2026-10-16.** `src/components/ui/Card.tsx`, its barrel export and the `.card`, `.card:hover`, `.card-elevated`, `.card-featured` rules were deleted — no component rendered them. The cards that remain in the UI are section-specific classes styled directly in `src/App.css`: `.project-section`, `.project-card`, `.expertise-card`, `.philosophy-card`. See `spec-v3-typography.md` §4.2.
 
 ---
 

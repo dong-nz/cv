@@ -12,7 +12,7 @@ Timeline hiển thị kinh nghiệm làm việc: role, company, duration/locatio
 ExperienceSection
 ├── SectionHeading ("Experience")
 └── ExperienceTimeline (.timeline)
-    ├── ExperienceEntry (×N, newest-first) — entry có `current: true` nhận thêm class `.timeline-entry-current`
+    ├── ExperienceEntry (×N, newest-first) — entry có `variant` nhận thêm class `.timeline-entry-${variant}` (`current` / `gap`)
     │   ├── TimelineMarker (.timeline-marker)
     │   ├── TimelineHeader (.timeline-header)
     │   │   ├── Title (.timeline-title)

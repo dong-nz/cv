@@ -345,8 +345,9 @@ Remove the dead replace since `{{TAGLINE}}` is also not in the template:
 ## Bugs Fixed
 
 | # | Issue | Fix |
-+---|-------|-----|
-+ 1 | `@font-face` font-family was `'Inter'` but body uses `'Source Sans 3'` — PDF would fallback to system font | Changed `scripts/generate-resume.ts:55` to `font-family: 'Source Sans 3'` |
+|---|-------|-----|
+| 1 | `@font-face` font-family was `'Inter'` but body uses `'Source Sans 3'` — PDF would fallback to system font | Changed `scripts/generate-resume.ts:55` to `font-family: 'Source Sans 3'` |
+| 2 | `${exp.achievements?.map(...).join('')}` printed the literal text `undefined` in every PDF as soon as an entry had no `achievements` — optional chaining short-circuits the whole chain and the template literal stringifies the `undefined` result (found 2026-10-16, after `achievements` was dropped from `src/data/experience.ts`) | `scripts/generate-resume.ts:100` — now `(exp.achievements ?? []).map(...).join('')` |
 
 ---
 

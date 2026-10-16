@@ -59,7 +59,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 
 - `src/data/profile.ts` — name, title, bio, links
 - `src/data/skills.ts` — skill groups → skills
-- `src/data/experience.ts` — work history entries
+- `src/data/experience.ts` — work history entries; optional `variant: 'current' | 'gap'` selects the timeline decoration (live node / career break)
 - `src/data/projects.ts` — project cards with categories
 - `src/data/resume.ts` — resume availability, supported languages, URL generation
 
@@ -70,7 +70,7 @@ src/
   components/
     layout/     — Layout.tsx, Navigation.tsx, Footer.tsx
     sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume
-    ui/         — Badge, Button, Card, SectionHeading, SocialLinks, Tag, Typewriter, AnimatedSection, InView, RollingTextLink, BackToTop
+    ui/         — Badge, Button, SectionHeading, SocialLinks, Tag, Typewriter, AnimatedSection, InView, RollingTextLink, BackToTop
     index.ts    — barrel export
   data/         — profile, skills, experience, projects, resume (TS modules)
   hooks/        — useTheme.tsx, useClickOutside.ts

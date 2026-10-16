@@ -92,8 +92,8 @@ Prose system (rewritten in place of the dead `.prose` block):
 .back-link, .section-cta { font-size: var(--text-meta); font-weight: 500; color: var(--accent); }
 .link-label { font-weight: 500; color: var(--text-primary); }
 .contact-link-sub { font-size: var(--text-meta); line-height: 1.5; color: var(--text-muted); }
-.achievement-impact { font-size: var(--text-meta); line-height: var(--leading-body); color: var(--text-secondary); margin-bottom: 8px; }
-.achievement-metrics { margin-bottom: 8px; }
+/* .achievement-impact and .achievement-metrics were added in this pass, then deleted in the
+   timeline pass (2026-10-16) when the achievements markup left the SPA — see §4.4 */
 .download-resume-button { justify-content: center; padding 12px 20px; color text-primary; }   /* variant of .contact-link; replaces the DownloadButton inline style */
 ```
 
@@ -105,14 +105,14 @@ Existing rules retuned to the scale:
 | `.timeline-title` | 20px, inherited 1.6 | 20px + `line-height: 1.3` |
 | `.timeline-company` | 16px, inherited 1.6 | 16px + `line-height: 1.4` |
 | `.timeline-responsibilities li` | 14px / 1.6 | `--text-meta` / `--leading-body` |
-| `.achievement-title` | 18px / 1.6 | 18px + `line-height: 1.3` |
-| `.achievement-context` | 14px / 1.6 | `--text-meta` / `--leading-body` |
+| `.achievement-title` | 18px / 1.6 | 18px + `line-height: 1.3` — **later deleted** (§4.4) |
+| `.achievement-context` | 14px / 1.6 | `--text-meta` / `--leading-body` — **later deleted** (§4.4) |
 | `.project-card-summary` | 14px / 1.6 | `--text-meta` / `--leading-body` |
 | `.philosophy-card h3` | 18px / 1.6 | 18px + `line-height: 1.25` |
 | `.philosophy-card p` | 14px / 1.7 (inherited) | `--text-meta` / `--leading-body` |
 | `.contact-link` | 16px / 1.6 | 16px + `line-height: 1.4` |
 
-Deleted as dead (no component rendered any of them; verified by grepping every class name against `src/**/*.tsx`): `.card`, `.card:hover`, `.card-elevated`, `.card-featured` (and `src/components/ui/Card.tsx` plus its barrel export), `.page-header`, `.breadcrumb*`, `.form-group/label/input/textarea`, `.filter-bar`, `.filter-pill*`, `.article-card`, `.article-meta`, `.engineering-tabs`, `.engineering-tab*`, `.container-narrow`, `--max-narrow`.
+Deleted as dead (no component rendered any of them; verified by grepping every class name against `src/**/*.tsx`): `.card`, `.card:hover`, `.card-elevated`, `.card-featured` (and `src/components/ui/Card.tsx` plus its barrel export), `.page-header`, `.breadcrumb*`, `.form-group/label/input/textarea`, `.filter-bar`, `.filter-pill*`, `.article-card`, `.article-meta`, `.engineering-tabs`, `.engineering-tab*`, `.container-narrow`, `--max-narrow`. The timeline pass later added `.achievement`, `.achievement-title`, `.achievement-context`, `.achievement-impact`, `.achievement-metrics`, `.achievement-techs` to this list — `.achievement-metric` is **kept**, `src/components/sections/Projects.tsx` and `src/pages/ProjectDetailPage.tsx` still render it.
 
 ### 4.3 TSX
 
@@ -121,18 +121,29 @@ Deleted as dead (no component rendered any of them; verified by grepping every c
 | `src/pages/PhilosophyPage.tsx` | whole body: `aria-labelledby="philosophy-heading"` matched by `<SectionHeading id="philosophy-heading">`; quotes wrapped in `<div className="prose prose-wide">` → `<div className="philosophy-quote">` → plain `<h3>` + `<div dangerouslySetInnerHTML>` (no outer `<p>`, so the injected `<p>` blocks are no longer nested); inline styles and the stale "Placeholder for expanded content" comment removed |
 | `src/pages/AboutPage.tsx`, `src/components/sections/About.tsx` | `maxWidth:'700px'` div → `.page-body` (first pass) → wrapper removed entirely (second pass): bio, `.subheading` titles and both grids are direct children of the section; bio → `.prose-lede lede-wide`; `/about` §1 section `container-content` → `container-wide` |
 | `src/pages/ProjectDetailPage.tsx` | back link → `.back-link`; summary → `.prose-lede`; narrative wrapped in `.prose`; four `marginBottom:'32px'` block wrappers unwound (rhythm now comes from `.prose h3`); four `<h3 style>` → plain `<h3>`; section cards → `.project-section` with plain `<h4>` / `<p>` |
-| `src/pages/ExperiencePage.tsx`, `src/components/sections/Experience.tsx` | impact div → `.achievement-impact`; metrics wrapper → `.achievement-metrics`; `maxWidth:'700px'` → `.page-body` |
+| `src/pages/ExperiencePage.tsx`, `src/components/sections/Experience.tsx` | impact div → `.achievement-impact`; metrics wrapper → `.achievement-metrics`; `maxWidth:'700px'` → `.page-body` — **superseded 2026-10-16**: the achievements markup was removed from both files and the two classes it used were deleted (§4.4) |
 | `src/pages/ContactPage.tsx`, `src/components/sections/Contact.tsx` | label divs → `.link-label`; sub-labels → `.contact-link-sub`; `maxWidth:'700px'` → `.page-body` |
 | `src/components/sections/Projects.tsx` | "view all" link → `.section-cta` |
 | `src/components/sections/DownloadResume.tsx` | option label → `.link-label`; `DownloadButton` inline layout + `color` → `className="contact-link download-resume-button"` |
 | `src/components/ui/Card.tsx` | deleted; export removed from `src/components/index.ts` |
+
+### 4.4 Timeline pass (2026-10-16, later)
+
+Two follow-up passes touched the same files. The timeline half is specified in `specs/ui/spec-ui-experience.md`; the typography-relevant parts are listed here.
+
+| Change | Files |
+|---|---|
+| Achievements dropped from the SPA timeline; `.achievement`, `.achievement-title`, `.achievement-context`, `.achievement-impact`, `.achievement-metrics`, `.achievement-techs` deleted; `.achievement-metric` kept (projects pages) | `src/pages/ExperiencePage.tsx`, `src/components/sections/Experience.tsx`, `src/App.css` |
+| Timeline chrome restyled through the existing tokens only — spine drawn per node, TLDR terminal node, `.timeline-entry-current` panel + pulse, `.timeline-entry-gap` dashed spine + 10px marker; no new type sizes introduced | `src/App.css`, `src/i18n/strings.ts` |
+| `.philosophy-quote p { text-align: justify }` | `src/App.css` |
+| Resume generator: `${exp.achievements?.map(...).join('')}` printed the literal `undefined` once an entry had no achievements (optional chaining short-circuits the whole chain; the template literal stringifies the result) → `(exp.achievements ?? [])` | `scripts/generate-resume.ts` |
 
 ## 5. Affected files
 
 | File | Change |
 |---|---|
 | `src/index.css` | token block (`--max-narrow` deleted, six scale tokens), `--sans`, `h3`-`h6`, `p`, `.container-narrow` deleted |
-| `src/App.css` | prose system added/rewritten, 10 selectors retuned, `.download-resume-button` added, `.philosophy-grid` 2 → 3 columns + a new ≤1024px breakpoint, ~170 lines of dead CSS deleted |
+| `src/App.css` | prose system added/rewritten, 10 selectors retuned, `.download-resume-button` added, `.philosophy-grid` 2 → 3 columns + a new ≤1024px breakpoint, ~170 lines of dead CSS deleted; the timeline pass later deleted the `.achievement*` rules that lost their consumers and added the timeline chrome (§4.4) |
 | 8 page/section TSX files | inline type styles → classes (see §4.3) |
 | `src/components/ui/Card.tsx` | deleted |
 | `src/components/index.ts` | `Card` export removed |

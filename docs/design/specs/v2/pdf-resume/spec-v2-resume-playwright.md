@@ -716,7 +716,7 @@ will show because `/resume.pdf` exists on the server.
 | 1 | `pnpm tsx scripts/generate-resume.ts` produces `dist/resume.pdf` | ✅ | Script at `scripts/generate-resume.ts`, alias `pnpm build:resume` |
 | 2 | PDF is A4 size, multi-page with correct pagination | ✅ | `@page { size: A4 }` in template, `format: 'A4'` in script |
 | 3 | Header contains profile photo (circular crop), name, title, contact info | ✅ | Base64 photo, profile data from `src/data/profile.ts` |
-| 4 | Experience section includes all companies, roles, responsibilities, achievements | ✅ | `renderExperience()` renders exp, responsibilities, achievements with technicalWork |
+| 4 | Experience section includes all companies, roles, responsibilities, achievements | ✅ | `renderExperience()` renders exp, responsibilities, achievements with technicalWork. Note (2026-10-16): the achievements branch is now a guarded no-op — `src/data/experience.ts` no longer carries `achievements`, and the map is `(exp.achievements ?? [])` because `${exp.achievements?.map(...).join('')}` used to print the literal `undefined` |
 | 5 | Skills section includes all skill groups | ✅ | `renderSkills()` renders all groups in 2-column grid |
 | 6 | All projects included (not just featured) | ✅ | `renderProjects()` iterates full `projects` array |
 | 7 | Sections do not split across pages | ✅ | `.avoid-break { page-break-inside: avoid }` on exp-entry, achievement, skill-group, project |
