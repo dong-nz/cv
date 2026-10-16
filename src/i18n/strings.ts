@@ -39,6 +39,11 @@ export const strings = {
     },
     experience: {
         heading: {en: 'Experience', vi: 'Kinh nghiệm'},
+        tldr: {en: 'TL;DR', vi: 'TL;DR'},
+        tldrText: {
+            en: '15 years of experience, more than 5 companies along the way. Too long to tell.',
+            vi: '15 năm kinh nghiệm, hơn 5 công ty đã đi qua. Quá dài để kể hết.'
+        },
     },
     projects: {
         featured: {en: 'Featured Projects', vi: 'Dự án nổi bật'},

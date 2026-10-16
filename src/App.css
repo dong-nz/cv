@@ -913,49 +913,226 @@
 /* ===== Experience Timeline ===== */
 .timeline {
   position: relative;
-  padding-left: 32px;
+  padding-left: 36px;
 }
 
-.timeline::before {
+/* Spine is drawn per node so it can stop exactly at the TLDR diamond instead of
+   trailing past the last card. left -31px = absolute x 5, so the 2px spine is centred
+   on x 6 — the same centre the markers use. bottom -32px bridges the entry's own margin
+   so consecutive segments join seamlessly. */
+.timeline-entry::before {
   content: '';
   position: absolute;
-  left: 4px;
+  left: -31px;
   top: 0;
-  bottom: 0;
+  bottom: -32px;
   width: 2px;
+  border-radius: 1px;
   background: var(--border);
 }
 
 .timeline-entry {
   position: relative;
-  margin-bottom: 48px;
-  padding-bottom: 48px;
+  padding-bottom: 32px;
+  margin-bottom: 32px;
   border-bottom: 1px solid var(--border);
+  transition: border-color var(--transition-normal);
+}
+
+/* First node starts the spine at its marker centre (top 6 + half of 12). */
+.timeline-entry:first-child::before {
+  top: 12px;
+}
+
+/* Guard for a timeline without a terminal node: stop at the entry's own bottom. */
+.timeline-entry:last-child::before {
+  bottom: 0;
 }
 
 .timeline-entry:last-child {
-  margin-bottom: 0;
   padding-bottom: 0;
+  margin-bottom: 0;
   border-bottom: none;
 }
 
+/* The 36px gutter puts the 12px marker's centre (x=6) exactly on the spine centre (left 5 + half of 2px). */
 .timeline-marker {
   position: absolute;
-  left: -32px;
-  top: 4px;
+  left: -36px;
+  top: 6px;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--border-strong);
   background: var(--bg-primary);
+  transition: border-color var(--transition-normal), background var(--transition-normal);
 }
 
-.timeline-entry:last-child .timeline-marker {
+/* Data is newest-first, so the first entry is the current role: filled marker with a soft halo. */
+.timeline-entry:first-child .timeline-marker {
   background: var(--accent);
-  width: 14px;
-  height: 14px;
-  left: -33px;
-  top: 3px;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.timeline-entry:hover .timeline-marker {
+  border-color: var(--accent);
+}
+
+.timeline-entry:hover {
+  border-bottom-color: var(--border-strong);
+}
+
+/* The newest node is a status, not a past role. It borrows the TLDR panel's quiet family —
+   flat surface, hairline border, radius, whisper shadow — and keeps two things the TLDR node
+   does not: an accent left edge and a pulsing marker. The entry gets real padding so the text
+   sits inside the panel instead of hugging its edge (the old bed had no padding, which on a
+   28px mobile gutter put the accent bar right against the first glyph). */
+.timeline-entry-current {
+  isolation: isolate;
+  padding: 16px 18px 20px;
+  border-bottom: none;
+}
+
+.timeline-entry-current .timeline-marker {
+  background: var(--accent);
+  border-color: var(--accent);
+  animation: timeline-status-pulse 2.4s ease-out infinite;
+}
+
+/* Panel geometry. The 12px marker occupies absolute x 0–12 and the pulse peak (10px spread)
+   reaches x 22, so the panel's 2px left border starts at x 28 (left −8 against the 36px
+   gutter): 6px clear of the ring, and the text starts at 36 + 18 = 54, i.e. 24px inside it.
+   The entry's own divider is gone; the panel's border closes the box. */
+.timeline-entry-current::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -10px -10px -10px -8px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--accent);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 var(--inset-highlight), 0 8px 20px -18px var(--shadow);
+}
+
+@keyframes timeline-status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50% { box-shadow: 0 0 0 10px transparent; }
+}
+
+/* Mobile variant of the same pulse: 6px spread, so the ring stops at x 18 and the panel border
+   can keep 6px of air inside a 28px gutter. */
+@keyframes timeline-status-pulse-sm {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-glow); }
+  50% { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* A break between jobs has to read as a break. Three signals, all quieter than the accent
+   work nodes: the spine turns dashed through this node, the marker shrinks to a muted ring,
+   the title goes italic-muted, and the divider is dropped so the dashed line bridges
+   straight into the next role. */
+.timeline-entry-gap::before {
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--border-strong) 0px,
+    var(--border-strong) 4px,
+    transparent 4px,
+    transparent 9px
+  );
+}
+
+.timeline-entry-gap {
+  border-bottom: none;
+}
+
+/* 10px ring: smaller than the 12px role markers. L = 6 − 36 − 10/2 = −35 keeps the centre on
+   the spine (x 6). */
+.timeline-entry-gap .timeline-marker {
+  width: 10px;
+  height: 10px;
+  left: -35px;
+  border-color: var(--border-strong);
+}
+
+.timeline-entry-gap .timeline-title {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.timeline-entry-gap .timeline-company {
+  color: var(--text-muted);
+}
+
+/* Terminal node: the whole timeline collapsed into one line. Deliberately quiet — a flat
+   surface, a hairline border, a whisper of shadow. The only loud element is the diamond on
+   the spine. */
+.timeline-tldr {
+  position: relative;
+  padding: 20px 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 var(--inset-highlight), 0 8px 20px -18px var(--shadow);
+}
+
+/* Stub from the previous node down to the diamond centre (top 16 + 6). Painted as ::before
+   so the diamond covers its end. */
+.timeline-tldr::before {
+  content: '';
+  position: absolute;
+  left: -31px;
+  top: 0;
+  width: 2px;
+  height: 22px;
+  border-radius: 1px;
+  background: var(--border);
+}
+
+/* Hollow diamond: the same ring language as the entry markers, but in accent so it still
+   reads as the end of the line. bg-primary fill masks the spine stub behind it; width and
+   height are border-box, so the centre stays on the spine (x 6). */
+.timeline-tldr-marker {
+  position: absolute;
+  left: -36px;
+  top: 16px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--accent);
+  border-radius: 2px;
+  background: var(--bg-primary);
+  transform: rotate(45deg);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Hairline link from the diamond into the panel, painted over the diamond so the join is
+   unbroken. */
+.timeline-tldr::after {
+  content: '';
+  position: absolute;
+  left: -24px;
+  top: 21px;
+  width: 24px;
+  height: 1px;
+  background: var(--accent);
+}
+
+/* Same voice as .section-tag: mono, uppercase, letterspaced — no box around it. */
+.timeline-tldr-chip {
+  display: block;
+  margin-bottom: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* No color declaration: inherits the global p treatment (--text-secondary), the same
+   treatment every other lede on the site gets. */
+.timeline-tldr-text {
+  font-size: var(--text-lede);
+  line-height: 1.55;
 }
 
 .timeline-header {
@@ -970,76 +1147,56 @@
 }
 
 .timeline-company {
+  margin-top: 2px;
   font-size: 16px;
   line-height: 1.4;
   color: var(--text-secondary);
 }
 
-.timeline-duration {
+.timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-top: 6px;
+}
+
+.timeline-duration,
+.timeline-location {
   font-size: 14px;
   color: var(--text-muted);
+}
+
+.timeline-location::before {
+  content: '·';
+  margin-right: 10px;
+  color: var(--border-strong);
 }
 
 .timeline-responsibilities {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 24px;
+  gap: 10px;
 }
 
 .timeline-responsibilities li {
+  position: relative;
+  padding-left: 18px;
   font-size: var(--text-meta);
   line-height: var(--leading-body);
-  padding-left: 16px;
-  position: relative;
 }
 
+/* Dot sits on the x-height centre of the first line (line-height 1.65 → 0.66em). */
 .timeline-responsibilities li::before {
-  content: '•';
+  content: '';
   position: absolute;
   left: 0;
-  color: var(--accent);
-}
-
-.achievement {
-  background: var(--bg-surface);
-  border-left: 4px solid var(--accent);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  padding: 20px 24px;
-  margin-bottom: 16px;
-}
-
-.achievement-title {
-  font-size: 18px;
-  line-height: 1.3;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 8px;
-}
-
-.achievement-context {
-  font-size: var(--text-meta);
-  line-height: var(--leading-body);
-  margin-bottom: 12px;
-}
-
-.achievement-impact {
-  font-size: var(--text-meta);
-  line-height: var(--leading-body);
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-}
-
-.achievement-metrics {
-  margin-bottom: 8px;
-}
-
-.achievement-techs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+  top: 0.66em;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
 }
 
 .achievement-metric {
@@ -1055,15 +1212,54 @@
 
 @media (max-width: 768px) {
   .timeline {
-    padding-left: 0;
+    padding-left: 28px;
   }
 
-  .timeline::before {
-    display: none;
+  .timeline-entry {
+    padding-bottom: 24px;
+    margin-bottom: 24px;
   }
 
-  .timeline-marker {
-    display: none;
+  .timeline-entry::before {
+    left: -23px;
+    bottom: -24px;
+  }
+
+  .timeline-tldr::before {
+    left: -23px;
+  }
+
+  .timeline-tldr::after {
+    left: -16px;
+    width: 16px;
+  }
+
+  .timeline-marker,
+  .timeline-tldr-marker {
+    left: -28px;
+  }
+
+  /* 10px ring at the 28px gutter: L = 6 − 28 − 10/2 = −27. */
+  .timeline-entry-gap .timeline-marker {
+    left: -27px;
+  }
+
+  /* Panel keeps a comparable absolute edge: 28 − 4 = 24, i.e. 6px clear of the capped mobile
+     ring (x 18) and 18px before the text (28 + 16 padding). */
+  .timeline-entry-current {
+    padding: 14px 16px 18px;
+  }
+
+  .timeline-entry-current::after {
+    inset: -8px -8px -8px -4px;
+  }
+
+  .timeline-entry-current .timeline-marker {
+    animation-name: timeline-status-pulse-sm;
+  }
+
+  .timeline-tldr {
+    padding: 18px 20px;
   }
 }
 
@@ -1144,7 +1340,7 @@
 /* ===== Philosophy ===== */
 .philosophy-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
   margin-top: 32px;
 }
@@ -1185,6 +1381,12 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 24px;
+}
+
+@media (max-width: 1024px) {
+  .philosophy-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
@@ -1347,6 +1549,17 @@
   font-style: italic;
 }
 
+/* Wide reading column: same width as the page column. Body steps up to
+   --text-lede so a wider column keeps the 45-80 characters-per-line band. */
+.prose-wide {
+  max-width: var(--measure-page);
+}
+
+.prose-wide p {
+  font-size: var(--text-lede);
+  line-height: 1.6;
+}
+
 /* Lead paragraph that stands outside a .prose column */
 .prose-lede {
   max-width: var(--measure-prose);
@@ -1354,14 +1567,23 @@
   line-height: 1.55;
 }
 
+/* A lede that sits next to a wide grid follows the page measure, not the prose measure */
+.lede-wide {
+  max-width: var(--measure-page);
+}
+
 /* Column for blocks that are not prose (grids, tag lists, timelines) */
 .page-body {
-  max-width: 700px;
+  max-width: var(--measure-page);
 }
 
 .subheading {
   margin-top: 32px;
   margin-bottom: 12px;
+}
+
+.philosophy-quote p {
+  text-align: justify;
 }
 
 .philosophy-quote + .philosophy-quote {

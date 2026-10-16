@@ -2,11 +2,41 @@ import type { ExperienceEntry } from "@/types";
 
 export const experiences: ExperienceEntry[] = [
   {
-    id: "senior-swe",
+    id: "open-to-work",
+    variant: "current",
+    title: "Đang tìm nơi làm việc mới",
+    titleEn: "Seeking a New Place",
+    company: "Open to new opportunities",
+    duration: "Nov 2026 – Present",
+    responsibilities: [
+      "Sẵn sàng cho vai trò Senior Engineering: system architecture, integration platform, full-stack delivery",
+    ],
+    responsibilitiesEn: [
+      "Open to Senior Engineering roles: system architecture, integration platforms, full-stack delivery",
+      "Available from Nov 2026",
+    ],
+  },
+  {
+    id: "relax-gap",
+    variant: "gap",
+    title: "Nghỉ ngơi",
+    titleEn: "Relax",
+    company: "Career break",
+    duration: "Aug 2026 – Oct 2026",
+    responsibilities: [
+      "Nghỉ có chủ đích giữa hai vai trò — lấy lại nhịp trước khi nhận hệ thống tiếp theo",
+      "Tự thử nghiệm theo nhịp riêng: local LLM với llama.cpp, đọc về Computer Vision",
+    ],
+    responsibilitiesEn: [
+      "Intentional break between roles — recovering the rhythm before the next system",
+    ],
+  },
+  {
+    id: "lazada-senior-swe",
     title: "Senior Software Engineer",
     titleEn: "Senior Software Engineer",
-    company: "Current Company",
-    duration: "2021 – Present",
+    company: "Lazada Tech Hub Vietnam",
+    duration: "Jan 2020 – Aug 2026",
     location: "Ho Chi Minh City, Vietnam",
     responsibilities: [
       "System ownership và architecture design cho logistics integration systems",
@@ -22,70 +52,33 @@ export const experiences: ExperienceEntry[] = [
       "Applied Computer Vision and ML to solve real-world operational problems",
       "Scrum Master responsibilities — team achieved Scrum Level L3",
     ],
-    achievements: [
-      {
-        id: "iot-dws",
-        title: "IoT-DWS Integration System",
-        titleEn: "IoT-DWS Integration System",
-        context:
-          "Tiếp nhận và nhanh chóng làm chủ hệ thống IoT-DWS sau khi thành viên phụ trách trước đó rời project.",
-        contextEn:
-          "Took over and rapidly mastered the IoT-DWS system after the previous responsible team member left the project.",
-        technicalWork: [
-          "HTTP integration with Signature Header",
-          "HMAC-based request/response security",
-          "RocketMQ integration",
-          "HTTP engine development",
-          "Integration with DWS machines",
-        ],
-        impact: "Giải pháp DWS integration được triển khai cho 16 sortations",
-        impactEn: "DWS integration solution deployed across 16 sortations",
-        metrics: ["16 sortations deployed"],
-        technologies: ["Java", "HTTP", "HMAC", "RocketMQ", "DWS"],
-        featured: true,
-      },
-      {
-        id: "awb-detection",
-        title: "AWB Detection / Computer Vision",
-        titleEn: "AWB Detection / Computer Vision",
-        context:
-          "Tự động phát hiện shipping label / AWB từ hình ảnh được camera trên sortation machine chụp.",
-        contextEn:
-          "Automatically detect shipping labels / AWB from images captured by cameras on sortation machines.",
-        technicalWork: [
-          "OpenCV image preprocessing",
-          "YOLO-based object detection",
-          "Oriented Bounding Box (OBB)",
-          "ONNX model inference",
-          "OCR pipeline",
-        ],
-        impact:
-          "Model được fine-tune cho bài toán AWB detection, xử lý white label trên white package",
-        impactEn:
-          "Model fine-tuned for AWB detection, handling white label on white package",
-        metrics: ["70,000 images/month processed"],
-        technologies: ["Python", "OpenCV", "YOLO", "ONNX", "OCR"],
-        featured: true,
-      },
-      {
-        id: "system-maintenance",
-        title: "System Maintenance & Optimization",
-        titleEn: "System Maintenance & Optimization",
-        context:
-          "Duy trì và hiện đại hóa hệ thống production theo yêu cầu của security/infrastructure team.",
-        contextEn:
-          "Maintained and modernized production systems per security/infrastructure team requirements.",
-        technicalWork: [
-          "Migration to newer middleware versions",
-          "OSS cleanup and duplicate image removal",
-          "System maintenance automation",
-        ],
-        impact: "Giảm OSS storage khoảng 7 GB/month",
-        impactEn: "Reduced OSS storage by approximately 7 GB/month",
-        metrics: ["7 GB/month reduction", "70,000 images/month"],
-        technologies: ["Docker", "Linux", "OSS", "CI/CD"],
-        featured: true,
-      },
+  },
+  {
+    id: "nexts-founder",
+    title: "Người sáng lập",
+    titleEn: "CTO & Founder",
+    company: "Nexts Limited Company",
+    duration: "06/2019 – 12/2019",
+    location: "Ho Chi Minh City, Vietnam",
+    responsibilities: [
+      "Phát triển giải pháp cho xe tự hành, thu thập dữ liệu thời gian thực từ cảm biến và hệ thống onboard: LiDAR, camera, GPS, CAN bus.",
+    ],
+    responsibilitiesEn: [
+      "Developed a solution for autonomous vehicles to collect real-time data from onboard sensors and systems, including LiDAR, cameras, GPS, and CAN bus.",
     ],
   },
+  {
+    id: "sap-senior-swe",
+    title: "Senior Software Engineer",
+    titleEn: "Senior Software Engineer",
+    company: "SAP Lab Vietnam",
+    duration: "2017 – 12/2019",
+    location: "Ho Chi Minh City, Vietnam",
+    responsibilities: [
+      "Team leader quản lý sản phẩm B1 Integration",
+    ],
+    responsibilitiesEn: [
+      "Team leader managing the B1 Integration product",
+    ],
+  }
 ];

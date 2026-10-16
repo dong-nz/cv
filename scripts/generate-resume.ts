@@ -97,7 +97,7 @@ function renderExperience(exps: typeof experiences): string {
       <ul class="exp-responsibilities">
         ${resolveField(exp.responsibilitiesEn, exp.responsibilities).map(r => `<li>${r}</li>`).join('')}
       </ul>
-      ${exp.achievements?.map(ach => `
+      ${(exp.achievements ?? []).map(ach => `
         <div class="achievement avoid-break">
           <div class="achievement-title">${resolveField(ach.titleEn, ach.title)}</div>
           <div class="achievement-context">${resolveField(ach.contextEn, ach.context)}</div>

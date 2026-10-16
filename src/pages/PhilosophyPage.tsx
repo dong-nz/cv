@@ -8,7 +8,7 @@ export function PhilosophyPage() {
     return (
         <section className="section container-content" aria-labelledby="philosophy-heading">
             <SectionHeading id="philosophy-heading" title={strings.philosophy.heading[lang]} tag={strings.philosophy.heading[lang]}/>
-            <div className="prose">
+            <div className="prose prose-wide">
                 {strings.philosophy.quotes.map((quote) => (
                     <div key={quote.title[lang]} className="philosophy-quote">
                         <h3>

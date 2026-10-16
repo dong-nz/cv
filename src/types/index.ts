@@ -47,6 +47,7 @@ export interface ExperienceEntry {
   responsibilities: string[];
   responsibilitiesEn?: string[];
   achievements?: FeaturedAchievement[];
+  variant?: 'current' | 'gap';
 }
 
 export interface FeaturedAchievement {

@@ -12,44 +12,42 @@ export function AboutPage() {
   return (
     <>
     <AnimatedSection>
-      <section className="section container-content" aria-labelledby="about-heading">
+      <section className="section container-wide" aria-labelledby="about-heading">
         <SectionHeading
           title={strings.about.heading[lang]}
           subtitle={strings.about.subtitle[lang]}
           tag={strings.about.heading[lang]}
         />
-        <div className="page-body">
-          <p className="prose-lede">
-            {useField(profile.bio, profile.bioEn)}
-          </p>
+        <p className="prose-lede lede-wide">
+          {useField(profile.bio, profile.bioEn)}
+        </p>
 
-          <h3 className="subheading">
-            {strings.about.engineeringTitle[lang]}
-          </h3>
-          <div className="philosophy-grid">
-            {profile.philosophy.map((point) => (
-              <div key={point.title} className="philosophy-card">
-                <h3>{point.title}</h3>
-                <p>{point.description}</p>
-                <div className="philosophy-keywords">
-                  {point.keywords.map((kw) => (
-                    <Tag key={kw}>{kw}</Tag>
-                  ))}
-                </div>
+        <h3 className="subheading">
+          {strings.about.engineeringTitle[lang]}
+        </h3>
+        <div className="philosophy-grid">
+          {profile.philosophy.map((point) => (
+            <div key={point.title} className="philosophy-card">
+              <h3>{point.title}</h3>
+              <p>{point.description}</p>
+              <div className="philosophy-keywords">
+                {point.keywords.map((kw) => (
+                  <Tag key={kw}>{kw}</Tag>
+                ))}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
 
-          <h3 className="subheading">
-            {strings.about.exploringTitlePage[lang]}
-          </h3>
-          <div className="interests-list">
-            {profile.currentInterests.map((interest) => (
-              <Tag key={interest} accent>
-                {interest}
-              </Tag>
-            ))}
-          </div>
+        <h3 className="subheading">
+          {strings.about.exploringTitlePage[lang]}
+        </h3>
+        <div className="interests-list">
+          {profile.currentInterests.map((interest) => (
+            <Tag key={interest} accent>
+              {interest}
+            </Tag>
+          ))}
         </div>
       </section>
     </AnimatedSection>
