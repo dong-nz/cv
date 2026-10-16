@@ -33,7 +33,7 @@ export function Projects() {
         <SectionHeading title={strings.projects.featured[lang]} tag={strings.projects.featured[lang]} />
         <Link
           to="/projects"
-          style={{ fontSize: "14px", fontWeight: 500, color: "var(--accent)", display: "block", marginBottom: "24px" }}
+          className="section-cta"
         >
           {strings.projects.viewAll[lang]} →
         </Link>

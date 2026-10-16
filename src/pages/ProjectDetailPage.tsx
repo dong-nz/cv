@@ -25,7 +25,7 @@ export function ProjectDetailPage() {
 
   return (
     <section className="section container-content" aria-labelledby="project-title">
-      <Link to="/projects" style={{ fontSize: '14px', fontWeight: 500, color: 'var(--accent)', marginBottom: '32px', display: 'inline-block' }}>
+      <Link to="/projects" className="back-link">
         {strings.projectDetail.backToProjects[lang]} ←
       </Link>
 
@@ -34,49 +34,51 @@ export function ProjectDetailPage() {
         <Badge variant="outline">{strings.projects.categories[project.category][lang]}</Badge>
       </div>
 
-      <p style={{ fontSize: '18px', color: 'var(--text-secondary)', marginBottom: '32px' }}>
+      <p className="prose-lede">
         {useField(project.summary, project.summaryEn)}
       </p>
 
-      {project.metrics && project.metrics.length > 0 && (
-        <div style={{ marginBottom: '32px' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'var(--text-primary)' }}>{strings.projectDetail.impact[lang]}</h3>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-            {project.metrics.map((m) => (
-              <span key={m} className="achievement-metric">
-                {m}
-              </span>
+      <div className="prose">
+        {project.metrics && project.metrics.length > 0 && (
+          <div>
+            <h3>{strings.projectDetail.impact[lang]}</h3>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              {project.metrics.map((m) => (
+                <span key={m} className="achievement-metric">
+                  {m}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div>
+          <h3>{strings.projectDetail.role[lang]}</h3>
+          <p>{project.role}</p>
+        </div>
+
+        <div>
+          <h3>{strings.projectDetail.technologies[lang]}</h3>
+          <div className="philosophy-keywords">
+            {project.technologies.map((tech) => (
+              <Tag key={tech}>{tech}</Tag>
             ))}
           </div>
         </div>
-      )}
 
-      <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'var(--text-primary)' }}>{strings.projectDetail.role[lang]}</h3>
-        <p>{project.role}</p>
+        {project.sections && project.sections.length > 0 && (
+          <div>
+            <h3>{strings.projectDetail.experiments[lang]}</h3>
+            {project.sections.map((section, idx) => (
+              <div key={idx} className="project-section">
+                <h4>{useField(section.title, section.titleEn)}</h4>
+                <p>{useField(section.content, section.contentEn)}</p>
+                <Tag accent>{section.type}</Tag>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      <div style={{ marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'var(--text-primary)' }}>{strings.projectDetail.technologies[lang]}</h3>
-        <div className="philosophy-keywords">
-          {project.technologies.map((tech) => (
-            <Tag key={tech}>{tech}</Tag>
-          ))}
-        </div>
-      </div>
-
-      {project.sections && project.sections.length > 0 && (
-        <div style={{ marginBottom: '32px' }}>
-          <h3 style={{ fontSize: '16px', marginBottom: '12px', color: 'var(--text-primary)' }}>{strings.projectDetail.experiments[lang]}</h3>
-          {project.sections.map((section, idx) => (
-            <div key={idx} style={{ marginBottom: '16px', padding: '16px', background: 'var(--bg-surface)', borderRadius: '8px' }}>
-              <h4 style={{ fontSize: '14px', marginBottom: '4px', color: 'var(--text-primary)' }}>{useField(section.title, section.titleEn)}</h4>
-              <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{useField(section.content, section.contentEn)}</p>
-              <Tag accent>{section.type}</Tag>
-            </div>
-          ))}
-        </div>
-      )}
     </section>
   )
 }

@@ -18,12 +18,12 @@ export function AboutPage() {
           subtitle={strings.about.subtitle[lang]}
           tag={strings.about.heading[lang]}
         />
-        <div style={{ maxWidth: '700px' }}>
-          <p style={{ fontSize: '18px', marginBottom: '32px' }}>
+        <div className="page-body">
+          <p className="prose-lede">
             {useField(profile.bio, profile.bioEn)}
           </p>
 
-          <h3 style={{ fontSize: '20px', marginBottom: '16px', color: 'var(--text-primary)' }}>
+          <h3 className="subheading">
             {strings.about.engineeringTitle[lang]}
           </h3>
           <div className="philosophy-grid">
@@ -40,7 +40,7 @@ export function AboutPage() {
             ))}
           </div>
 
-          <h3 style={{ fontSize: '20px', marginTop: '32px', marginBottom: '12px', color: 'var(--text-primary)' }}>
+          <h3 className="subheading">
             {strings.about.exploringTitlePage[lang]}
           </h3>
           <div className="interests-list">

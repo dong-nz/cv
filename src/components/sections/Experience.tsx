@@ -25,7 +25,7 @@ export function Experience() {
         }}
       >
         <SectionHeading title={strings.experience.heading[lang]} tag={strings.experience.heading[lang]} />
-        <div style={{ maxWidth: '700px' }}>
+        <div className="page-body">
         <div className="timeline">
           {experiences.map((exp, i) => (
             <motion.div
@@ -64,18 +64,12 @@ export function Experience() {
                   <div className="achievement-context">
                     {useField(achievement.context, achievement.contextEn)}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "14px",
-                      color: "var(--text-secondary)",
-                      marginBottom: "8px",
-                    }}
-                  >
+                  <div className="achievement-impact">
                     {useField(achievement.impact, achievement.impactEn)}
                   </div>
                   {achievement.metrics &&
                     achievement.metrics.length > 0 && (
-                      <div style={{ marginBottom: "8px" }}>
+                      <div className="achievement-metrics">
                         {achievement.metrics.map((m) => (
                           <span key={m} className="achievement-metric">
                             {m}

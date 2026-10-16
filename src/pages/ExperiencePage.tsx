@@ -30,11 +30,11 @@ export function ExperiencePage() {
               <div key={achievement.id} className="achievement">
                 <div className="achievement-title">{achievement.title}</div>
                 <div className="achievement-context">{useField(achievement.context, achievement.contextEn)}</div>
-                <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                <div className="achievement-impact">
                   {useField(achievement.impact, achievement.impactEn)}
                 </div>
                 {achievement.metrics && achievement.metrics.length > 0 && (
-                  <div style={{ marginBottom: '8px' }}>
+                  <div className="achievement-metrics">
                     {achievement.metrics.map((m) => (
                       <span key={m} className="achievement-metric">
                         {m}

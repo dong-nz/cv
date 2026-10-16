@@ -11,12 +11,12 @@ export function About() {
     <InView>
     <section className="section container-wide" aria-labelledby="about-heading">
       <SectionHeading title={strings.about.heading[lang]} tag={strings.about.heading[lang]} />
-      <div style={{ maxWidth: '700px' }}>
-        <p style={{ fontSize: '18px', marginBottom: '32px' }}>
+      <div className="page-body">
+        <p className="prose-lede">
           {useField(profile.bio, profile.bioEn)}
         </p>
 
-        <h3 style={{ fontSize: '20px', marginBottom: '16px', color: 'var(--text-primary)' }}>
+        <h3 className="subheading">
           {strings.about.engineeringTitle[lang]}
         </h3>
         <div className="philosophy-grid">
@@ -33,7 +33,7 @@ export function About() {
           ))}
         </div>
 
-        <h3 style={{ fontSize: '20px', marginTop: '32px', marginBottom: '12px', color: 'var(--text-primary)' }}>
+        <h3 className="subheading">
           {strings.about.exploringTitle[lang]}
         </h3>
         <div className="interests-list">

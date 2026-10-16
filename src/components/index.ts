@@ -1,7 +1,6 @@
 export { Button } from './ui/Button'
 export { Badge } from './ui/Badge'
 export { Tag } from './ui/Tag'
-export { Card } from './ui/Card'
 export { SectionHeading } from './ui/SectionHeading'
 export { SocialLinks } from './ui/SocialLinks'
 export { Navigation } from './layout/Navigation'

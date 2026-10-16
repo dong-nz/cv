@@ -317,7 +317,7 @@ New structure: **one dark block + one light block + one media bridge** (removes 
 
 `@media (prefers-color-scheme: dark) { :root:not([data-theme='light']) { … } }` is **deleted**: its values are identical to `:root`, so it can never change anything.
 
-`.skip-link` (`src/index.css:265-275`): `background: var(--accent); color: white;` → `color: var(--text-on-accent);`. **Moot in the shipped tree:** the block was deleted in the working tree and no component renders `.skip-link`; `strings.skipLink` is unused.
+`.skip-link` (`src/index.css:265-275`): `background: var(--accent); color: white;` → `color: var(--text-on-accent);`. **Closed:** the block was deleted in the working tree, no component renders `.skip-link`, and `strings.skipLink` has been removed too — `grep -i skip` over `src/` → 0 matches.
 
 ### 4.2 `index.html` — prevent first-paint flash
 
@@ -426,7 +426,7 @@ New structure: **one dark block + one light block + one media bridge** (removes 
 - [x] Rebuilt after the second pass: `tsc -b` exit 0; `vite build` 538 modules, 26.04 kB CSS — built CSS carries `#b04138`, `#a8382f`, `#9b3229` (×2 each: light block + media bridge) and `#f06060`, with no `#b91c1c`, no `#7f1d1d`, no blue
 - [x] Third pass (user feedback): the translucent `--accent-soft` panel let the conic lazer sweep show through the whole button — replaced with the new **opaque** token `--accent-tint` (light `#f5e3e1`, dark `#2f1e1a`) on `.download-resume-lazer-inner` (`src/App.css:835`), so the sweep is visible only in the 2 px ring
 - [x] Third pass verified: `tsc -b` exit 0; `vite build` → 26.11 kB CSS; compiled rule is `.download-resume-lazer-inner{…background:var(--accent-tint)…}` and the built CSS carries `#2f1e1a` ×1 and `#f5e3e1` ×2 (light block + bridge). Accent label on the solid tint: 4.63 light / 5.74 dark; primary ink on it 14.36 / 14.58
-- [ ] **B7** reclassified — the `.skip-link` rules were deleted from `src/index.css` in the working tree (not by this change) and no component renders the class; `strings.skipLink` (`src/i18n/strings.ts:98`) is now an unused string. Either restore markup + CSS or delete the string; nothing left to tokenize
+- [x] **B7** closed — the `.skip-link` rules were deleted from `src/index.css` in the working tree (not by this change), no component renders the class, and `strings.skipLink` has since been removed as well; nothing left to tokenize or delete
 
 ## 7. Verification plan
 
@@ -498,5 +498,5 @@ New structure: **one dark block + one light block + one media bridge** (removes 
 - Manual browser pass (§7 item 4) is the user's; the palette has not been verified headlessly, per project rule.
 - `pnpm build` end-to-end blocked by the nginx `dist/` mount — needs `docker compose stop` before a real production build, or a different out dir.
 - `pnpm lint` dirty at baseline (15 errors + 9 warnings, all `react-hooks(rules-of-hooks)` in `.tsx` files this change never touched).
-- `.skip-link` orphan decision (§6, B7).
+- ~~`.skip-link` orphan decision (§6, B7)~~ — closed: no markup, no CSS, no string (`grep -i skip` over `src/` → 0 matches). Restoring it would be a new feature, not a cleanup.
 - Hairline grid adoption deferred (§9 item 3).

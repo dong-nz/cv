@@ -4,7 +4,7 @@
 > **Version:** 1.0.0
 > **Parent:** `spec.md` (IA/content readability), sibling of `spec-v3-theme-palette-gasatrya.md`
 > **Priority:** P1
-> **Status:** Implemented in source. `tsc -b` and the production build are green; the visual pass is the user's in a real browser (project rule: no headless verification).
+> **Status:** Implemented. TSX sweep done, `Card` deleted, `tsc -b` and the production build are green; the visual pass is the user's in a real browser (project rule: no headless verification).
 
 ---
 
@@ -63,7 +63,7 @@ Reading bands used: 45-75 characters (Bringhurst), 38-80 (Butterick). Before: 11
 - `--sans` → system stack (finding P5). `--mono` unchanged (it already ends in `ui-monospace, monospace`, so it resolves without a download).
 - `h3 { font-size: 21px }`; new `h4 { 18px }`, `h5 { 16px }`, `h6 { 15px }`.
 - `p { font-size: var(--text-body); line-height: var(--leading-body); color: var(--text-secondary); }` — was implicit 16px / 1.7.
-- `.container-narrow` deleted (no consumer).
+- `.container-narrow` deleted (no consumer), including its two leftover entries in the responsive padding selector lists.
 
 ### 4.2 `src/App.css`
 
@@ -90,6 +90,7 @@ Prose system (rewritten in place of the dead `.prose` block):
 .contact-link-sub { font-size: var(--text-meta); line-height: 1.5; color: var(--text-muted); }
 .achievement-impact { font-size: var(--text-meta); line-height: var(--leading-body); color: var(--text-secondary); margin-bottom: 8px; }
 .achievement-metrics { margin-bottom: 8px; }
+.download-resume-button { justify-content: center; padding 12px 20px; color text-primary; }   /* variant of .contact-link; replaces the DownloadButton inline style */
 ```
 
 Existing rules retuned to the scale:
@@ -119,7 +120,7 @@ Deleted as dead (no component rendered any of them; verified by grepping every c
 | `src/pages/ExperiencePage.tsx`, `src/components/sections/Experience.tsx` | impact div → `.achievement-impact`; metrics wrapper → `.achievement-metrics`; `maxWidth:'700px'` → `.page-body` |
 | `src/pages/ContactPage.tsx`, `src/components/sections/Contact.tsx` | label divs → `.link-label`; sub-labels → `.contact-link-sub`; `maxWidth:'700px'` → `.page-body` |
 | `src/components/sections/Projects.tsx` | "view all" link → `.section-cta` |
-| `src/components/sections/DownloadResume.tsx` | option label → `.link-label` |
+| `src/components/sections/DownloadResume.tsx` | option label → `.link-label`; `DownloadButton` inline layout + `color` → `className="contact-link download-resume-button"` |
 | `src/components/ui/Card.tsx` | deleted; export removed from `src/components/index.ts` |
 
 ## 5. Affected files
@@ -127,7 +128,7 @@ Deleted as dead (no component rendered any of them; verified by grepping every c
 | File | Change |
 |---|---|
 | `src/index.css` | token block (5 added, `--max-narrow` deleted), `--sans`, `h3`-`h6`, `p`, `.container-narrow` deleted |
-| `src/App.css` | prose system added/rewritten, 10 selectors retuned, ~170 lines of dead CSS deleted |
+| `src/App.css` | prose system added/rewritten, 10 selectors retuned, `.download-resume-button` added, ~170 lines of dead CSS deleted |
 | 8 page/section TSX files | inline type styles → classes (see §4.3) |
 | `src/components/ui/Card.tsx` | deleted |
 | `src/components/index.ts` | `Card` export removed |
@@ -144,8 +145,8 @@ Deleted as dead (no component rendered any of them; verified by grepping every c
 - [x] 10 existing selectors retuned to the scale
 - [x] Dead CSS deleted, `Card` component deleted
 - [x] Philosophy page: prose column, paragraph spacing, no nested `<p>`, ARIA id wired
-- [ ] Inline type styles removed from the 8 TSX files — in flight, tracked here
-- [ ] `tsc -b` + `vite build` green after the TSX sweep
+- [x] Inline type styles removed from the 8 TSX files — gate `style=\{\{[^}]*(fontSize|lineHeight|fontWeight|color|maxWidth)` over `src/` → 0 matches
+- [x] `tsc -b` + `vite build` green after the TSX sweep
 - [ ] Manual browser pass (§7) on `/`, `/about`, `/experience`, `/projects`, `/projects/:id`, `/philosophy`, `/contact`, dark and light
 
 ## 7. Verification plan
@@ -153,6 +154,9 @@ Deleted as dead (no component rendered any of them; verified by grepping every c
 1. `pnpm exec tsc -b` → exit 0 (the `Card` deletion must not leave an import behind).
 2. `pnpm exec vite build --outDir dist-verify` → module count and CSS size; grep the built CSS for `--text-body`, `--measure-prose`, `.prose-lede`, and for the absence of `.card{`, `.form-input`, `.filter-pill`, `.article-card`, `.engineering-tab`, `.breadcrumb`, `.page-header`, `.container-narrow`.
 3. Grep gate: `style=\{\{[^}]*(fontSize|lineHeight|fontWeight|color|maxWidth)` over `src/**/*.tsx` → zero matches; `grep "Card"` over `src/` → zero matches.
+   Result: 538 modules, CSS 24.8 KB (5.37 KB gzip). Built CSS contains `--text-body`, `--measure-prose`, `.prose-lede`, `.prose`, `.page-body`, `.subheading`, `.project-section`, `.back-link`, `.section-cta`, `.link-label`, `.contact-link-sub`, `.achievement-impact`, `.achievement-metrics`, `.philosophy-quote`, `.download-resume-button`; zero hits for `.card{`, `card-elevated`, `card-featured`, `form-*`, `filter-*`, `article-*`, `engineering-tab*`, `breadcrumb*`, `page-header`, `container-narrow`, `--max-narrow`. `grep "Card"` over `src/` → 0 matches.
+
+   oxlint against HEAD and against the working tree produce identical diagnostics (15 errors / 9 warnings): every one is pre-existing — oxlint treats the `useField` / `useFieldArray` helpers in `src/i18n/useField.ts` as hooks, plus `Navigation.tsx:26` `set-state-in-effect`. Out of scope here.
 4. Manual, real browser (no headless, per project rule):
    - `/philosophy`: three paragraphs visibly separated, ~600px column, 18px body, quote title 21px, no wall of text.
    - `/about`: bio 20px capped at 600px, section titles 21px, cards unchanged in width.
@@ -174,5 +178,5 @@ Deleted as dead (no component rendered any of them; verified by grepping every c
 ## 9. Open questions
 
 1. **Wire Source Sans 3 later?** It is already shipped and used by the PDF, and gasatrya uses it. Cost: four `@font-face` rules, ~75 KB per weight, and its x-height is 0.486 em vs Segoe UI's 0.500 — the scale would need +1px to read the same. Deferred by user decision.
-2. **`.skip-link` orphan** (shared with the palette spec): the rules were deleted from `src/index.css` in the working tree and no component renders the class, while `strings.skipLink` (`src/i18n/strings.ts:98`) still exists. Restore markup + CSS or delete the string.
+2. ~~**`.skip-link` orphan**~~ — closed. `strings.skipLink` no longer exists either: `grep -i skip` over `src/` → 0 matches, so there is no orphan left in either direction.
 3. **`--leading-body` 1.65 vs the old 1.7** — 1.7 was applied only to `p`; 1.65 is now applied to body copy in every element role. Whether 1.6 or 1.7 reads better at 18px is a call for the manual pass.
