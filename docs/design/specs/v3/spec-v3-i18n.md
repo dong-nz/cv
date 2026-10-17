@@ -42,13 +42,14 @@ Add full English/Vietnamese bilingual support to the portfolio. Users can toggle
 | 18 | Update `ContactPage.tsx` (heading, labels) | 1 | ✅ Completed |
 | 19 | Update `profile.ts` (fix tagline to VI) | 1 | ✅ Completed |
 | 20 | Update `skills.ts` (add `titleEn` to skillGroups) | 1 | ✅ Completed |
-| 21 | Add `.lang-toggle` CSS styles | 1 | ✅ Completed |
+| 21 | Add `.lang-toggle` CSS styles | 1 | ✅ Completed — superseded 2026-10-17 by row 28 |
 | 22 | **Phase 1 Complete** | | ✅ Completed |
 | 23 | Create `src/i18n/useLocaleData.ts` (API fetch + fallback) | 2 | ⬜ Pending |
 | 24 | Update all components to use `useLocaleData()` | 2 | ⬜ Pending |
 | 25 | Remove `src/i18n/strings.ts` | 2 | ⬜ Pending |
 | 26 | Remove `src/i18n/useField.ts` | 2 | ⬜ Pending |
 | 27 | **Phase 2 Complete** | | ⬜ Pending |
+| 28 | Language control → icon-only wireframe (globe / flag outline), `.lang-toggle` CSS deleted — 2026-10-17 | 1 | ✅ Completed |
 
 ## Current State Analysis
 
@@ -412,43 +413,42 @@ export function useLocaleData() {
 
 ---
 
-## CSS
+## Language Control — icon rendering (2026-10-17)
 
-### Language Toggle Button
+Supersedes the text-glyph design this spec first specified — `{lang === 'en' ? 'VI' : 'EN'}` in
+`nav-control lang-toggle`, plus the `.lang-toggle` block that moved to `src/App.css` and is now
+deleted. Both renderings are icon-only.
 
-```css
-/* src/index.css */
-.lang-toggle {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 6px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
+Both icons are line drawings. The filled first pass (red `#da251d` field, `#ff0` star, scaled from
+the Wikimedia flag SVG) was redrawn as a wireframe the same day on the owner's request, then re-cut
+twice more the same day: band 21×14 → 21×16 → 21×17.5 to follow the globe's footprint, mullet r=4.2
+at 2px → r=3.6 at 1.5px.
 
-.lang-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-}
+`src/components/ui/LanguageIcon.tsx` draws one 20×20 icon per language:
 
-.lang-toggle .lang-label {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+| Language | Drawing | Stroke |
+|---|---|---|
+| `en` | globe: circle r=10, equator `M2 12h20`, meridian ellipse rx=4 ry=10 | `currentColor`, 2px, round joins — follows `.nav-control:hover`'s accent, like the mode toggle |
+| `vi` | flag outline: 21×17.5 band (`rx=2`) at 1.5/3.25 — drawn 23×19.5 against the globe's 22×22; the width is already at the limit (the globe's own stroke spans 1..23), so every further size step has to come from height, and height drags the constitutional 2:3 to 1.2; the mullet centred at (12, 12) stays under the flag's own 0.6 × band-height construction — radius 3.6, drawn ≈ 8.3 units ≈ 36% × 41% of the band — traced as its concave decagon rather than a self-crossing pentagram | `currentColor`, no fills: band 2px round joins; star 1.5px round joins. 2px ink at r=3.6 closes the inner pentagon into a blob (the gap is 2(0.309·R − strokeWidth/2)), and miter joins throw a spike 3.24 × strokeWidth/2 past each 36° tip, drawing the star larger than its own radius |
 
-.lang-toggle .lang-icon {
-  width: 16px;
-  height: 16px;
-  opacity: 0.7;
-}
-```
+**Bar** (`src/components/layout/Navigation.tsx`): `nav-control lang-toggle` shows the language it
+switches TO — the same contract the old glyph had.
+
+| Attribute | Source |
+|---|---|
+| `aria-label` | `strings.nav.langSwitch[lang]` — `Switch language` / `Đổi ngôn ngữ` |
+| `title` | `strings.nav.switchTo[lang]` + the target's `langEn` / `langVi` — `Switch to Tiếng Việt` / `Chuyển sang English` |
+| Content | `<LanguageIcon lang={targetLang} />`, `aria-hidden="true"` + `focusable="false"` |
+| CSS | `.nav-control` chrome only; `.lang-toggle` carries no rules of its own — it marks the button in the DOM |
+
+**Sheet** (`src/components/layout/MobileMenu.tsx`): the Language row's two options are
+`.mobile-menu-icon-option` — the 44px icon-only square the Theme color row uses. The Mode row keeps
+`.mobile-menu-segment-option`, because its options are words. Each option carries `aria-pressed` and
+its own-language name in `aria-label` and `title`: an icon alone cannot say which language it is.
+
+`langEn` / `langVi` stay flat `{en, vi}` records. A nested `langName: { en: …, vi: … }` record inside
+`strings.nav` was tried and rejected: `strings.nav[navKey][lang]`, the lookup both components use for
+nav labels, would then carry an object in its value union and `tsc` rejects it as a `ReactNode`.
 
 ---
 
@@ -459,6 +459,7 @@ export function useLocaleData() {
 - [ ] Testing: Verify all strings render correctly in both languages
 - [ ] Testing: Verify language toggle persists across page navigation
 - [ ] Testing: Verify language preference persists across sessions (localStorage)
+- [x] Testing: 2026-10-17 icon swap — throwaway SSR render of `Navigation` + `MobileMenu` at `lang=en` and `lang=vi`: bar icon equals the target language's icon, `aria-label`/`title` translated, sheet options icon-only with `aria-pressed`, Mode row still word-based — 24/24 PASS, script deleted after the run. Visual pass left to the owner's browser (repo rule §5).
 
 ---
 

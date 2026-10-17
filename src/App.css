@@ -96,7 +96,9 @@
 }
 
 /* One chrome for the three bar controls — mode, theme color, language: a bordered 44px box,
-   accent border + text on hover/open. Per-control rules add only what is specific to them. */
+   accent border + icon on hover/open. The language control is icon-only like the other two, so it
+   carries no rules of its own any more: `.lang-toggle` marks the button in the DOM and nothing
+   else. */
 .nav-control {
   display: flex;
   align-items: center;
@@ -122,13 +124,6 @@
 .nav-control:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-}
-
-/* The language control's glyph is chrome: 13px/600 is its own scale step. */
-.lang-toggle {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
 }
 
 .mobile-menu-btn {
@@ -276,9 +271,10 @@
   outline-offset: 2px;
 }
 
-/* The palette options use the Mode/Language segmented row's shape — same 44px target, border
-   and radius — drawn as colour icons via the existing .nav-palette-preview dot. */
-.mobile-menu-swatch-option {
+/* Icon-only options in the sheet share this shape — the segmented row's 44px target, border and
+   radius — for the Theme color dots (.nav-palette-preview) and the Language globe/flag. The Mode
+   row keeps .mobile-menu-segment-option, because its options are words. */
+.mobile-menu-icon-option {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,16 +288,16 @@
   transition: background var(--transition-fast), border-color var(--transition-fast);
 }
 
-.mobile-menu-swatch-option:hover {
+.mobile-menu-icon-option:hover {
   background: var(--bg-elevated);
 }
 
-.mobile-menu-swatch-option.active {
+.mobile-menu-icon-option.active {
   border-color: var(--accent);
   background: var(--bg-elevated);
 }
 
-.mobile-menu-swatch-option:focus-visible {
+.mobile-menu-icon-option:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

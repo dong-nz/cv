@@ -8,6 +8,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
 import { RollingTextLink } from '@/components/ui/RollingTextLink'
 import { SocialLinks } from '@/components/ui/SocialLinks'
+import { LanguageIcon } from '@/components/ui/LanguageIcon'
 
 interface MobileMenuProps {
   open: boolean
@@ -72,21 +73,28 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               <div className="mobile-menu-segment">
                 <span className="mobile-menu-segment-label">{strings.nav.langGroup[lang]}</span>
                 <div className="mobile-menu-segment-options" role="group" aria-label={strings.nav.langGroup[lang]}>
+                  {/* Icons, not words — globe for English, red flag for Tiếng Việt — in the same
+                      44px icon-only shape as the Theme color row. An icon cannot say which language
+                      it is, so each option carries its own-language name in aria-label and title. */}
                   <button
                     type="button"
-                    className={lang === 'en' ? 'mobile-menu-segment-option active' : 'mobile-menu-segment-option'}
+                    className={lang === 'en' ? 'mobile-menu-icon-option active' : 'mobile-menu-icon-option'}
                     aria-pressed={lang === 'en'}
+                    aria-label={strings.nav.langEn[lang]}
+                    title={strings.nav.langEn[lang]}
                     onClick={() => setLang('en')}
                   >
-                    {strings.nav.langEn[lang]}
+                    <LanguageIcon lang="en" />
                   </button>
                   <button
                     type="button"
-                    className={lang === 'vi' ? 'mobile-menu-segment-option active' : 'mobile-menu-segment-option'}
+                    className={lang === 'vi' ? 'mobile-menu-icon-option active' : 'mobile-menu-icon-option'}
                     aria-pressed={lang === 'vi'}
+                    aria-label={strings.nav.langVi[lang]}
+                    title={strings.nav.langVi[lang]}
                     onClick={() => setLang('vi')}
                   >
-                    {strings.nav.langVi[lang]}
+                    <LanguageIcon lang="vi" />
                   </button>
                 </div>
               </div>
@@ -120,7 +128,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                     <button
                       key={id}
                       type="button"
-                      className={palette === id ? 'mobile-menu-swatch-option active' : 'mobile-menu-swatch-option'}
+                      className={palette === id ? 'mobile-menu-icon-option active' : 'mobile-menu-icon-option'}
                       aria-pressed={palette === id}
                       aria-label={paletteMeta[id].label[lang]}
                       title={paletteMeta[id].hint[lang]}

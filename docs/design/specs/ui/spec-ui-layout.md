@@ -101,9 +101,9 @@ App
 | Property | Value |
 |---|---|
 | Location | Navigation bar (right side, the last of the three appearance controls — after the mode toggle) at **every** width — the control is not hidden at ≤1024px (Q14) — plus the Theme color row, the last of three rows in the mobile sheet's Appearance group (Language → Mode → Theme color), while the sheet is open |
-| Control | Bar: `ThemePaletteMenu` (`src/components/layout/ThemePaletteMenu.tsx`), icon-only trigger — a 20px half-circle swatch (active palette's accent left, `--swatch-empty` right), no text and no chevron, name in `aria-label`, hint in `title` — opening the `#palette-menu` panel. Sheet: rendered by `MobileMenu.tsx` from `paletteIds` + `paletteMeta` as `.mobile-menu-swatch-option` buttons — the Mode/Language segmented-row shape, options drawn as colour icons |
+| Control | Bar: `ThemePaletteMenu` (`src/components/layout/ThemePaletteMenu.tsx`), icon-only trigger — a 20px half-circle swatch (active palette's accent left, `--swatch-empty` right), no text and no chevron, name in `aria-label`, hint in `title` — opening the `#palette-menu` panel. Sheet: rendered by `MobileMenu.tsx` from `paletteIds` + `paletteMeta` as `.mobile-menu-icon-option` buttons — the 44px icon-only square the Language row shares, options drawn as colour icons |
 | Options | `red` (default) / `blue` — `src/data/palettes.ts` (`paletteIds`, `paletteMeta.label`/`hint`), written to `data-palette` on `<html>`; the sheet lists both, one colour icon each |
-| Chrome | The bar's three appearance controls share `.nav-control` (44px bordered box, accent border + text on hover/open, one `:focus-visible`) and sit in `.nav-actions` at the bar's right end in the order language → mode → theme color; the hamburger leads the bar inside `.nav-brand`, left of the logo (Q17 of `specs/v3/spec-v3-nav-swatch-and-hamburger.md`, superseding that spec's Q16 hamburger-last clause), with a `@media (max-width: 420px)` guard so the row fits 320px |
+| Chrome | The bar's three appearance controls share `.nav-control` (44px bordered box, accent border + icon on hover/open, one `:focus-visible`) and sit in `.nav-actions` at the bar's right end in the order language → mode → theme color; the hamburger leads the bar inside `.nav-brand`, left of the logo (Q17 of `specs/v3/spec-v3-nav-swatch-and-hamburger.md`, superseding that spec's Q16 hamburger-last clause), with a `@media (max-width: 420px)` guard so the row fits 320px |
 
 Spec: `specs/v3/spec-v3-theme-palette-switch.md`.
 
@@ -112,7 +112,7 @@ Spec: `specs/v3/spec-v3-theme-palette-switch.md`.
 | Property | Value |
 |---|---|
 | Trigger | Hamburger button at the bar's **left edge**, immediately left of the brand home icon (`.nav-logo`, a `<Link to="/">`), ≤1024px (Q17) |
-| Groups | Menu (6 routes) → Appearance (Language, Mode, Theme color) → Connect (GitHub, LinkedIn, email) |
+| Groups | Menu (6 routes) → Appearance (Language — icon-only globe / flag-outline options, Mode, Theme color) → Connect (GitHub, LinkedIn, email) |
 | Behaviour | `role="dialog"` + `aria-modal="true"` + `tabIndex={-1}`: focus lands on the panel itself on open — never on a link, because focusing a link fires its rolling-text animation — Escape closes from any focus position, `#main-content` / `.footer` / `.back-to-top` are `inert` while open, body scroll locked |
 
 Spec: `specs/v3/spec-v3-mobile-navigation.md`.

@@ -19,6 +19,8 @@ export const strings = {
         langGroup: {en: 'Language', vi: 'Ngôn ngữ'},
         langEn: {en: 'English', vi: 'English'},
         langVi: {en: 'Tiếng Việt', vi: 'Tiếng Việt'},
+        langSwitch: {en: 'Switch language', vi: 'Đổi ngôn ngữ'},
+        switchTo: {en: 'Switch to', vi: 'Chuyển sang'},
     },
     social: {
         heading: {en: 'Connect', vi: 'Kết nối'},

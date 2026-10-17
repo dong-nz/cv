@@ -7,11 +7,14 @@ import { strings } from '@/i18n/strings'
 import { navPaths } from '@/data/navigation'
 import { RollingTextLink } from '@/components/ui/RollingTextLink'
 import { ThemePaletteMenu } from '@/components/layout/ThemePaletteMenu'
+import { LanguageIcon } from '@/components/ui/LanguageIcon'
 import { MobileMenu } from '@/components/layout/MobileMenu'
 
 export function Navigation() {
   const { cycleTheme, resolvedTheme } = useTheme()
   const { lang, toggleLang } = useLanguage()
+  const targetLang = lang === 'en' ? 'vi' : 'en'
+  const targetLabel = targetLang === 'en' ? strings.nav.langEn[lang] : strings.nav.langVi[lang]
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -125,13 +128,16 @@ export function Navigation() {
           </ul>
 
           <div className="nav-actions">
+            {/* The control names the language it switches TO — the same contract the old VI/EN
+                glyph had, now drawn: globe for English, red flag for Tiếng Việt. The icon is
+                decorative; the accessible name is the translated action, the target is the title. */}
             <button
               className="nav-control lang-toggle"
               onClick={toggleLang}
-              aria-label="Switch language"
-              title={`Switch to ${lang === 'en' ? 'Tiếng Việt' : 'English'}`}
+              aria-label={strings.nav.langSwitch[lang]}
+              title={`${strings.nav.switchTo[lang]} ${targetLabel}`}
             >
-              {lang === 'en' ? 'VI' : 'EN'}
+              <LanguageIcon lang={targetLang} />
             </button>
 
             <button

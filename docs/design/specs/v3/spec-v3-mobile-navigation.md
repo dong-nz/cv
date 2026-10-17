@@ -327,7 +327,7 @@ langEn:          {en: 'English', vi: 'English'},
 langVi:          {en: 'Tiếng Việt', vi: 'Tiếng Việt'},
 ```
 
-`langEn` / `langVi` carry the same value in both locales on purpose: a language option is named in its own language, so a reader who cannot read English can still find "Tiếng Việt". The bar keeps the short `VI` / `EN` codes (`Navigation.tsx:84`); the sheet uses full names because it has the width.
+`langEn` / `langVi` carry the same value in both locales on purpose: a language option is named in its own language, so a reader who cannot read English can still find "Tiếng Việt". The bar keeps the short `VI` / `EN` codes (`Navigation.tsx:84`); the sheet uses full names because it has the width. **Superseded 2026-10-17:** both renderings are icons now — the bar shows the target language's globe/flag, the sheet's Language row shows both — and the own-language names moved into `aria-label` / `title`. See `spec-v3-i18n.md` §Language Control.
 
 New block, replacing `strings.common.socialAriaLabels` (`strings.ts:106-110`), which is **deleted** — it already holds these three values and is consumed by nothing today:
 

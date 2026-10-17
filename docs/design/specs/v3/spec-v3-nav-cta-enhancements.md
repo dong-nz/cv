@@ -228,7 +228,7 @@ No new state, no new handler, no `initial` prop (the component mounts closed, so
 
 ### Step 5 — nothing else
 
-`Navigation.tsx`, `MobileMenu.tsx`, `strings.ts`, `useClickOutside.ts`, `palettes.ts` and the language control are not touched. No CSS class is added or removed; `.lang-toggle` (`src/App.css:119-123`) stays live.
+`Navigation.tsx`, `MobileMenu.tsx`, `strings.ts`, `useClickOutside.ts`, `palettes.ts` and the language control are not touched. No CSS class is added or removed; `.lang-toggle` (`src/App.css:119-123`) stays live. **Superseded 2026-10-17:** the language control became icon-only line art (globe / flag outline, `src/components/ui/LanguageIcon.tsx`) and its `.lang-toggle` rules were deleted, so the bar's three controls are all icon-only; §2.1 facts 1–3 describe the pre-change baseline. See `spec-v3-i18n.md` §Language Control.
 
 ---
 
