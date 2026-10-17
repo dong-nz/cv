@@ -9,11 +9,10 @@ export const experiences: ExperienceEntry[] = [
     company: "Open to new opportunities",
     duration: "Nov 2026 – Present",
     responsibilities: [
-      "Sẵn sàng cho vai trò Senior Engineering: system architecture, integration platform, full-stack delivery",
+      "Sẵn sàng cho vai trò Senior Engineer: system architecture, integration platform, full-stack delivery",
     ],
     responsibilitiesEn: [
-      "Open to Senior Engineering roles: system architecture, integration platforms, full-stack delivery",
-      "Available from Nov 2026",
+      "Open to Senior Engineer roles: system architecture, integration platforms, full-stack delivery",
     ],
   },
   {
