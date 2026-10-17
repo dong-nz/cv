@@ -1,11 +1,11 @@
 # Specification — v3 Mobile Navigation Menu (social links + modern sheet)
 
 > **Document:** `spec-v3-mobile-navigation.md`
-> **Version:** 0.7.0 (seven owner decisions + three review answers resolved 2026-10-17, then six post-build follow-ups Q11–Q16; the review pass re-measured §3.3, corrected the Escape/focus/`inert` rules, moved the social aria strings, and pinned the nav order — Q16 puts it at Language → Mode → Theme in the bar and in the sheet)
+> **Version:** 0.8.0 (seven owner decisions + three review answers resolved 2026-10-17, then six post-build follow-ups Q11–Q16 and one owner-reported defect — the sheet rolled the Home link on open; the review pass re-measured §3.3, corrected the Escape/focus/`inert` rules, moved the social aria strings, pinned the nav order at Language → Mode → Theme (Q16), and moved the sheet's focus target onto the panel itself)
 > **Parents:** `specs/ui/spec-ui-layout.md` (navigation layout), `spec-v3-i18n.md` (translated chrome), `spec-v3-theme-palette-switch.md` (palette row, contrast table at `:145-159`), `spec-v3-typography.md` (type tokens, chrome band)
 > **Priority:** P1
 > **Estimate:** ~2.5 hours including the social-links cutover
-> **Status:** DECISIONS CLOSED — §10 records the seven owner answers, the three review answers (Q8–Q10) and the six post-build follow-ups (Q11–Q16). §3.2's contrast measurement was reproduced independently and stands. §3.3's height arithmetic was wrong — drafted 596px, actually 736px as drafted, 643px with the Step 8 tightenings, 647px after Q13 — and is rewritten. Steps 1–9 plus Q12–Q16 are built and gated (§12); the five criteria that can only be observed live all wait on the owner's browser pass (§11)
+> **Status:** DECISIONS CLOSED — §10 records the seven owner answers, the three review answers (Q8–Q10) and the six post-build follow-ups (Q11–Q16). §3.2's contrast measurement was reproduced independently and stands. §3.3's height arithmetic was wrong — drafted 596px, actually 736px as drafted, 643px with the Step 8 tightenings, 647px after Q13 — and is rewritten. Steps 1–9 plus Q12–Q16 are built and gated (§12), as is the 2026-10-17 focus defect fix (the sheet no longer rolls the Home link on open); the five criteria that can only be observed live all wait on the owner's browser pass (§11)
 
 ---
 
@@ -202,7 +202,7 @@ Total perceived open time: 220ms panel + 330ms last row ≈ 0.55s. Nothing loops
 | Open | hamburger, with `aria-expanded` (already) plus new `aria-controls="mobile-menu"` |
 | Close | hamburger, any nav link click, `Escape` — handled on `document` while the sheet is open (see the Escape row below) |
 | Navigation | every sheet link carries `onClick={close}` (already the case, `Navigation.tsx:116`); the redundant route effect (D3) is **deleted**, and with it the `key={location.pathname}` reset on the palette instance — conditional mount resets it |
-| Focus | open → first sheet link, via `onAnimationComplete` on the panel (no effect, no lint finding) — note that lands ~220ms after the click, and the callback also fires for the exit animation, where `firstLinkRef.current` is already null: the optional chain covers it. Close → `triggerRef.current?.focus()`, mirroring `ThemePaletteMenu`'s Escape handler (`ThemePaletteMenu.tsx:22-26`), **but only when the trigger is rendered**: `.mobile-menu-btn` is `display: none` above 1024px (`src/App.css:109-110`), so a close caused by the media-query subscription must skip the restore (`if (triggerRef.current?.offsetParent)`) rather than fail silently and drop focus to `<body>` mid-navigation |
+| Focus | open → **the panel itself**: `tabIndex={-1}` + `ref={sheetRef}` on the panel, focused in `onAnimationComplete` (~220ms after the click, no effect, no lint finding; the callback also fires for the exit animation, where the ref is already null — the optional chain covers it). The drafted version focused the first sheet link, and that was a defect: `RollingTextLink` rolls its text on `onFocus`, so every open rolled "Home" whatever the route. A focusable container is also the standard dialog target, and Tab from it still reaches the Home link first. Close → `triggerRef.current?.focus()`, mirroring `ThemePaletteMenu`'s Escape handler (`ThemePaletteMenu.tsx:22-26`), **but only when the trigger is rendered**: `.mobile-menu-btn` is `display: none` above 1024px (`src/App.css:109-110`), so a close caused by the media-query subscription must skip the restore (`if (triggerRef.current?.offsetParent)`) rather than fail silently and drop focus to `<body>` mid-navigation |
 | Background | the existing scroll-lock effect (`Navigation.tsx:15-24`) also sets `inert` on `#main-content`, `.footer` **and `.back-to-top`** while open and clears all three on close. `Layout.tsx:17` renders `<BackToTop />` as a sibling of the other two, and `.back-to-top` is `position: fixed; bottom/right: 24px; z-index: 100` (`src/App.css:1820-1837`) — painted under the sheet (z 999) yet Tab-reachable unless it is inert. Imperative DOM work in the effect that already does imperative DOM work, so no new context and no new provider |
 | Bar while open | stays operable on purpose: the hamburger is the sheet's own close control. A focus trap would have to trap the bar too — more code, known source of stuck-focus bugs |
 | Semantics | sheet: `role="dialog" aria-modal="true" aria-label={translated}`; bar keeps `role="navigation" aria-label="Main navigation"` |
@@ -372,22 +372,24 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
   const { resolvedTheme, setTheme, palette, setPalette } = useTheme()
   const location = useLocation()
   const reduceMotion = useReducedMotion()
-  const firstLinkRef = useRef<HTMLAnchorElement>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
+          ref={sheetRef}
           id="mobile-menu"
           className="mobile-menu"
           role="dialog"
           aria-modal="true"
+          tabIndex={-1}
           aria-label={strings.nav.menuAria[lang]}
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-          onAnimationComplete={() => firstLinkRef.current?.focus()}
+          onAnimationComplete={() => sheetRef.current?.focus()}
         >
           <div className="mobile-menu-inner">
             <nav className="mobile-menu-group" aria-label={strings.nav.groupMenu[lang]}>
@@ -405,7 +407,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                     >
                       <RollingTextLink
                         to={path}
-                        ref={index === 0 ? firstLinkRef : undefined}
                         ariaCurrent={active ? 'page' : undefined}
                         className={active ? 'mobile-menu-link active' : 'mobile-menu-link'}
                         onClick={onClose}
@@ -496,14 +497,14 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 
 Notes:
 
-- `ref={index === 0 ? firstLinkRef : undefined}` works because `Link` forwards refs to its `<a>` (`lib.d.ts:974`); `RollingTextLink` is a plain function component, so Step 6 adds `ref` to its props (React 19 takes `ref` as an ordinary prop — no `forwardRef`). Fallback if the generic fights it: `tabIndex={-1}` on the panel and focus the panel itself, which is also valid dialog practice.
+- Focus target: the panel carries `tabIndex={-1}` and `ref={sheetRef}`, focused from `onAnimationComplete`. The drafted version instead passed `ref={index === 0 ? firstLinkRef : undefined}` to the first `RollingTextLink` (workable — `Link` forwards refs to its `<a>`, `lib.d.ts:974`, and React 19 takes `ref` as an ordinary prop). It shipped and was **reverted 2026-10-17**: focusing a link fires that link's own `onFocus`, and `RollingTextLink` maps focus to its rolling-text animation, so opening the sheet rolled "Home" whatever the current route. `tabIndex={-1}` makes the panel programmatically focusable without making it a tab stop, so the first Tab from it still lands on the Home link; `.mobile-menu:focus { outline: none }` (`src/App.css:157-163`) stops the panel drawing a ring around the whole viewport.
 - The group label is both visible text and the `aria-label` of the group landmark: "6 links, in a navigation named Menu".
 - `role="group"` + `aria-label` on the segmented pair keeps the two buttons announceable as one control.
 - No key handler here: Escape is owned by the document-level listener in `Navigation`'s open/close effect (Step 7), which closes the sheet from any focus position. Since Q13 the sheet carries no submenu at all — the palette is a segmented row — so nothing inside the sheet can intercept Escape. The bar's palette control keeps its own handler with `stopPropagation()`, which now matters only when focus sits on the bar trigger while the sheet is open: Escape closes the submenu and leaves the sheet open. A panel `onKeyDown` would only fire once focus had moved inside — which is exactly the guarantee this design cannot make.
 
-### Step 6 — `RollingTextLink` gains `aria-current` and a `ref`
+### Step 6 — `RollingTextLink` gains `aria-current` (and later loses the `ref`)
 
-`src/components/ui/RollingTextLink.tsx:20-27` — `RollingTextLinkProps` gains `ariaCurrent?: 'page'` and `ref?: React.Ref<HTMLAnchorElement>`; the returned `<Link>` (`:73-76`) takes `aria-current={ariaCurrent}` and `ref={ref}`. `React.Ref` is a type-only import under `verbatimModuleSyntax`. Both callers benefit: the desktop bar's active link also lacks `aria-current` today (`Navigation.tsx:46-51`).
+`src/components/ui/RollingTextLink.tsx:20-25` — `RollingTextLinkProps` gains `ariaCurrent?: 'page'`; the returned `<Link>` (`:73-76`) takes `aria-current={ariaCurrent}`. Both callers benefit: the desktop bar's active link also lacks `aria-current` today (`Navigation.tsx:46-51`). The `ref?: React.Ref<HTMLAnchorElement>` prop Step 5 consumed was **deleted 2026-10-17** — nothing focuses a sheet link any more, so it was removed rather than left unused.
 
 ### Step 7 — `Navigation.tsx` changes
 
@@ -743,7 +744,7 @@ Nothing deprecated or aliased: `SocialLinks` keeps its name and barrel export; i
 | `src/components/ui/SocialLinks.tsx` | rewrite — data-driven, per-link `target`/`rel`, accessible names from `strings.social.aria[link.id][lang]` |
 | `src/components/layout/MobileMenu.tsx` | **new** — the sheet, its three groups, the Dark/Light, English/Tiếng Việt and Theme color (swatch) segmented rows (`paletteIds` × `paletteMeta`, Q13) |
 | `src/components/layout/Navigation.tsx` | edit — `:8`, extend `:15-24` (three `inert` targets + the document `keydown` Escape listener), delete `:26-28`, `:86-101`, replace `:106-126`, add `triggerRef` + `closeMenu`, add the media-query subscription; **Q14**: `nav-control` joins `theme-toggle` (`:85`) and `lang-toggle` (`:103`) so the three controls share one chrome |
-| `src/components/ui/RollingTextLink.tsx` | edit — `ariaCurrent` + `ref` (`:20-27`, `:73-76`) |
+| `src/components/ui/RollingTextLink.tsx` | edit — `ariaCurrent` (`:20-25`, `:73-76`); the `ref` prop Step 5 used for focus is **deleted** 2026-10-17 (§7 Focus row) |
 | `src/components/sections/Hero.tsx` | edit — delete `:31-65`; `:148` becomes `<SocialLinks />` |
 | `src/components/layout/Footer.tsx` | edit — delete `:32-65`, use `<SocialLinks />`, drop local `footerPaths` (`:5`) |
 | `src/components/layout/ThemePaletteMenu.tsx` | edit — `event.stopPropagation()` in the Escape branch (handler bound on the wrapper); **Q13**: bar-only, `variant` prop and the sheet variant removed, panel `id="palette-menu"`; **Q14**: trigger is `nav-control nav-palette-trigger` and renders **only** the 20px half-circle swatch — the chevron svg is deleted |
@@ -800,7 +801,7 @@ Nothing deprecated or aliased: `SocialLinks` keeps its name and barrel export; i
 - [x] The sheet ends with a Connect group holding GitHub, LinkedIn and Email as the same 48×48 tiles as the footer, translated accessible names, `mailto:` without `target="_blank"`.
 - [ ] The sheet animates in **and** out; `@keyframes slideIn` no longer exists.
 - [x] Active route identifiable without colour: 2px left bar + `aria-current="page"`.
-- [ ] `role="dialog"` is honest: `aria-modal="true"`, focus into the sheet on open, back to the hamburger on close **when the hamburger is rendered**, `Escape` closes from any focus position (document-level listener), and `#main-content`, `.footer` **and `.back-to-top`** are `inert` while open.
+- [ ] `role="dialog"` is honest: `aria-modal="true"`, focus into the sheet on open **on the panel itself (`tabIndex={-1}`) — never on a link, because `RollingTextLink` turns a focus event into its rolling-text animation**, back to the hamburger on close **when the hamburger is rendered**, `Escape` closes from any focus position (document-level listener), and `#main-content`, `.footer` **and `.back-to-top`** are `inert` while open.
 - [x] Appearance group renders in this order (Q16): the English/Tiếng Việt segmented control, then the Dark/Light segmented control, then the Theme color row — a segmented row of colour-icon buttons (`paletteIds`, one per schema, since Q13); the bar carries the same order with the palette as an icon-only trigger — language toggle, mode toggle, palette icon, then the hamburger. Changing any one of them updates its twin, and no control holds local state.
 - [x] The bar carries the palette control at every width, in the order language → mode → theme color → hamburger (Q16), with the three controls sharing one `.nav-control` chrome (44px bordered box, accent border + text on hover/open, a single `:focus-visible` rule); the trigger is the 20px half-circle swatch — no text, no chevron — named by `aria-label` ("Theme: Red") with `title` ("Switch theme color"). `@media (max-width: 420px)` keeps that row inside 320px. Proven by the §9 SSR bar assertions
 - [x] Panel is `color-mix(in srgb, var(--bg-surface) 94%, transparent)` + `backdrop-filter: blur(12px)`, and the §9 glass contrast gate passes in all four palettes.
@@ -838,8 +839,8 @@ Eleven criteria are proven by the automated checks in §12 and three more (the 2
 | Step 2 `src/data/social.ts` + `SocialId` | DONE — `id/href/external` only (12 lines); `SocialId` at `src/types/index.ts:5` |
 | Step 3 `SocialLinks` rewrite + Hero/Footer cutover | DONE — 51-line prop-less component, icons keyed by `SocialId`, `target`/`rel` only for `external`; Hero's 35-line inline array deleted (Hero 138 lines), Footer 37 lines; the `SocialLink` interface is gone |
 | Step 4 strings | DONE — 11 keys at `src/i18n/strings.ts:11-21`, `strings.social` at `:23-30`, `common.socialAriaLabels` deleted |
-| Step 5 `MobileMenu.tsx` | DONE — 144 lines, no key handler anywhere; Appearance order Mode → Language → Theme color (Q12) verified in the rendered markup — **superseded by Q15, then Q16**; Q13 renders the palette row inline from `paletteIds.map` (swatch buttons, `aria-pressed`, `nav-palette-preview`) instead of mounting `ThemePaletteMenu` |
-| Step 6 `RollingTextLink` `aria-current` + `ref` | DONE — `ariaCurrent` / `ref` props at `:24-25`, forwarded to `<Link>` at `:76-80`; 126 lines |
+| Step 5 `MobileMenu.tsx` | DONE — no key handler anywhere; Appearance order Mode → Language → Theme color (Q12) verified in the rendered markup — **superseded by Q15, then Q16**; Q13 renders the palette row inline from `paletteIds.map` (swatch buttons, `aria-pressed`, `nav-palette-preview`) instead of mounting `ThemePaletteMenu`; 2026-10-17 focus target moved to the panel (`sheetRef` + `tabIndex={-1}`), first-link ref removed — 145 lines |
+| Step 6 `RollingTextLink` `aria-current` + `ref` | DONE — `ariaCurrent` forwarded to `<Link>`; the `ref` half was **deleted 2026-10-17** when the sheet stopped focusing a link (126 → 124 lines) |
 | Step 7 `Navigation.tsx` rewiring | DONE — 154 lines: `navPaths` import, `triggerRef` + `closeMenu` with the `offsetParent` guard, one effect doing body-lock + `inert` ×3 + document `Escape`, a `matchMedia('(max-width: 1024px)')` effect, `AnimatePresence mode="wait"` icon morph, `aria-controls="mobile-menu"`, translated hamburger label, route-change effect deleted, inline sheet replaced; `.nav-actions` order is theme toggle → language toggle → palette → hamburger (`:84-112`) — **superseded by Q15, then Q16** |
 | Step 8 CSS | DONE — `src/App.css` 1919 lines at Q13, 1908 after Q14: `.nav` 94% with the contrast comment at `:2-4`; sheet block written from Step 8 (48px rows, `--text-lede` links, `--text-meta` heading with `line-height: 1`, 12px group padding/margin with one hairline per group and `:last-child` cleared, `padding: 24px 24px calc(24px + env(safe-area-inset-bottom))`, `.mobile-menu-inner` capped at `var(--max-content)`), the `@media (min-width: 1025px)` guard, `.mobile-menu.open` + `@keyframes slideIn` deleted; Q13 adds `.mobile-menu-swatch-option` and a ≤1024px `.nav-palette` hide rule; Q14 adds `.nav-control` (`:91-116`), `.lang-toggle` (`:119-123`) and the `@media (max-width: 420px)` bar guard (`:305-313`), and deletes that hide rule. Line numbers in this row are Q13-era; current positions are sheet block `:140-291`, 1025px guard `:315-319`, palette block `:321-340`. `vite build` green — CSS 33.39 kB at Q13, 32.84 kB after Q14 |
 | Step 9 removals | DONE — `.nav-palette-sheet` was trimmed **in place** at `src/App.css:419-421` (`display: block` only) rather than overridden earlier in the file, where the same-specificity rule downstream wins the cascade; `.social-link span { display: none }` deleted; `≤768px` centering scoped to `.hero .social-links, .footer .social-links`; `ThemePaletteMenu.tsx` Escape calls `stopPropagation()` **only while the submenu is open**, because React's synthetic `stopPropagation()` also stops the native event and would otherwise swallow the sheet's Escape when the submenu is closed. Q13 then deletes `.nav-palette-sheet` and `.nav-palette-group` outright (34 lines) |
@@ -853,6 +854,7 @@ Eleven criteria are proven by the automated checks in §12 and three more (the 2
 | §9 gates re-run after Q14 (2026-10-17) | DONE — `tsc -b` exit 0; oxlint **19** finding lines (11 errors / 8 warnings); hex/`rgba(` in `src/App.css` **0**; `slideIn` **0**; dead-class gate **0**; inline `fontSize`/`lineHeight`/`color` **0**; SSR smoke **16/16** — the 15 Q13-era assertions plus two new bar assertions (control order mode → language → theme color → hamburger; trigger renders no text node but keeps `aria-label="Theme: Red"` + `title="Switch theme color"` + `aria-expanded` + the swatch, no chevron); `vite build --outDir dist-verify` 544 modules, CSS 32.84 kB, deleted after |
 | Owner follow-up Q15 — Mode → Theme → Language, in the bar and in the sheet | DONE 2026-10-17 — `Navigation.tsx:102-111` (palette control moved ahead of the language button) and `MobileMenu.tsx:93-132` (Theme color segment moved ahead of the Language segment); §3.1 anatomy, §3.4, §10 Q15, §11 criteria, `spec-ui-layout.md:103,106,115` and `AGENTS.md` Theming corrected. Re-verified: `tsc -b` exit 0; oxlint **19** finding lines; hex/`rgba(` in `src/App.css` **0**; throwaway SSR smoke **8/8**; `vite build --outDir dist-verify` green then deleted. **Superseded the same day by Q16 below** |
 | Owner follow-up Q16 — Language first: Language → Mode → Theme | DONE 2026-10-17 — `Navigation.tsx:84-111` (language button first, mode toggle second, `<ThemePaletteMenu />` third at `:111`) and `MobileMenu.tsx:71-132` (Language segment `:71-91`, Mode `:93-113`, Theme color `:115-132`); §3.1 anatomy, §3.4, §9's smoke row, §10 (Q15 note + Q16), §11 criteria, `spec-ui-layout.md:103,106,115`, `AGENTS.md` Theming and `spec-v3-theme-palette-switch.md:242,244,466` corrected. Re-verified: `tsc -b` exit 0; oxlint **19** finding lines; hex/`rgba(` in `src/App.css` **0**; inline `fontSize`/`lineHeight`/`color` **0**; throwaway SSR smoke **8/8** — bar order lang-toggle (2425) < theme-toggle (2534) < palette-trigger (2974) < hamburger (3729), sheet segment labels `Language \| Mode \| Theme` with the swatch row last, three `aria-pressed="true"` groups intact, 6 nav links with one `aria-current="page"`; `vite build --outDir dist-verify` green then deleted; script deleted after the run. Markup-only: no CSS rule keys off child order, so the 647px sheet total and the 320px bar arithmetic still hold |
+| Defect — the sheet rolled "Home" on every open | DONE 2026-10-17 — owner-reported. Cause: `MobileMenu.tsx` focused the **first sheet link** in `onAnimationComplete`, and `RollingTextLink` maps `onFocus` → its rolling-text animation, so Home's text rolled on every route (and stayed rolled while focused). Fix: `sheetRef` + `tabIndex={-1}` on the panel (`MobileMenu.tsx:22,28,33,39`; file 144 → 145 lines), the link `ref` prop deleted from `RollingTextLink` (126 → 124 lines, no caller left), `.mobile-menu:focus { outline: none }` (`src/App.css:157-163`) so the panel draws no viewport-sized ring. §7 Focus row, the Step 5 listing + its note, Step 6, §8, §11 and `spec-ui-layout.md:116` updated. Verified: throwaway SSR smoke **6/6** — the panel carries `role="dialog" aria-modal="true" tabindex="-1"`, all 6 sheet links carry no `tabindex`, exactly one `aria-current="page"` and it sits on the row matching the route (`/projects`), the appearance order and the three `aria-pressed` groups intact, bar order intact; `tsc -b` exit 0; oxlint **19**; hex gate **0**; `vite build --outDir dist-verify` green then deleted; script deleted after the run. The visible "no roll on open" is the owner's browser check (repo rule §5) |
 | Owner browser pass | TODO |
 
 ---

@@ -22,11 +22,10 @@ interface RollingTextLinkProps {
   className?: string
   onClick?: () => void
   ariaCurrent?: 'page'
-  ref?: React.Ref<HTMLAnchorElement>
   children: React.ReactNode
 }
 
-export function RollingTextLink({ to, className, onClick, ariaCurrent, ref, children }: RollingTextLinkProps) {
+export function RollingTextLink({ to, className, onClick, ariaCurrent, children }: RollingTextLinkProps) {
   const reduceMotion = useReducedMotion()
   const [active, setActive] = useState(false)
   const activeRef = useRef(false)
@@ -73,7 +72,6 @@ export function RollingTextLink({ to, className, onClick, ariaCurrent, ref, chil
 
   return (
     <Link
-      ref={ref}
       to={to}
       className={className}
       onClick={onClick}

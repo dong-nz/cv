@@ -155,6 +155,13 @@
   overscroll-behavior: contain;
 }
 
+/* The sheet itself is the focus target on open (`tabIndex={-1}` on the panel in
+   `MobileMenu.tsx`). A ring here would frame the whole viewport, and every control inside
+   already carries its own `:focus-visible` rule. */
+.mobile-menu:focus {
+  outline: none;
+}
+
 .mobile-menu-inner {
   max-width: var(--max-content);
   margin: 0 auto;

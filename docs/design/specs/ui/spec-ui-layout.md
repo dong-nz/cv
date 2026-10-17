@@ -113,7 +113,7 @@ Spec: `specs/v3/spec-v3-theme-palette-switch.md`.
 |---|---|
 | Trigger | Hamburger button in the bar, ≤1024px |
 | Groups | Menu (6 routes) → Appearance (Language, Mode, Theme color) → Connect (GitHub, LinkedIn, email) |
-| Behaviour | `role="dialog"` + `aria-modal="true"`, Escape closes from any focus position, `#main-content` / `.footer` / `.back-to-top` are `inert` while open, body scroll locked |
+| Behaviour | `role="dialog"` + `aria-modal="true"` + `tabIndex={-1}`: focus lands on the panel itself on open — never on a link, because focusing a link fires its rolling-text animation — Escape closes from any focus position, `#main-content` / `.footer` / `.back-to-top` are `inert` while open, body scroll locked |
 
 Spec: `specs/v3/spec-v3-mobile-navigation.md`.
 

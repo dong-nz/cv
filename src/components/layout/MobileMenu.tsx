@@ -19,22 +19,24 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
   const { resolvedTheme, setTheme, palette, setPalette } = useTheme()
   const location = useLocation()
   const reduceMotion = useReducedMotion()
-  const firstLinkRef = useRef<HTMLAnchorElement>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
+          ref={sheetRef}
           id="mobile-menu"
           className="mobile-menu"
           role="dialog"
           aria-modal="true"
+          tabIndex={-1}
           aria-label={strings.nav.menuAria[lang]}
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
           transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
-          onAnimationComplete={() => firstLinkRef.current?.focus()}
+          onAnimationComplete={() => sheetRef.current?.focus()}
         >
           <div className="mobile-menu-inner">
             <nav className="mobile-menu-group" aria-label={strings.nav.groupMenu[lang]}>
@@ -52,7 +54,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                     >
                       <RollingTextLink
                         to={path}
-                        ref={index === 0 ? firstLinkRef : undefined}
                         ariaCurrent={active ? 'page' : undefined}
                         className={active ? 'mobile-menu-link active' : 'mobile-menu-link'}
                         onClick={onClose}
