@@ -239,8 +239,9 @@ One component, two placements, chosen by media query. No floating sheet that can
 
 | Width | Trigger | Options |
 |---|---|---|
-| > 1024px | in `.nav-actions`, between the theme toggle and the language toggle | absolute panel under the trigger, right-aligned to it |
+| > 1024px | in `.nav-actions`, after the mode toggle — last of the three appearance controls | absolute panel under the trigger, right-aligned to it |
 | ≤ 1024px | a block at the bottom of `.mobile-menu`, after the nav links — 44px tap targets | the options are **inline in the mobile sheet**, not a second overlay |
+> **Superseded 2026-10-17 by Q13–Q16 of `spec-v3-mobile-navigation.md`:** the `variant` split described below is gone. One bar-only trigger renders at **every** width (no ≤1024px hide rule, Q14), the sheet draws its own Theme color row from `paletteIds` (Q13), and the bar order is language → mode → theme color → hamburger (Q16). §7 shows the shipped component; `AGENTS.md` Theming and `specs/ui/spec-ui-layout.md:103-106` carry the current wording.
 
 **Why 1024px, not 768px.** `.nav-menu` is hidden and `.mobile-menu-btn` appears at `@media (max-width: 1024px)` (`src/App.css:176-184`). Using the same breakpoint means *whatever collapses into the sheet collapses together*. A 768px palette breakpoint would leave a 769–1024px band where the page links hide behind a hamburger while a color menu sits in the bar — two navigation idioms at the same time. Cost of the choice: at 800px the palette costs two taps instead of one. Alternative if the owner wants one tap: keep 768px and hide the label (`.nav-palette-current { display: none }`) down to 1024px — the bar fits comfortably there; crowding is only a risk *below* 1024px, which is where the hamburger already lives. Not taken: the shipped build collapses at 1024 with the links.
 
@@ -462,7 +463,7 @@ Shipped as specified in §6: `variant: 'nav' | 'sheet'`, local `open` state, `co
 
 ### Step 6 — `src/components/layout/Navigation.tsx`
 
-- Nav variant after the theme toggle: `Navigation.tsx:76`, inside `.nav-actions`, before the language toggle (`:78-85`).
+- Nav variant after the mode toggle: `Navigation.tsx:111`, inside `.nav-actions`, the last of the three appearance controls ahead of the hamburger — the order was re-pinned by Q16 of `spec-v3-mobile-navigation.md` (language → mode → theme color → hamburger).
 - Sheet variant after `</ul>` inside `.mobile-menu`: `Navigation.tsx:125`, mounted as `<ThemePaletteMenu key={location.pathname} variant="sheet" />` so navigation remounts it closed.
 - No new state in `Navigation`; the menu owns its own open state.
 

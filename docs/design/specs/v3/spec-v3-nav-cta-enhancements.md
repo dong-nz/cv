@@ -25,9 +25,9 @@ Request 3 is not a navigation-bar item. The buttons in question are `.btn-primar
 
 | Fact | Evidence |
 |---|---|
-| The language control is a text glyph: `{lang === 'en' ? 'VI' : 'EN'}` inside `nav-control lang-toggle` | `src/components/layout/Navigation.tsx:102-109` |
+| The language control is a text glyph: `{lang === 'en' ? 'VI' : 'EN'}` inside `nav-control lang-toggle` | `src/components/layout/Navigation.tsx:84-91` |
 | `.lang-toggle` sets `font-size: 13px; font-weight: 600; letter-spacing: 0.5px` | `src/App.css:119-123` |
-| The bar's other two controls are icon-only (inline sun/moon SVG; the half-circle swatch), so the language control is the only text control in the bar | `Navigation.tsx:84-100`, `:111`, `src/App.css:331-340` |
+| The bar's other two controls are icon-only (inline sun/moon SVG; the half-circle swatch), so the language control is the only text control in the bar | `Navigation.tsx:93-109`, `:111`, `src/App.css:331-340` |
 | `public/icons.svg` holds social symbols only (`github-icon`, `x-icon`, …); every bar icon is inline SVG | `grep id= public/icons.svg` |
 | The palette trigger is `<span className="nav-palette-swatch" aria-hidden="true" />` — a plain span, no motion, **no `transition` declared** | `ThemePaletteMenu.tsx:39`, `src/App.css:333-340` |
 | The swatch is `linear-gradient(to right, var(--accent) 0 50%, var(--swatch-empty) 50% 100%)`, 20×20, `border-radius: 50%` | `src/App.css:333-340` |

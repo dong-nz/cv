@@ -82,6 +82,15 @@ export function Navigation() {
 
           <div className="nav-actions">
             <button
+              className="nav-control lang-toggle"
+              onClick={toggleLang}
+              aria-label="Switch language"
+              title={`Switch to ${lang === 'en' ? 'Tiếng Việt' : 'English'}`}
+            >
+              {lang === 'en' ? 'VI' : 'EN'}
+            </button>
+
+            <button
               className="nav-control theme-toggle"
               onClick={cycleTheme}
               aria-label={`Switch theme (currently ${resolvedTheme})`}
@@ -97,15 +106,6 @@ export function Navigation() {
                   <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                 </svg>
               )}
-            </button>
-
-            <button
-              className="nav-control lang-toggle"
-              onClick={toggleLang}
-              aria-label="Switch language"
-              title={`Switch to ${lang === 'en' ? 'Tiếng Việt' : 'English'}`}
-            >
-              {lang === 'en' ? 'VI' : 'EN'}
             </button>
 
             <ThemePaletteMenu />

@@ -69,28 +69,6 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               <span className="mobile-menu-heading">{strings.nav.groupAppearance[lang]}</span>
 
               <div className="mobile-menu-segment">
-                <span className="mobile-menu-segment-label">{strings.nav.themeGroup[lang]}</span>
-                <div className="mobile-menu-segment-options" role="group" aria-label={strings.nav.themeGroup[lang]}>
-                  <button
-                    type="button"
-                    className={resolvedTheme === 'dark' ? 'mobile-menu-segment-option active' : 'mobile-menu-segment-option'}
-                    aria-pressed={resolvedTheme === 'dark'}
-                    onClick={() => setTheme('dark')}
-                  >
-                    {strings.nav.themeDark[lang]}
-                  </button>
-                  <button
-                    type="button"
-                    className={resolvedTheme === 'light' ? 'mobile-menu-segment-option active' : 'mobile-menu-segment-option'}
-                    aria-pressed={resolvedTheme === 'light'}
-                    onClick={() => setTheme('light')}
-                  >
-                    {strings.nav.themeLight[lang]}
-                  </button>
-                </div>
-              </div>
-
-              <div className="mobile-menu-segment">
                 <span className="mobile-menu-segment-label">{strings.nav.langGroup[lang]}</span>
                 <div className="mobile-menu-segment-options" role="group" aria-label={strings.nav.langGroup[lang]}>
                   <button
@@ -108,6 +86,28 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
                     onClick={() => setLang('vi')}
                   >
                     {strings.nav.langVi[lang]}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mobile-menu-segment">
+                <span className="mobile-menu-segment-label">{strings.nav.themeGroup[lang]}</span>
+                <div className="mobile-menu-segment-options" role="group" aria-label={strings.nav.themeGroup[lang]}>
+                  <button
+                    type="button"
+                    className={resolvedTheme === 'dark' ? 'mobile-menu-segment-option active' : 'mobile-menu-segment-option'}
+                    aria-pressed={resolvedTheme === 'dark'}
+                    onClick={() => setTheme('dark')}
+                  >
+                    {strings.nav.themeDark[lang]}
+                  </button>
+                  <button
+                    type="button"
+                    className={resolvedTheme === 'light' ? 'mobile-menu-segment-option active' : 'mobile-menu-segment-option'}
+                    aria-pressed={resolvedTheme === 'light'}
+                    onClick={() => setTheme('light')}
+                  >
+                    {strings.nav.themeLight[lang]}
                   </button>
                 </div>
               </div>
