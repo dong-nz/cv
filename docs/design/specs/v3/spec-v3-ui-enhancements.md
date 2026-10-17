@@ -827,6 +827,8 @@ export function Footer() {
 
 **Effect:** Navigation logo uses `{Name}` format with bracket styling.
 
+> **Superseded 2026-10-17.** The `{Name}` bracket wordmark is gone. `src/components/layout/Navigation.tsx:97-106` renders the brand as a 24px stroke home icon — `fill="none" stroke="currentColor"` with round caps, `aria-hidden="true"` — inside a 44px `.nav-logo` target, still a `<Link to="/">` so the click behaviour is unchanged, with the translated `strings.nav.home` label as `aria-label`. `.logo-bracket` and `.logo-text` are deleted from `src/App.css`; `.nav-logo` becomes a flex-centred 44px box with `:hover { color: var(--accent) }` and its own `:focus-visible` ring, because an icon-only control has no text to underline. Record: `specs/v3/spec-v3-nav-swatch-and-hamburger.md` §11.
+
 **Implementation:**
 - Update logo in `Navigation.tsx`:
   - `<span className="logo-bracket">{</span>`

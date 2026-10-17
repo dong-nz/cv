@@ -21,6 +21,13 @@
   --accent-soft: rgba(248, 113, 113, 0.12);
   --accent-tint: #2f1e1a;
   --accent-glow: rgba(248, 113, 113, 0.3);
+  /* Picker previews: each row previews its own palette, never the active one — the token is
+     keyed by palette name, not by --accent. The values mirror this block's --accent so a
+     submenu dot and the bar swatch's accent half are the same colour in the same theme.
+     The two [data-palette='blue'] blocks declare nothing for the same reason. */
+  --preview-red-accent: #f87171;
+  --preview-blue-accent: #60a5fa;
+  --swatch-empty: #ffffff;
   --border: #2a3028;
   --border-strong: #3a403a;
   --shadow: rgba(0, 0, 0, 0.45);
@@ -85,6 +92,8 @@
   --accent-soft: rgba(176, 65, 56, 0.1);
   --accent-tint: #f5e3e1;
   --accent-glow: rgba(176, 65, 56, 0.22);
+  --preview-red-accent: #b04138;
+  --preview-blue-accent: #2563eb;
   --border: #e3e1dc;
   --border-strong: #d9d6d0;
   --shadow: rgba(21, 25, 20, 0.1);
@@ -165,17 +174,6 @@
   color-scheme: light;
 }
 
-/* Fixed identity colours: a picker row previews its own palette rather than the active one,
-   and the bar's palette icon keeps a constant "empty" half in both themes. Referenced only by
-   `.nav-palette-preview` (previews) and `.nav-palette-swatch` (the empty half). */
-:root {
-  --preview-red-accent: #b04138;
-  --preview-red-bg: #f6f5f2;
-  --preview-blue-accent: #2563eb;
-  --preview-blue-bg: #f4f6f9;
-  --swatch-empty: #ffffff;
-}
-
 /* Pre-hydration / no-JS: honour an OS light preference */
 @media (prefers-color-scheme: light) {
   :root:not([data-theme='dark']) {
@@ -197,6 +195,8 @@
     --accent-soft: rgba(176, 65, 56, 0.1);
     --accent-tint: #f5e3e1;
     --accent-glow: rgba(176, 65, 56, 0.22);
+    --preview-red-accent: #b04138;
+    --preview-blue-accent: #2563eb;
     --border: #e3e1dc;
     --border-strong: #d9d6d0;
     --shadow: rgba(21, 25, 20, 0.1);

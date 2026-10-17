@@ -22,27 +22,36 @@
   justify-content: space-between;
 }
 
+/* Icon brand: a 24px stroke house in a 44px target, matching the hamburger's icon language.
+   It is a <Link to="/"> — same behaviour the {CV} wordmark had. */
 .nav-logo {
-  font-size: 20px;
-  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   text-decoration: none;
+}
+
+/* The hamburger and the brand travel together on the left of the bar so the sheet's trigger
+   sits where a left-handed thumb reaches it. Above 1024px the button is display:none, so this
+   group renders as the home icon alone. */
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .nav-logo:hover {
   color: var(--accent);
 }
 
-.logo-bracket {
-  color: var(--accent);
-  font-family: var(--mono);
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-.logo-text {
-  color: var(--text-primary);
-  font-weight: 700;
-  font-size: 1.1rem;
+/* An icon-only control needs a ring: colour alone is not a focus indicator. */
+.nav-logo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .nav-menu {
@@ -307,8 +316,9 @@
   }
 }
 
-/* Four controls share the bar at ≤1024px. At 320px: {CV} (~70px) + 44×4 controls + 12×3 gaps
-   = 262px inside 288px of content, so the row keeps 26px of slack. */
+/* Four controls share the bar at ≤1024px. At 320px: hamburger 40 + 12 + home icon 44 + 44×3
+   controls + 12×2 gaps = 252px inside 288px of content, so the row keeps 36px of slack — the
+   wordmark's 8px brand-gap tightening is no longer needed. */
 @media (max-width: 420px) {
   .nav-container {
     padding: 0 16px;
@@ -335,8 +345,11 @@
    icon, and its accessible name lives in `aria-label`. The class stays as the hook that ties
    the trigger to the `#palette-menu` panel it expands. */
 
-/* The palette icon: left half is the active palette's accent, right half the constant empty
-   half (--swatch-empty). The hairline keeps the white half visible on a light surface. */
+/* The palette icon: left half is the live --accent of the active palette, right half the
+   constant --swatch-empty; the hairline keeps the white half visible on a light surface. The
+   submenu dots read --preview-*-accent, which mirror the same per-theme accent values, so a
+   dot and this swatch half are the same colour in the same theme.
+   Spec: docs/design/specs/v3/spec-v3-nav-swatch-and-hamburger.md */
 .nav-palette-swatch {
   flex: none;
   width: 20px;
@@ -408,22 +421,23 @@
   outline-offset: -2px;
 }
 
+/* One ring style for every colour chip: the same 1px --border-strong hairline the swatch
+   above uses. --preview-red-bg and --preview-blue-bg are gone — their light-mode values drew
+   a near-white halo (13.30–16.21) around the dot in dark mode. */
 .nav-palette-preview {
   flex: none;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  border: 2px solid;
+  border: 1px solid var(--border-strong);
 }
 
 .nav-palette-preview[data-preview='red'] {
   background: var(--preview-red-accent);
-  border-color: var(--preview-red-bg);
 }
 
 .nav-palette-preview[data-preview='blue'] {
   background: var(--preview-blue-accent);
-  border-color: var(--preview-blue-bg);
 }
 
 .nav-palette-name {

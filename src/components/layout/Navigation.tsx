@@ -56,11 +56,55 @@ export function Navigation() {
     <>
       <nav className="nav" role="navigation" aria-label="Main navigation">
         <div className="nav-container">
-          <Link to="/" className="nav-logo">
-            <span className="logo-bracket">&#123;</span>
-            <span className="logo-text">CV</span>
-            <span className="logo-bracket">&#125;</span>
-          </Link>
+          <div className="nav-brand">
+            {/* Trigger first, brand next: the hamburger is the sheet's own control and sits at
+                the bar's left edge, where a left-handed thumb reaches it. The three appearance
+                controls stay in .nav-actions at the right end. */}
+            <button
+              ref={triggerRef}
+              className="mobile-menu-btn"
+              onClick={() => setMobileOpen((prev) => !prev)}
+              aria-label={mobileOpen ? strings.nav.closeMenu[lang] : strings.nav.openMenu[lang]}
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
+            >
+              <AnimatePresence mode="wait" initial={false}>
+                {mobileOpen ? (
+                  <motion.svg
+                    key="close"
+                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </motion.svg>
+                ) : (
+                  <motion.svg
+                    key="menu"
+                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    initial={{ opacity: 0, rotate: 90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: -90 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <path d="M3 12h18M3 6h18M3 18h18" />
+                  </motion.svg>
+                )}
+              </AnimatePresence>
+            </button>
+            {/* Brand is a home icon: the same 24px stroke language as the hamburger, and the same
+                <Link to="/"> target the {CV} wordmark always had. The accessible name is the
+                translated Home label; the icon itself is decorative. The current-page marker stays
+                on the nav link and the sheet's Home row. */}
+            <Link to="/" className="nav-logo" aria-label={strings.nav.home[lang]}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            </Link>
+          </div>
 
           <ul className="nav-menu">
             {navPaths.map((path) => {
@@ -109,41 +153,6 @@ export function Navigation() {
             </button>
 
             <ThemePaletteMenu />
-
-            <button
-              ref={triggerRef}
-              className="mobile-menu-btn"
-              onClick={() => setMobileOpen((prev) => !prev)}
-              aria-label={mobileOpen ? strings.nav.closeMenu[lang] : strings.nav.openMenu[lang]}
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-menu"
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {mobileOpen ? (
-                  <motion.svg
-                    key="close"
-                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                    initial={{ opacity: 0, rotate: -90 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    exit={{ opacity: 0, rotate: 90 }}
-                    transition={{ duration: 0.18 }}
-                  >
-                    <path d="M18 6L6 18M6 6l12 12" />
-                  </motion.svg>
-                ) : (
-                  <motion.svg
-                    key="menu"
-                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
-                    initial={{ opacity: 0, rotate: 90 }}
-                    animate={{ opacity: 1, rotate: 0 }}
-                    exit={{ opacity: 0, rotate: -90 }}
-                    transition={{ duration: 0.18 }}
-                  >
-                    <path d="M3 12h18M3 6h18M3 18h18" />
-                  </motion.svg>
-                )}
-              </AnimatePresence>
-            </button>
           </div>
         </div>
       </nav>

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Sticky navigation bar xuất hiện ở top mọi trang. Chứa logo, menu links, theme toggle.
+Sticky navigation bar xuất hiện ở top mọi trang. Chứa brand home icon (`.nav-logo`, `<Link to="/">`), menu links, theme toggle.
 
 ---
 

@@ -335,6 +335,8 @@ A picker must show the colour of the option, not of the current palette: while R
 
 No inline `style`, no hex in `src/App.css`, no dependence on which palette is active.
 
+> **Superseded 2026-10-17 by `spec-v3-nav-swatch-and-hamburger.md` §4.1–§4.2.** The *palette*-independence above was right; the *theme*-independence was the defect. `#b04138` and `#2563eb` are the light-mode accents, so in dark mode a dot disagreed with the bar swatch's `var(--accent)` half by 2.07× (red) and 2.03× (blue) in luminance and sat at 2.53 / 3.13 against its own panel — under the 4.5 floor this project gates on. The tokens are now declared per theme: `:root` carries `#f87171` / `#60a5fa`, `:root[data-theme='light']` carries `#b04138` / `#2563eb`, and the `prefers-color-scheme` bridge repeats the light pair. `--preview-red-bg` and `--preview-blue-bg` are deleted — their light values drew a 13.30–16.21 near-white halo in dark mode — and every chip now carries the same 1px `--border-strong` hairline the swatch uses. The two `[data-palette='blue']` blocks declare no preview token at all: a preview names its own palette through `data-preview`, so it never needs the active palette's values.
+
 ### States
 
 | State | Style |
@@ -632,6 +634,7 @@ Steps 1–8 applied on `feature/new-theme-color`. Nothing committed — the owne
 | Emitted CSS, selector order | `:root[data-theme=light]{` … then `:root[data-theme=dark][data-palette=blue]{`, then `:root[data-theme=light][data-palette=blue]{` — the blue blocks land after both base blocks, and win by specificity regardless of order |
 | Emitted CSS, menu rules | `.nav-palette-panel{…display:none…}` + `.nav-palette-panel.open{display:block}` + `.nav-palette-sheet .nav-palette-panel{…position:static}`; the minified media block reads `@media (width<=1024px){.nav-menu{display:none}.mobile-menu-btn{display:flex}.nav-palette-nav{display:none}}` |
 | Preview tokens in the bundle | `--preview-red-accent:#b04138`, `--preview-red-bg:#f6f5f2`, `--preview-blue-accent:#2563eb`, `--preview-blue-bg:#f4f6f9` — one declaration each |
+| Preview tokens — **superseded 2026-10-17** | Now four `--preview-*-accent` declarations and no `--preview-*-bg`: dark pair `#f87171` / `#60a5fa` in `:root`, light pair `#b04138` / `#2563eb` in `:root[data-theme='light']` and in the bridge. Re-verified in `spec-v3-nav-swatch-and-hamburger.md` §11 |
 | SSR render, both variants at once | `id="palette-menu-nav"` ×1, `id="palette-menu-sheet"` ×1, `aria-controls` ×2 matching those ids, `aria-expanded="false"` ×2, `aria-current="true"` ×1 per instance, 4 preview chips, both panels without `.open`; trigger label `Theme color: Red` on the default palette with the default language `en` |
 | Contrast | minima 4.96 / 4.63 / 4.81 / 4.64; zero required pairs < 4.5; layering invariant holds in all four |
 | oxlint | 20 finding lines = 11 errors / 9 warnings, identical to the baseline before the feature |
