@@ -1,7 +1,7 @@
 # Specification — v3 Theme Palette Switch (Red / Blue)
 
 > **Document:** `spec-v3-theme-palette-switch.md`
-> **Version:** 0.3.0 (implementation applied 2026-10-17 — §6 and §7 now show the shipped code, §11–§12 and §14 carry the verification evidence)
+> **Version:** 0.4.0 (implementation applied 2026-10-17 — §6 and §7 now show the shipped code, §11–§12 and §14 carry the verification evidence; 0.4.0 adds the `--accent-solid` family that `spec-v3-nav-cta-enhancements.md` introduced into the palette blocks)
 > **Parents:** `spec-v3-theme-palette-gasatrya.md` (the shipped token set), `spec-v3-theme-switch.md` (the dark/light control)
 > **Priority:** P1
 > **Estimate:** ~3 hours including contrast verification and browser pass
@@ -95,6 +95,8 @@ Red's neutrals, accents, borders, tints and shadows stay byte-identical to what 
 --text-primary: #e8eaed; --text-secondary: #9aa0a6; --text-muted: #828d9e;
 --accent: #60a5fa;       --accent-hover: #93c5fd;  --accent-active: #3b82f6;
 --text-on-accent: #0f1117;
+--accent-solid: #1d4ed8;  --accent-solid-hover: #1e40af; --accent-solid-active: #1c3f9e;
+--text-on-accent-solid: #e8eaed;
 --accent-soft: rgba(96, 165, 250, 0.12);
 --accent-tint: #182338;
 --accent-glow: rgba(96, 165, 250, 0.30);
@@ -115,6 +117,8 @@ color-scheme: dark;
 --text-primary: #111827; --text-secondary: #4b5563; --text-muted: #5c6b82;
 --accent: #2563eb;       --accent-hover: #1d4ed8;  --accent-active: #1e40af;
 --text-on-accent: #ffffff;
+--accent-solid: #2563eb;  --accent-solid-hover: #1d4ed8; --accent-solid-active: #1e40af;
+--text-on-accent-solid: #ffffff;
 --accent-soft: rgba(37, 99, 235, 0.10);
 --accent-tint: #eef3fc;
 --accent-glow: rgba(37, 99, 235, 0.22);
@@ -159,6 +163,9 @@ Text pairs, need ≥ 4.5:
 | text-on-accent / accent | 6.43 | 5.74 | 7.42 | 5.17 |
 | text-on-accent / accent-hover | 9.37 | 6.42 | 10.46 | 6.70 |
 | text-on-accent / accent-active | 5.54 | 7.29 | 5.13 | 8.72 |
+| text-on-accent-solid / accent-solid | 5.26 | 5.74 | 5.56 | 5.17 |
+| text-on-accent-solid / accent-solid-hover | 6.00 | 6.42 | 7.24 | 6.70 |
+| text-on-accent-solid / accent-solid-active | 6.68 | 7.29 | 7.73 | 8.72 |
 | accent / accent-tint | 5.74 | 4.63 | 6.18 | 4.64 |
 | text-primary / accent-tint | 14.58 | 14.36 | 13.04 | 15.93 |
 | text-primary / code-bg | 15.47 | 15.08 | 13.73 | 15.40 |
@@ -207,6 +214,20 @@ Wash composites and the resulting accent-on-wash ratios:
 No AA regression — the worst pair is 4.51 (dark accent text on a soft wash over `--bg-elevated`), and the wash became slightly more visible against its background in every case. Verified against the emitted bundle: `--accent-soft:#f871711f`, `--accent-glow:#f871714d`, `--accent-soft:#b041381a` (×2, light block + bridge), `--accent-glow:#b0413838` (×2) — hex-alpha form, 0x1f = 0.12, 0x4d = 0.30, 0x1a = 0.10, 0x38 = 0.22.
 
 The resume PDF is independent of this: `scripts/generate-resume.ts` and `public/resume-template.html` reference no theme token (`grep 'accent|--bg|--text'` → 0 matches), and both regenerated PDFs still render the five entries with no `undefined`.
+
+### Solid accent family (added 2026-10-17)
+
+`spec-v3-nav-cta-enhancements.md` §4.3 adds a fourth accent tier so an accent-filled surface can carry **light** text in dark mode. `--accent` / `--accent-hover` / `--accent-active` keep their job — signal colour (links, underlines, borders, glows) and the fill of the accent surfaces the new family does not cover. `--accent-solid` / `-hover` / `-active` plus `--text-on-accent-solid` are the fill and text of `.btn-primary` and `.badge-accent`, declared after each block's `--text-on-accent` line in `src/index.css`.
+
+| Block | `--accent-solid` | `-hover` | `-active` | `--text-on-accent-solid` | text on solid |
+|---|---|---|---|---|---|
+| dark red (`:root`) | `#b04138` | `#a33a32` | `#9b3229` | `#f6f5f2` | 5.26 |
+| light red (`[data-theme='light']`) | `#b04138` | `#a8382f` | `#9b3229` | `#ffffff` | 5.74 |
+| dark blue (`[data-theme='dark'][data-palette='blue']`) | `#1d4ed8` | `#1e40af` | `#1c3f9e` | `#e8eaed` | 5.56 |
+| light blue (`[data-theme='light'][data-palette='blue']`) | `#2563eb` | `#1d4ed8` | `#1e40af` | `#ffffff` | 5.17 |
+| `prefers-color-scheme: light` bridge | `#b04138` | `#a8382f` | `#9b3229` | `#ffffff` | 5.74 |
+
+Three facts to keep: the two light blocks duplicate `--accent` / `--accent-hover` / `--accent-active` / `--text-on-accent` verbatim, so light mode does not move by a pixel; blue-dark cannot start at the light-mode blue accent `#2563eb` because `#e8eaed` on it measures **4.29**, one step under the text floor; and in dark mode the solid fill alone sits at 3.10 (red) / 2.82 (blue) against `--bg-primary` — under the 3.0 UI-boundary line — which is why `.btn-primary` carries `border: 1px solid var(--accent)` at 6.43 / 7.42.
 
 ---
 

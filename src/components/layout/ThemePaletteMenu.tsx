@@ -1,3 +1,4 @@
+import { motion } from 'motion/react'
 import { useCallback, useRef, useState } from 'react'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
@@ -36,7 +37,16 @@ export function ThemePaletteMenu() {
         title={strings.nav.paletteAria[lang]}
         onClick={() => setOpen((prev) => !prev)}
       >
-        <span className="nav-palette-swatch" aria-hidden="true" />
+        {/* Rotation tracks the submenu: 90° while it is open, back to 0° on selection, Escape or
+            a pointer-down outside. Reduced motion is handled globally by
+            `motion.config.reducedMotion = 'user'` (src/main.tsx:7-9) — the angle changes without
+            animating. No CSS transition on `.nav-palette-swatch`: motion owns the transform. */}
+        <motion.span
+          className="nav-palette-swatch"
+          aria-hidden="true"
+          animate={{ rotate: open ? 90 : 0 }}
+          transition={{ duration: 0.15, ease: 'easeOut' }}
+        />
       </button>
 
       <div id="palette-menu" className={`nav-palette-panel ${open ? 'open' : ''}`}>

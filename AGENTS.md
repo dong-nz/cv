@@ -56,6 +56,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 - `type Palette = 'red' | 'blue'` (`src/types/index.ts`), labels/hints in `src/data/palettes.ts` (`paletteIds`, `paletteMeta`); default `red`
 - `data-palette` attribute + `localStorage` key `portfolio-palette`; `index.html`'s init script writes both attributes before paint
 - Palette overrides in `src/index.css` are `:root[data-theme='dark'][data-palette='blue']` / `:root[data-theme='light'][data-palette='blue']` (specificity 0,3,0 — they beat the base blocks regardless of order); no blue variant exists in the `prefers-color-scheme` bridge, because the init script always writes `data-palette`
+- Accent has two tiers: `--accent` / `--accent-hover` / `--accent-active` are the bright signal colours (links, underlines, borders, glows) and the fill of the pale accent surfaces (palette-option hover, `.tag-accent`, `.back-to-top`, resume summary bar); `--accent-solid` / `-hover` / `-active` plus `--text-on-accent-solid` are the deeper fill and light text used by `.btn-primary` and `.badge-accent`, which is what lets a dark-mode button carry light text. The solid family is declared in all five blocks of `src/index.css` (dark red, light red, dark blue, light blue, the `prefers-color-scheme` bridge); the two light blocks duplicate the plain accent values verbatim, so light mode does not move. Spec: `docs/design/specs/v3/spec-v3-nav-cta-enhancements.md`
 - Picker, two renderings, both present at every width: the bar uses `src/components/layout/ThemePaletteMenu.tsx` — icon-only trigger (`nav-control nav-palette-trigger`, a 20px half-circle swatch: active palette's accent on the left, `--swatch-empty` on the right; no text, no chevron; the name lives in `aria-label`, the hint in `title`) opening the `#palette-menu` panel. The sheet renders its own Theme color row inside `MobileMenu.tsx` from `paletteIds` + `paletteMeta` as `.mobile-menu-swatch-option` buttons — the same segmented shape as the Mode/Language rows, options drawn as colour icons via `.nav-palette-preview`. `ThemePaletteMenu` has no `variant` prop and is never mounted in the sheet
 - Bar controls share one chrome: `.nav-control` covers the mode toggle, the language toggle and the palette trigger (44px bordered box, accent border + text on hover/open, one `:focus-visible`). All four controls — mode, language, theme color, hamburger — sit in `.nav-actions` at every width, in that order; `@media (max-width: 420px)` tightens the container padding and action gap so the row fits a 320px viewport
 
@@ -93,6 +94,7 @@ src/
 - `RollingTextLink.tsx` — animated text-scrolling navigation link
 - `BackToTop.tsx` — scroll-to-top floating button with AnimatePresence
 - `HeroParticles.tsx` — decorative particle background (uses AnimatePresence)
+- Palette swatch rotation — `ThemePaletteMenu.tsx` renders the swatch as a `motion.span` whose `rotate` target is 90° while the `#palette-menu` submenu is open and 0° otherwise; reduced motion comes from the global `motion.config.reducedMotion = 'user'` in `main.tsx`, so no per-component branch
 
 ## External Assets
 
@@ -155,7 +157,7 @@ All specification documents are in `docs/design/`:
 | `spec-v2.md` | v2 index — overview, implementation order, feature list |
 | `specs/ui/spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
 | `specs/v2/spec-v2-*.md` | v2 feature specs (resume, seo, blog, analytics, testing, cicd) |
-| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, theme palette switch, UI enhancements) |
+| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, theme palette switch, UI enhancements, mobile navigation, nav & CTA enhancements) |
 
 Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 

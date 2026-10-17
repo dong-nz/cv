@@ -453,19 +453,20 @@
 }
 
 .btn-primary {
-  background: var(--accent);
-  color: var(--text-on-accent);
-  border: 1px solid transparent;
+  background: var(--accent-solid);
+  color: var(--text-on-accent-solid);
+  border: 1px solid var(--accent);
   box-shadow: 0 4px 20px var(--accent-glow);
 }
 
 .btn-primary:hover {
-  background: var(--accent-hover);
-  color: var(--text-on-accent);
+  background: var(--accent-solid-hover);
+  color: var(--text-on-accent-solid);
   transform: translateY(-2px);
   box-shadow: 0 8px 30px var(--accent-glow);
 }
 .btn-primary:active {
+  background: var(--accent-solid-active);
   transform: translateY(0);
   box-shadow: 0 2px 10px var(--accent-glow);
 }
@@ -532,8 +533,8 @@
 }
 
 .badge-accent {
-  background: var(--accent);
-  color: var(--text-on-accent);
+  background: var(--accent-solid);
+  color: var(--text-on-accent-solid);
 }
 
 .badge-outline {
