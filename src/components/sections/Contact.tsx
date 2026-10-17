@@ -27,8 +27,12 @@ export function Contact() {
           <motion.a
             href={`mailto:${profile.email}`}
             className="contact-link"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, ease: 'easeOut', delay: 0 }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            whileTap={{ scale: 0.98 }}
           >
             <svg
               viewBox="0 0 24 24"
@@ -55,8 +59,12 @@ export function Contact() {
             target="_blank"
             rel="noopener noreferrer"
             className="contact-link"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, ease: 'easeOut', delay: 0.08 }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            whileTap={{ scale: 0.98 }}
           >
             <svg
               viewBox="0 0 24 24"
@@ -80,8 +88,12 @@ export function Contact() {
             target="_blank"
             rel="noopener noreferrer"
             className="contact-link"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.45, ease: 'easeOut', delay: 0.16 }}
+            whileHover={{ scale: 1.02, y: -4 }}
+            whileTap={{ scale: 0.98 }}
           >
             <svg
               viewBox="0 0 24 24"

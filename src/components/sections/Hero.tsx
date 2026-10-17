@@ -37,23 +37,26 @@ export function Hero() {
         <InView>
             <motion.section
                 className="hero container-wide"
-                initial={{opacity: 0}}
-                animate={{opacity: 1}}
-                transition={{duration: 0.3}}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{once: true, amount: 0.1}}
+                variants={{
+                    hidden: {opacity: 0},
+                    visible: {opacity: 1, transition: {duration: 0.5}},
+                }}
                 aria-labelledby="hero-heading"
             >
                 <div className="hero-bg-grid"/>
                 <HeroParticles/>
-                <motion.div
-                    className="hero-content"
-                    initial={{opacity: 0, x: -30}}
-                    animate={{opacity: 1, x: 0}}
-                    transition={{duration: 0.6, delay: 0.2}}
-                >
+                {/* Entrance belongs to the items (whileInView + delay 0, 0.08, 0.16, 0.24,
+                     0.32, 0.4 = i * 0.08), exactly like the timeline entries; the wrapper no
+                     longer slides in on its own, so there is one fade, not three. */}
+                <div className="hero-content">
                     <motion.div
-                        initial={{opacity: 0, y: 10}}
-                        animate={{opacity: 1, y: 0}}
-                        transition={{duration: 0.4, delay: 0.15}}
+                        initial={{opacity: 0, y: 24}}
+                        whileInView={{opacity: 1, y: 0}}
+                        viewport={{once: true, amount: 0.2}}
+                        transition={{duration: 0.45, ease: "easeOut", delay: 0}}
                     >
           <span className="hero-greeting">
             <span className="greeting-dot"/>
@@ -63,32 +66,36 @@ export function Hero() {
                     <motion.h1
                         id="hero-heading"
                         className="hero-name"
-                        initial={{opacity: 0, y: 20}}
-                        animate={{opacity: 1, y: 0}}
-                        transition={{duration: 0.5, delay: 0.3}}
+                        initial={{opacity: 0, y: 24}}
+                        whileInView={{opacity: 1, y: 0}}
+                        viewport={{once: true, amount: 0.2}}
+                        transition={{duration: 0.45, ease: "easeOut", delay: 0.08}}
                     >
                         <span className="name-highlight">{useField(profile.name, profile.nameEn)}</span>
                     </motion.h1>
                     <motion.p
                         className="hero-title"
-                        initial={{opacity: 0, y: 20}}
-                        animate={{opacity: 1, y: 0}}
-                        transition={{duration: 0.5, delay: 0.4}}
+                        initial={{opacity: 0, y: 24}}
+                        whileInView={{opacity: 1, y: 0}}
+                        viewport={{once: true, amount: 0.2}}
+                        transition={{duration: 0.45, ease: "easeOut", delay: 0.16}}
                     >
                         <Typewriter texts={profile.roles}/>
                     </motion.p>
                     <motion.p
                         className="hero-tagline"
-                        initial={{opacity: 0, y: 20}}
-                        animate={{opacity: 1, y: 0}}
-                        transition={{duration: 0.5, delay: 0.5}}
+                        initial={{opacity: 0, y: 24}}
+                        whileInView={{opacity: 1, y: 0}}
+                        viewport={{once: true, amount: 0.2}}
+                        transition={{duration: 0.45, ease: "easeOut", delay: 0.24}}
                         dangerouslySetInnerHTML={{__html: useField(profile.tagline, profile.taglineEn)}}
                     />
                     <motion.div
                         className="hero-cta"
-                        initial={{opacity: 0, y: 20}}
-                        animate={{opacity: 1, y: 0}}
-                        transition={{duration: 0.5, delay: 0.6}}
+                        initial={{opacity: 0, y: 24}}
+                        whileInView={{opacity: 1, y: 0}}
+                        viewport={{once: true, amount: 0.2}}
+                        transition={{duration: 0.45, ease: "easeOut", delay: 0.32}}
                     >
                         <Button href="/projects" variant="primary">
                             {strings.hero.ctaProjects[lang]}
@@ -112,7 +119,7 @@ export function Hero() {
 
                         <SocialLinks />
                     </motion.div>
-                </motion.div>
+                </div>
                 <div className="scroll-indicator" aria-hidden="true">
                     <div className="scroll-mouse">
                         <div className="scroll-wheel"/>
@@ -121,15 +128,16 @@ export function Hero() {
                 </div>
                 <motion.div
                     className="hero-visual"
-                    style={{y}}
-                    initial={{opacity: 0, x: 30}}
-                    animate={{opacity: 1, x: 0}}
-                    transition={{duration: 0.6, delay: 0.4}}
+                    initial={{opacity: 0, y: 24}}
+                    whileInView={{opacity: 1, y: 0}}
+                    viewport={{once: true, amount: 0.2}}
+                    transition={{duration: 0.45, ease: "easeOut", delay: 0.4}}
                 >
-                    <img
+                    <motion.img
                         src="/profile-photo.webp"
                         alt="Profile photo"
                         className="hero-photo"
+                        style={{y}}
                     />
                 </motion.div>
             </motion.section>

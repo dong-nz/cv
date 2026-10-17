@@ -25,12 +25,17 @@ Enhance the portfolio UI with visual effects inspired by modern developer portfo
 | 6 | Hero: floating particles | ✅ Done | `HeroParticles.tsx`, `Hero.tsx`, `App.css` |
 | 7 | Hero: scroll indicator | ✅ Done | `Hero.tsx`, `App.css` |
 | 8 | Button: gradient + outline + icon slide | ✅ Done | `Button.tsx`, `App.css` |
-| 9 | Scroll animations: AnimatedSection | ✅ Done | `AnimatedSection.tsx`, `AboutPage.tsx` |
+| 9 | Scroll animations: section + item entrance recipe | ✅ Done | `Hero.tsx`, `About.tsx`, `AboutPage.tsx`, `Experience.tsx`, `Expertise.tsx`, `Projects.tsx`, `Contact.tsx` |
 | 10 | Logo: bracket format | ✅ Done | `Navigation.tsx`, `App.css` |
 | 11 | Build + verify | ✅ Done | type-check + lint pass (build locked by dev server) |
 | 12 | Download resume: click outside to close | ✅ Done | `DownloadResume.tsx`, `Hero.tsx`, `App.css`, `hooks/useClickOutside.ts` |
 | 13 | Download resume: FontAwesome-style icon | ✅ Done | `DownloadResume.tsx`, `Hero.tsx` |
 | 14 | Mobile: hero section responsive fixes | ✅ Done | `App.css` |
+| 15 | Hero particles: reduced-motion fallback (iPadOS) | ✅ Done | `App.css` |
+| 16 | Hero particles: 3D depth tiers + scroll parallax | ✅ Done | `HeroParticles.tsx`, `App.css` |
+| 17 | Animation consistency: hero + about match the Experience recipe | ✅ Done | `Hero.tsx`, `About.tsx`, `AboutPage.tsx`, `AnimatedSection.tsx` (deleted) |
+| 18 | Animation consistency: every page and section on the same recipe | ✅ Done | `Expertise.tsx`, `Projects.tsx`, `Contact.tsx`, `ExperiencePage.tsx`, `ProjectsListPage.tsx`, `ProjectDetailPage.tsx`, `PhilosophyPage.tsx`, `ContactPage.tsx` |
+| 19 | Hover + press feedback unified (motion owns the transform) | ✅ Done | `Button.tsx`, `Expertise.tsx`, `Contact.tsx`, `About.tsx`, `AboutPage.tsx`, `Projects.tsx`, `ProjectsListPage.tsx`, `ContactPage.tsx`, `App.css` |
 ---
 
 ## Prerequisites (Type/Data Changes)
@@ -232,79 +237,111 @@ interface TypewriterProps {
 
 ### 1.4 Floating Particles
 
-**Effect:** Small dots floating upward in the hero background (30 desktop, 15 mobile).
+**Effect:** Dots rising through a perspective-projected depth field — three tiers (far / mid / near), 30 dots desktop, 15 mobile.
 
 **Implementation:**
-- New component: `src/components/sections/HeroParticles.tsx`
-- Creates `div.hero-particle` elements via `useMemo` (stable, no re-renders)
-- Each particle has random: `left` position, `animationDuration` (8–18s), `animationDelay` (0–10s), `width` (2–5px)
-- Animation: `float-particle` keyframes (translateY 100vh → -100px, scale 0 → 1)
-- Color: `var(--accent)`
+- Three `DepthTier` records (`FAR`, `MID`, `NEAR`) hold every per-tier constant; the component renders one `motion.div.hero-particle-layer--<id>` per tier
+- Each tier declares its own `perspective: 700px`, so its dots are direct children of a perspective-declaring element and get genuine projection — `transform-style: preserve-3d` is used nowhere
+- `translateZ` runs from deep towards the viewer, so a dot grows *and* fans out away from the vanishing point (`perspective-origin: 50% 78%`); hand-applied `scale()` cannot produce that lateral fan, which is why the old flat version read as "dots sliding up" rather than "dots floating in space"
+- `--p-from` / `--p-to` are raw translateY offsets tuned per tier so that after projection every tier crosses the full hero box; equal projected distance with a longer `animation-duration` is what makes the far tier read as slower
+- `--p-drift` sweeps each dot sideways across the cycle (opposite sign at 0% and 100%), so no path is a straight vertical line
+- `animation-delay` is negative: every cycle is already in progress at mount, so the hero is populated at once instead of filling in over 10s
+- Scroll parallax: three `useTransform(scrollY, [0, 500], [0, -30 | -60 | -100])`, one per layer — the near tier moves fastest
+- Depth cue for the closest tier is `box-shadow: 0 0 10px var(--accent-glow)`. No `filter: blur()` and no `mask-image` on the container: both pull the animated dots into one re-rasterized group every frame, which is the main takedown risk on iPad
+- Color `var(--accent)`; per-dot opacity jitter 0.75–1.10 × the tier opacity. Dot count stays 30 / 15 — the 3D pass adds a transform axis, not more elements
+
+| Tier | `translateZ` | Projected scale | Size | Opacity | Duration | Drift | Desktop / Mobile |
+|---|---|---|---|---|---|---|---|
+| far | -500 → -180px | 0.58x → 0.80x | 6–9px → 3.5–7.2px projected | 0.22 | 16–24s | ±14px | 12 / 6 |
+| mid | -300 → -60px | 0.70x → 0.92x | 7–11px → 4.9–10.1px projected | 0.45 | 11–17s | ±26px | 12 / 6 |
+| near | -120 → +120px | 0.85x → 1.21x | 7–12px → 6.0–14.5px projected | 0.80 | 7–11s | ±40px | 6 / 3 |
 
 **CSS:**
 ```css
-.hero-particles {
+.hero-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+/* perspective lives on the layer: overflow: hidden on .hero-particles forces its used
+   transform-style to flat, so a perspective declared there projects only the three
+   layers and never the dots. */
+.hero-particle-layer {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  pointer-events: none;
+  perspective: 700px;
+  perspective-origin: 50% 78%;
 }
 .hero-particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
   background: var(--accent);
   border-radius: 50%;
-  opacity: 0.3;
+  opacity: 0;
   animation: float-particle linear infinite;
 }
+.hero-particle-layer--near .hero-particle { box-shadow: 0 0 10px var(--accent-glow); }
+
 @keyframes float-particle {
-  0% { transform: translateY(100vh) scale(0); opacity: 0; }
-  10% { opacity: 0.3; }
-  90% { opacity: 0.3; }
-  100% { transform: translateY(-100px) scale(1); opacity: 0; }
+  0% { transform: translate3d(var(--p-drift), var(--p-from), var(--p-z0)); opacity: 0; }
+  12% { opacity: var(--p-op); }
+  88% { opacity: var(--p-op); }
+  100% { transform: translate3d(calc(var(--p-drift) * -1), var(--p-to), var(--p-z1)); opacity: 0; }
 }
 ```
 
+**Reduced motion (iPadOS / Safari):**
+
+`.hero-particle` declares `animation: float-particle linear infinite`, so `animation-fill-mode` is `none`. The global reduced-motion rule in `src/index.css` clamps `animation-duration` to `0.01ms` with `animation-iteration-count: 1`, which ends the animation instantly and returns each dot to its unanimated style: `opacity` restored, no transform, `top: auto` — the static position at the top edge of `.hero-particles`. All dots then stack inside the hero's first 16px, behind `.nav` (`position: fixed; top: 0; z-index: 1000`), so the layer reads as missing. iPadOS exposes this as Settings → Accessibility → Motion → Reduce Motion, which Safari reports as `prefers-reduced-motion: reduce`.
+
+Fix: hide the decorative layer instead of freezing it, in the existing reduced-motion block of `src/App.css` (same convention as `.download-resume-lazer-border`):
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  .hero-particles {
+    display: none;
+  }
+}
+```
+
+Not a viewport problem: no media query hides `.hero-particles`, and `window.innerWidth < 768` only picks 15 vs 30 dots — iPad Pro (834 / 1024 / 1210 / 1366) always takes 30.
+
 **HeroParticles.tsx:**
 ```tsx
+const FAR: DepthTier  = { z: [-500, -180], from: 121, to: -29, size: [6, 9],  opacity: 0.22, duration: [16, 24], drift: 14, counts: { desktop: 12, mobile: 6 }, scrollShift: -30 }
+const MID: DepthTier  = { z: [-300, -60],  from: 114, to: -14, size: [7, 11], opacity: 0.45, duration: [11, 17], drift: 26, counts: { desktop: 12, mobile: 6 }, scrollShift: -60 }
+const NEAR: DepthTier = { z: [-120, 120],  from: 103, to: 17,  size: [7, 12], opacity: 0.8,  duration: [7, 11],  drift: 40, counts: { desktop: 6,  mobile: 3 }, scrollShift: -100 }
+
 export function HeroParticles() {
-  const count = typeof window !== 'undefined' && window.innerWidth < 768 ? 15 : 30
-  const particles = useMemo(() =>
-    Array.from({ length: count }, (_, i) => ({
-      id: i,
-      left: `${Math.random() * 100}%`,
-      duration: `${Math.random() * 10 + 8}s`,
-      delay: `${Math.random() * 10}s`,
-      size: `${Math.random() * 3 + 2}px`,
-    })),
-    [count]
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const { scrollY } = useScroll()
+  const layerY = {
+    far: useTransform(scrollY, SCROLL_RANGE, [0, FAR.scrollShift]),
+    mid: useTransform(scrollY, SCROLL_RANGE, [0, MID.scrollShift]),
+    near: useTransform(scrollY, SCROLL_RANGE, [0, NEAR.scrollShift]),
+  }
+  const layers = useMemo(
+    () => depthTiers.map(tier => ({ tier, particles: createParticles(tier, isMobile ? tier.counts.mobile : tier.counts.desktop) })),
+    [isMobile],
   )
 
   return (
     <div className="hero-particles" aria-hidden="true">
-      {particles.map(p => (
-        <div
-          key={p.id}
-          className="hero-particle"
-          style={{
-            left: p.left,
-            width: p.size,
-            height: p.size,
-            animationDuration: p.duration,
-            animationDelay: p.delay,
-          }}
-        />
+      {layers.map(({ tier, particles }) => (
+        <motion.div key={tier.id} className={`hero-particle-layer hero-particle-layer--${tier.id}`} style={{ y: layerY[tier.id] }}>
+          {particles.map(p => (
+            <div key={p.id} className="hero-particle" style={particleStyle(p, tier)} />
+          ))}
+        </motion.div>
       ))}
     </div>
   )
 }
+
+// particleStyle(p, tier) emits left / width / height / animationDuration / a negative
+// animationDelay, plus --p-from, --p-to, --p-z0, --p-z1, --p-drift and --p-op.
 ```
 
 **Files:**
-- `src/components/sections/HeroParticles.tsx` (new)
-- `src/components/sections/Hero.tsx`
-- `src/index.css`
+- `src/components/sections/HeroParticles.tsx` (created here; rewritten for the depth tiers)
+- `src/components/sections/Hero.tsx` (mounts `<HeroParticles/>`; untouched by the 3D pass — the component owns its own `useScroll`)
+- `src/App.css` (`.hero-particles`, `.hero-particle-layer`, `.hero-particle`, `@keyframes float-particle`, reduced-motion block)
 
 ---
 
@@ -596,87 +633,103 @@ export function SectionHeading({ title, subtitle, tag, id }: SectionHeadingProps
 
 ## 4. Scroll Animations
 
-### 4.1 Unified Animation Wrapper
+### 4.1 Unified Section Entrance
 
-**Effect:** Sections animate in on scroll with configurable direction and delay.
+**Effect:** Every section enters the same way: a scroll-triggered fade on the section, then its items rising one by one.
 
-**Current state:**
-- Expertise, Experience, Projects, Contact: `whileInView` fade-in + slide-up (via `motion.section`)
-- Hero: `InView` + initial fade-in (no scroll trigger for entrance)
-- About: no animation
+**State before the consistency passes:**
+- Experience: `motion.section` + staggered timeline entries — the reference
+- Expertise, Projects: `motion.section` with cards on `variants` (`y: 30`) driven by **both** `staggerChildren: 0.1` and `delay: i * 0.1` — the stagger was applied twice
+- Contact: `motion.section` whose links had hover/tap only, no entrance
+- Hero: `InView` plus mount-time `animate` (no scroll trigger), `.hero-content` sliding in from `x: -30`, hand-written delays 0.15–0.6 — three overlapping fades on the same subtree
+- About (homepage): bare `<section>` inside `<InView>` — no section animation, no item animation
+- AboutPage: `AnimatedSection` nested inside `InView`, with its own distance (40px), duration (0.6s) and cubic-bezier — no item animation
+- ExperiencePage: staggered entries but no `InView` wrapper; ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage: no animation at all
 
-**Implementation:**
-- New component: `src/components/ui/AnimatedSection.tsx`
-- Wraps children in `motion.div` with `whileInView` animation
-- Accepts `direction` prop: `'up' | 'right' | 'left'`
-- Accepts `delay` prop for staggered children
-- Uses `InView` for scroll-triggered rendering
+**Implementation (the two recipes every section now uses):**
+- Section: `InView` wrapping `motion.section` with `initial="hidden" whileInView="visible"`, `viewport={{ once: true, amount: 0.1 }}` and `variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.5 } } }}`
+- Item: `motion.*` with `initial={{ opacity: 0, y: 24 }}`, `whileInView={{ opacity: 1, y: 0 }}`, `viewport={{ once: true, amount: 0.2 }}`, `transition={{ duration: 0.45, ease: 'easeOut', delay: i * 0.08 }}`
+- Items animate individually rather than through `staggerChildren`. `Expertise.tsx` and `Projects.tsx` were moved off `variants` + `staggerChildren: 0.1` at `y: 30`; their `whileHover` / `whileTap` behaviour is untouched
+- `AnimatedSection.tsx` is gone: its only consumer was `AboutPage`, and its `direction` / `delay` props were never passed
 
-**Props:**
+**Recipe:**
 ```tsx
-interface AnimatedSectionProps {
-  direction?: 'up' | 'right' | 'left'
-  delay?: number
-  children: ReactNode
-}
+<InView>
+  <motion.section
+    className="section container-wide"
+    initial="hidden" whileInView="visible"
+    viewport={{ once: true, amount: 0.1 }}
+    variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { duration: 0.5 } } }}
+  >
+    <motion.div className="philosophy-card"
+      initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.45, ease: 'easeOut', delay: i * 0.08 }} />
+  </motion.section>
+</InView>
 ```
 
-**AnimatedSection.tsx:**
+**Hero specifics:** `Hero.tsx:38-48` carries the section recipe. `.hero-content` (`Hero.tsx:54`) is a plain `div`: the greeting, name, title, tagline and CTA each carry the item recipe with `delay: 0 / 0.08 / 0.16 / 0.24 / 0.32`, and `.hero-visual` rises with `delay: 0.4`. The scroll parallax moved from `.hero-visual` to `.hero-photo` (`motion.img style={{ y }}`) — a `MotionValue` bound to `y` and an animated `y` on the same element collide, so parallax and entrance now live on different elements.
+
+**Coverage after the sweep:**
+
+| File | Section recipe | Items carrying the item recipe |
+|---|---|---|
+| `Hero.tsx` | ✓ | greeting, `h1`, title, tagline, CTA, visual — delays 0 → 0.4 |
+| `About.tsx` | ✓ | 3 philosophy cards |
+| `Expertise.tsx` | ✓ | skill-group cards |
+| `Experience.tsx` | ✓ | timeline entries (the reference) |
+| `Projects.tsx` | ✓ | featured project cards |
+| `Contact.tsx` | ✓ | 3 contact links — delays 0 / 0.08 / 0.16 |
+| `AboutPage.tsx` | ✓ ×2 | philosophy cards, expertise cards |
+| `ExperiencePage.tsx` | ✓ | timeline entries |
+| `ProjectsListPage.tsx` | ✓ | project cards |
+| `ProjectDetailPage.tsx` | ✓ ×2 (found + not-found) | title row, lede, impact, role, technologies, experiment heading (0 → 0.4) then entries at `0.48 + idx * 0.08` |
+| `PhilosophyPage.tsx` | ✓ | quotes |
+| `ContactPage.tsx` | ✓ | 3 contact links — delays 0 / 0.08 / 0.16 |
+
+`HomePage.tsx` composes the six homepage sections and needs nothing of its own.
+
+**Files — hero + about pass:**
+- `src/components/sections/Hero.tsx` (section recipe + per-item entrance; parallax moved to `.hero-photo`)
+- `src/components/sections/About.tsx` (`motion.section` + staggered philosophy cards)
+- `src/pages/AboutPage.tsx` (`AnimatedSection` → `InView` + `motion.section`, staggered cards in both sections)
+- `src/components/ui/AnimatedSection.tsx` (deleted)
+- `AGENTS.md` (Motion & Animation now records the two recipes)
+
+**Files — rest of the site:**
+- `src/components/sections/Expertise.tsx` (cards moved off `variants` + `staggerChildren`)
+- `src/components/sections/Projects.tsx` (same)
+- `src/components/sections/Contact.tsx` (3 contact links gained the item recipe, delays 0 / 0.08 / 0.16)
+- `src/pages/ExperiencePage.tsx` (bare `<section>` → `InView` + `motion.section`)
+- `src/pages/ProjectsListPage.tsx` (`Link` → `MotionLink`, section + item recipe)
+- `src/pages/ProjectDetailPage.tsx` (section recipe on both branches; title row, lede, impact, role, technologies, experiment heading and entries as items; shared `itemTransition(delay): Transition` helper)
+- `src/pages/PhilosophyPage.tsx` (section recipe + staggered quotes)
+- `src/pages/ContactPage.tsx` (`<a>` → `motion.a`, section + item recipe)
+
+### 4.2 Hover and Press Feedback
+
+**Rule:** motion owns the transform; CSS `:hover` owns colour, border and shadow only. A CSS `transform` on a `motion.*` element is dead as soon as motion writes its inline transform, and a CSS `transition: all` on that element re-times motion's own per-frame updates. Both patterns were removed.
+
+**Card / link recipe** — `.project-card`, `.expertise-card`, `.philosophy-card`, `.contact-link`:
 ```tsx
-import { motion } from "motion/react"
-import { InView } from "@/components/ui/InView"
-
-const directions = {
-  up: { y: [40, 0], opacity: [0, 1] },
-  right: { x: [-40, 0], opacity: [0, 1] },
-  left: { x: [40, 0], opacity: [0, 1] },
-}
-
-export function AnimatedSection({
-  direction = 'up',
-  delay = 0,
-  children,
-}: AnimatedSectionProps) {
-  const { y, opacity } = directions[direction]
-  return (
-    <InView>
-      <motion.div
-        initial={{ y, opacity }}
-        whileInView={{ y: 0, opacity: 1 }}
-        viewport={{ once: true, margin: "0px 0px -50px 0px" }}
-        transition={{ duration: 0.6, delay, ease: [0.25, 0.1, 0.25, 1] }}
-      >
-        {children}
-      </motion.div>
-    </InView>
-  )
-}
+whileHover={{ scale: 1.02, y: -4 }}
+whileTap={{ scale: 0.98 }}
 ```
 
-**Usage:**
+**Button recipe** — `.btn-primary`, `.btn-secondary`, `.btn-ghost`:
 ```tsx
-// AboutPage.tsx
-<AnimatedSection>
-  <section className="section container-content" ...>
-    {/* content */}
-  </section>
-</AnimatedSection>
-
-// Expertise.tsx (replace existing motion.section)
-<AnimatedSection direction="up" delay={0.1}>
-  <section className="section container-wide" ...>
-    {/* content */}
-  </section>
-</AnimatedSection>
+whileHover={{ y: -2 }}
+whileTap={{ scale: 0.95 }}
 ```
 
-**Files:**
-- `src/components/ui/AnimatedSection.tsx` (new)
-- `src/pages/AboutPage.tsx` (wrap with AnimatedSection)
-- `src/components/sections/Expertise.tsx` (replace motion.section)
-- `src/pages/ExperiencePage.tsx` (replace motion.section)
-- `src/pages/ProjectsListPage.tsx` (replace motion.section)
-- `src/pages/ContactPage.tsx` (replace motion.section)
+**Icon tile recipe** — `.social-link`: `whileHover={{ scale: 1.1 }}`, `whileTap={{ scale: 0.9 }}`. A 44px tile needs a larger scale than a card for the change to read as feedback.
+
+Hover and press never fight: motion's `variantPriorityOrder` is `animate, whileInView, whileFocus, whileHover, whileTap, whileDrag, exit`, so `whileTap` outranks `whileHover` on `scale` while the hover `y` offset survives. `whileHover` also outranks the entrance's `whileInView` for `y`, and falls back to `y: 0` when the pointer leaves.
+
+**CSS removed** (`src/App.css`): the `transform` line in `.btn-primary:hover`, `.btn-primary:active`, `.btn-secondary:hover`, `.social-link:hover`, `.project-card:hover`, `.contact-link:hover`; the whole `.btn-secondary:active` rule (transform was its only declaration); the `.back-to-top.visible` block plus `opacity: 0` and `transform: translateY(10px)` on `.back-to-top` — that button is mounted and unmounted by `AnimatePresence`, so `.visible` is never rendered. `transition: all` was narrowed to the properties each rule actually animates: `.btn`, `.social-link`, `.expertise-card`, `.project-card`, `.philosophy-card`, `.contact-link`, `.back-to-top`.
+
+**Files:** `Button.tsx`, `Expertise.tsx`, `Contact.tsx`, `About.tsx`, `AboutPage.tsx`, `Projects.tsx`, `ProjectsListPage.tsx`, `ContactPage.tsx`, `App.css`. `SocialLinks.tsx` keeps its tile values; `DownloadResume.tsx` is a plain `<details>` with no motion, so its CSS hover is untouched.
 
 ---
 
@@ -997,7 +1050,7 @@ function DownloadDropdown() {
 | 6 | Hero: floating particles | — | 15m |
 | 7 | Hero: scroll indicator | — | 10m |
 | 8 | Button: gradient + outline + icon slide | — | 10m |
-| 9 | Scroll animations: AnimatedSection | — | 20m |
+| 9 | Scroll animations: entrance recipe | — | 20m |
 | 10 | Logo: bracket format | Step 0 | 5m |
 | 11 | Build + verify | All | 10m |
 | 12 | Download resume: click outside to close | — | 15m |
@@ -1041,3 +1094,8 @@ function DownloadDropdown() {
 21. [ ] Scroll indicator visible and centered on mobile
 22. [ ] Social links centered on mobile
 23. [ ] All hero text (greeting, title, tagline, social links) visible in both dark/light modes on mobile
+24. [ ] Hero particle layer is hidden (not frozen at the hero top edge) when `prefers-reduced-motion: reduce` matches — verify on iPad with Settings → Accessibility → Motion → Reduce Motion
+25. [ ] Particle field reads as depth: the near tier is larger, faster and sweeps wider than the far tier, and its scroll parallax is the strongest — verify on iPad Pro with Reduce Motion off
+26. [ ] Hero content, homepage About and AboutPage animate with the same recipe as Experience: section fade 0.5s, items `y: 24 → 0` at 0.45s `easeOut` with `delay: i * 0.08`; no nested animation wrapper remains
+27. [ ] Every section and every standalone page uses the same entrance recipe: section fade 0.5s, items `y: 24 → 0` at 0.45s `easeOut` on a 0.08 delay ladder — no `staggerChildren`, no `y: 30`, no mount-time `animate` left anywhere
+28. [ ] Hover and press feedback is uniform: every card and contact link lifts 4px with `scale: 1.02` on hover and `scale: 0.98` on press, buttons lift 2px with `scale: 0.95` on press, social tiles `1.1` / `0.9` — and no CSS `:hover` transform or `transition: all` remains on a motion-animated element

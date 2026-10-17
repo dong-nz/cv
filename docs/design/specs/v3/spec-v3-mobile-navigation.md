@@ -183,7 +183,7 @@ Per the owner's answer, the sheet reuses the footer's icon-only 48×48 tiles (`s
 
 | Effect | Implementation | Cost / risk |
 |---|---|---|
-| Sheet enter **and** exit | `AnimatePresence` + `motion.div`, `opacity 0→1`, `y -12→0`, 220ms, `ease [0.25, 0.1, 0.25, 1]` (the curve already used in `AnimatedSection.tsx:31`) | Replaces `@keyframes slideIn` (`src/App.css:143-152`), deleted. Conditional mount also fixes D4 |
+| Sheet enter **and** exit | `AnimatePresence` + `motion.div`, `opacity 0→1`, `y -12→0`, 220ms, `ease [0.25, 0.1, 0.25, 1]` (declared inline at `MobileMenu.tsx:38`) | Replaces `@keyframes slideIn` (`src/App.css:143-152`), deleted. Conditional mount also fixes D4 |
 | Staggered rows | each nav row is a `motion.li` with `opacity 0→1`, `y 8→0`, `delay 0.05 + index * 0.04` | 6 rows finish at 0.33s. `motion.config.reducedMotion = 'user'` (`main.tsx:9`) strips transforms for reduce-users; `useReducedMotion()` zeroes the delays |
 | Group blocks | the Appearance and Connect groups fade with the panel, no separate stagger | Deliberate: staggering 3 groups too would push the total reveal past 0.5s |
 | Row press feedback | CSS only: `:hover` / `:active` → `background: var(--bg-elevated)` | No JS, no per-row motion cost |

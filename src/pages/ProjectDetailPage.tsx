@@ -1,11 +1,23 @@
 import { useParams, Link } from 'react-router'
+import { motion, type Transition } from 'motion/react'
 import { Badge } from '@/components/ui/Badge'
 import { Tag } from '@/components/ui/Tag'
+import { InView } from '@/components/ui/InView'
 import { projects } from '@/data/projects'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
 import { useField } from '@/i18n/useField'
 
+const sectionVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.5 } },
+}
+
+const itemTransition = (delay: number): Transition => ({
+  duration: 0.45,
+  ease: 'easeOut',
+  delay,
+})
 
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -14,71 +26,129 @@ export function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <section className="section container-content">
-        <h2>{strings.projectDetail.notFound[lang]}</h2>
-        <p>
-          <Link to="/projects">{strings.projectDetail.backToProjects[lang]} ←</Link>
-        </p>
-      </section>
+      <InView>
+        <motion.section
+          className="section container-content"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          variants={sectionVariants}
+        >
+          <h2>{strings.projectDetail.notFound[lang]}</h2>
+          <p>
+            <Link to="/projects">{strings.projectDetail.backToProjects[lang]} ←</Link>
+          </p>
+        </motion.section>
+      </InView>
     )
   }
 
   return (
-    <section className="section container-content" aria-labelledby="project-title">
-      <Link to="/projects" className="back-link">
-        {strings.projectDetail.backToProjects[lang]} ←
-      </Link>
+    <InView>
+      <motion.section
+        className="section container-content"
+        aria-labelledby="project-title"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        variants={sectionVariants}
+      >
+        <Link to="/projects" className="back-link">
+          {strings.projectDetail.backToProjects[lang]} ←
+        </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-        <h1 id="project-title" style={{ flex: 1 }}>{project.title}</h1>
-        <Badge variant="outline">{strings.projects.categories[project.category][lang]}</Badge>
-      </div>
+        <motion.div
+          style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={itemTransition(0)}
+        >
+          <h1 id="project-title" style={{ flex: 1 }}>{project.title}</h1>
+          <Badge variant="outline">{strings.projects.categories[project.category][lang]}</Badge>
+        </motion.div>
 
-      <p className="prose-lede">
-        {useField(project.summary, project.summaryEn)}
-      </p>
+        <motion.p
+          className="prose-lede"
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={itemTransition(0.08)}
+        >
+          {useField(project.summary, project.summaryEn)}
+        </motion.p>
 
-      <div className="prose">
-        {project.metrics && project.metrics.length > 0 && (
-          <div>
-            <h3>{strings.projectDetail.impact[lang]}</h3>
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-              {project.metrics.map((m) => (
-                <span key={m} className="achievement-metric">
-                  {m}
-                </span>
+        <div className="prose">
+          {project.metrics && project.metrics.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={itemTransition(0.16)}
+            >
+              <h3>{strings.projectDetail.impact[lang]}</h3>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                {project.metrics.map((m) => (
+                  <span key={m} className="achievement-metric">
+                    {m}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={itemTransition(0.24)}
+          >
+            <h3>{strings.projectDetail.role[lang]}</h3>
+            <p>{project.role}</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={itemTransition(0.32)}
+          >
+            <h3>{strings.projectDetail.technologies[lang]}</h3>
+            <div className="philosophy-keywords">
+              {project.technologies.map((tech) => (
+                <Tag key={tech}>{tech}</Tag>
               ))}
             </div>
-          </div>
-        )}
+          </motion.div>
 
-        <div>
-          <h3>{strings.projectDetail.role[lang]}</h3>
-          <p>{project.role}</p>
+          {project.sections && project.sections.length > 0 && (
+            <div>
+              <motion.h3
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={itemTransition(0.4)}
+              >
+                {strings.projectDetail.experiments[lang]}
+              </motion.h3>
+              {project.sections.map((section, idx) => (
+                <motion.div
+                  key={idx}
+                  className="project-section"
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={itemTransition(0.48 + idx * 0.08)}
+                >
+                  <h4>{useField(section.title, section.titleEn)}</h4>
+                  <p>{useField(section.content, section.contentEn)}</p>
+                  <Tag accent>{section.type}</Tag>
+                </motion.div>
+              ))}
+            </div>
+          )}
         </div>
-
-        <div>
-          <h3>{strings.projectDetail.technologies[lang]}</h3>
-          <div className="philosophy-keywords">
-            {project.technologies.map((tech) => (
-              <Tag key={tech}>{tech}</Tag>
-            ))}
-          </div>
-        </div>
-
-        {project.sections && project.sections.length > 0 && (
-          <div>
-            <h3>{strings.projectDetail.experiments[lang]}</h3>
-            {project.sections.map((section, idx) => (
-              <div key={idx} className="project-section">
-                <h4>{useField(section.title, section.titleEn)}</h4>
-                <p>{useField(section.content, section.contentEn)}</p>
-                <Tag accent>{section.type}</Tag>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </section>
+      </motion.section>
+    </InView>
   )
 }

@@ -18,10 +18,7 @@ export function Expertise() {
         viewport={{ once: true, amount: 0.1 }}
         variants={{
           hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 },
-          },
+          visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
         <SectionHeading title={strings.expertise.heading[lang]} tag={strings.expertise.heading[lang]} />
@@ -30,15 +27,11 @@ export function Expertise() {
             <motion.div
               key={group.title}
               className="expertise-card"
-              variants={{
-                hidden: { opacity: 0, y: 30 },
-                visible: {
-                  opacity: 1,
-                  y: 0,
-                  transition: { duration: 0.5, delay: i * 0.1 },
-                },
-              }}
-              whileHover={{ scale: 1.05, y: -2 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.45, ease: 'easeOut', delay: i * 0.08 }}
+              whileHover={{ scale: 1.02, y: -4 }}
               whileTap={{ scale: 0.98 }}
             >
               <h3>{useField(group.title, group.titleEn)}</h3>

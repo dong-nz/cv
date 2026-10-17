@@ -59,6 +59,7 @@ export const Button = forwardRef<
             to={href}
             className={classes}
             ref={ref as React.Ref<HTMLAnchorElement>}
+            whileHover={{ y: -2 }}
             whileTap={{ scale: 0.95 }}
             {...(safeProps as Omit<
               React.AnchorHTMLAttributes<HTMLAnchorElement>,
@@ -78,6 +79,7 @@ export const Button = forwardRef<
           href={href}
           className={classes}
           ref={ref as React.Ref<HTMLAnchorElement>}
+          whileHover={{ y: -2 }}
           whileTap={{ scale: 0.95 }}
           {...(props as Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, keyof ButtonProps>)}
         >
@@ -93,6 +95,7 @@ export const Button = forwardRef<
       <motion.button
         className={classes}
         ref={ref as React.Ref<HTMLButtonElement>}
+        whileHover={{ y: -2 }}
         whileTap={{ scale: 0.95 }}
         {...(props as Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, keyof ButtonProps>)}
       >

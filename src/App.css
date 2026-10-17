@@ -450,7 +450,7 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   text-decoration: none;
-  transition: all var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
   border: none;
 }
 
@@ -469,12 +469,10 @@
 .btn-primary:hover {
   background: var(--accent-solid-hover);
   color: var(--text-on-accent-solid);
-  transform: translateY(-2px);
   box-shadow: 0 8px 30px var(--accent-glow);
 }
 .btn-primary:active {
   background: var(--accent-solid-active);
-  transform: translateY(0);
   box-shadow: 0 2px 10px var(--accent-glow);
 }
 
@@ -488,10 +486,6 @@
 .btn-secondary:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
-  transform: translateY(-2px);
-}
-.btn-secondary:active {
-  transform: translateY(0);
 }
 
 .btn-icon {
@@ -611,12 +605,11 @@
   border: 1.5px solid var(--border-strong);
   border-radius: 6px;
   color: var(--text-primary);
-  transition: color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+  transition: color var(--transition-fast), border-color var(--transition-fast);
 }
 .social-link:hover {
   border-color: var(--accent);
   color: var(--accent);
-  transform: translateY(-3px);
 }
 .social-link:focus-visible {
   outline: 2px solid var(--accent);
@@ -758,26 +751,52 @@
   50% { opacity: 0; }
 }
 
+/* No mask-image on .hero-particles on purpose: a mask pulls the animated children into
+   one re-rasterized group, the same cost as filter: blur(). The 12% / 88% opacity ramp in
+   float-particle dissolves each dot before it reaches the clip edge, so the edges need no
+   extra softening. */
+
 .hero-particles {
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
+/* One layer per depth tier. `perspective` belongs on the layer, not on
+   .hero-particles: overflow: hidden on the container forces its used transform-style
+   to flat, so a perspective declared there would project only the three layers and
+   never the particles. Clipping stays on the container. */
+.hero-particle-layer {
+  position: absolute;
+  inset: 0;
+  perspective: 700px;
+  perspective-origin: 50% 78%;
+}
 .hero-particle {
   position: absolute;
-  width: 4px;
-  height: 4px;
   background: var(--accent);
   border-radius: 50%;
-  opacity: 0.8;
+  opacity: 0;
   animation: float-particle linear infinite;
 }
+/* Depth cue for the tier closest to the viewer. box-shadow, not filter: blur() —
+   animating children inside a filtered container re-rasterizes the whole layer every
+   frame, which is the main takedown risk on iPad. 6 particles; --accent-glow is
+   declared in all five blocks of index.css. */
+.hero-particle-layer--near .hero-particle {
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+/* --p-from / --p-to are raw translateY offsets from the top of the layer, tuned per
+   tier so that after projection (700px, origin 50% 78%) every tier crosses the full
+   hero box: far z -500 -> -180 projects 0.58x -> 0.80x, mid 0.70x -> 0.92x, near
+   z -120 -> +120 projects 0.85x -> 1.21x. Equal projected distance with a longer
+   duration is what makes the far tier read as slower. vh, not dvh: dvh re-resolves
+   when iOS Safari collapses its toolbar mid-cycle and the whole field jumps. */
 @keyframes float-particle {
-  0% { transform: translateY(100vh) scale(0); opacity: 0; }
-  10% { opacity: 0.8; }
-  90% { opacity: 0.8; }
-  100% { transform: translateY(-100px) scale(1); opacity: 0; }
+  0% { transform: translate3d(var(--p-drift), var(--p-from), var(--p-z0)); opacity: 0; }
+  12% { opacity: var(--p-op); }
+  88% { opacity: var(--p-op); }
+  100% { transform: translate3d(calc(var(--p-drift) * -1), var(--p-to), var(--p-z1)); opacity: 0; }
 }
 
 .scroll-indicator {
@@ -1072,6 +1091,16 @@
   .download-resume-lazer-glow {
     animation: none;
   }
+
+  /* Hero particles have no reduced-motion fallback: `.hero-particle` uses the
+     `animation` shorthand, so animation-fill-mode is `none`. The global clamp in
+     src/index.css (animation-duration: 0.01ms, animation-iteration-count: 1) ends
+     `float-particle` instantly and returns every dot to its unanimated style — no
+     transform, `top: auto` — stacking all of them at the top edge of
+     `.hero-particles`, behind the fixed nav. Hide the decorative layer instead. */
+  .hero-particles {
+    display: none;
+  }
 }
 
 
@@ -1117,7 +1146,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
-  transition: all var(--transition-normal);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
 }
 
 .expertise-card:hover {
@@ -1530,7 +1559,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  transition: all var(--transition-normal);
+  transition: border-color var(--transition-normal), box-shadow var(--transition-normal);
   text-decoration: none;
   color: inherit;
 }
@@ -1538,7 +1567,6 @@
 .project-card:hover {
   border-color: var(--accent);
   box-shadow: 0 4px 12px var(--shadow);
-  transform: translateY(-2px);
   color: inherit;
 }
 
@@ -1602,7 +1630,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 24px;
-  transition: all var(--transition-normal);
+  transition: border-color var(--transition-normal);
 }
 
 .philosophy-card:hover {
@@ -1666,13 +1694,12 @@
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  transition: all var(--transition-fast);
+  transition: border-color var(--transition-fast), color var(--transition-fast);
 }
 
 .contact-link:hover {
   border-color: var(--accent);
   color: var(--accent);
-  transform: translateY(-2px);
 }
 
 .contact-link svg {
@@ -1900,16 +1927,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all var(--transition-normal);
+  transition: background var(--transition-fast);
   z-index: 100;
 }
 
-.back-to-top.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
 
 .back-to-top:hover {
   background: var(--accent-hover);

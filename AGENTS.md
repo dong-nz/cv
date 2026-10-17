@@ -78,7 +78,7 @@ src/
   components/
     layout/     — Layout.tsx, Navigation.tsx, MobileMenu.tsx, Footer.tsx, ThemePaletteMenu.tsx
     sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume
-    ui/         — Badge, Button, SectionHeading, SocialLinks, Tag, Typewriter, AnimatedSection, InView, RollingTextLink, BackToTop
+    ui/         — Badge, Button, SectionHeading, SocialLinks, Tag, Typewriter, InView, RollingTextLink, BackToTop
     index.ts    — barrel export
   data/         — profile, skills, experience, projects, resume, palettes, navigation, social (TS modules)
   hooks/        — useTheme.tsx, useLanguage.tsx, useClickOutside.ts
@@ -89,7 +89,9 @@ src/
 ## Motion & Animation
 
 - `motion/react` v14 — ESM-first entrypoint (NOT `framer-motion`)
-- `AnimatedSection.tsx` — scroll-triggered motion animation wrapper
+- Section entrance recipe — every section (`Hero`, `About`, `Expertise`, `Experience`, `Projects`, `Contact`) and every standalone page: `InView` wrapping a `motion.section` with `initial="hidden" whileInView="visible"`, `viewport={{ once: true, amount: 0.1 }}` and `variants` `hidden: { opacity: 0 }` / `visible: { opacity: 1, transition: { duration: 0.5 } }`
+- Item recipe (timeline entries, philosophy/expertise/project cards, hero content blocks, contact links, project-detail blocks): `motion.*` with `initial={{ opacity: 0, y: 24 }}`, `whileInView={{ opacity: 1, y: 0 }}`, `viewport={{ once: true, amount: 0.2 }}`, `transition={{ duration: 0.45, ease: 'easeOut', delay: i * 0.08 }}`
+- Hover/press recipe — motion owns the transform, CSS `:hover` only colour/border/shadow: cards and links (`.project-card`, `.expertise-card`, `.philosophy-card`, `.contact-link`) use `whileHover={{ scale: 1.02, y: -4 }}` + `whileTap={{ scale: 0.98 }}`; `Button` uses `whileHover={{ y: -2 }}` + `whileTap={{ scale: 0.95 }}`; `.social-link` tiles use `scale: 1.1` / `0.9`. A motion-animated element never carries a CSS `transform` or `transition: all`
 - `InView.tsx` — viewport intersection observer motion component
 - `RollingTextLink.tsx` — animated text-scrolling navigation link
 - `BackToTop.tsx` — scroll-to-top floating button with AnimatePresence
