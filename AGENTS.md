@@ -44,8 +44,8 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 | `/experience` | `ExperiencePage` | Timeline |
 | `/projects` | `ProjectsListPage` | All projects grid |
 | `/projects/:id` | `ProjectDetailPage` | Single project |
-| `/philosophy` | `PhilosophyPage` | Engineering philosophy |
 | `/contact` | `ContactPage` | Contact info |
+| `/philosophy` | `PhilosophyPage` | Engineering philosophy |
 
 ## Theming
 
@@ -56,7 +56,8 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 - `type Palette = 'red' | 'blue'` (`src/types/index.ts`), labels/hints in `src/data/palettes.ts` (`paletteIds`, `paletteMeta`); default `red`
 - `data-palette` attribute + `localStorage` key `portfolio-palette`; `index.html`'s init script writes both attributes before paint
 - Palette overrides in `src/index.css` are `:root[data-theme='dark'][data-palette='blue']` / `:root[data-theme='light'][data-palette='blue']` (specificity 0,3,0 — they beat the base blocks regardless of order); no blue variant exists in the `prefers-color-scheme` bridge, because the init script always writes `data-palette`
-- Picker: `src/components/layout/ThemePaletteMenu.tsx`, mounted twice in `Navigation.tsx` — `variant="nav"` in `.nav-actions` (>1024px) and `variant="sheet"` inside `.mobile-menu` (≤1024px, remounted closed via `key={location.pathname}`)
+- Picker, two renderings, both present at every width: the bar uses `src/components/layout/ThemePaletteMenu.tsx` — icon-only trigger (`nav-control nav-palette-trigger`, a 20px half-circle swatch: active palette's accent on the left, `--swatch-empty` on the right; no text, no chevron; the name lives in `aria-label`, the hint in `title`) opening the `#palette-menu` panel. The sheet renders its own Theme color row inside `MobileMenu.tsx` from `paletteIds` + `paletteMeta` as `.mobile-menu-swatch-option` buttons — the same segmented shape as the Mode/Language rows, options drawn as colour icons via `.nav-palette-preview`. `ThemePaletteMenu` has no `variant` prop and is never mounted in the sheet
+- Bar controls share one chrome: `.nav-control` covers the mode toggle, the language toggle and the palette trigger (44px bordered box, accent border + text on hover/open, one `:focus-visible`). All four controls — mode, language, theme color, hamburger — sit in `.nav-actions` at every width, in that order; `@media (max-width: 420px)` tightens the container padding and action gap so the row fits a 320px viewport
 
 ## Data Layer
 
@@ -65,18 +66,21 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 - `src/data/experience.ts` — work history entries; optional `variant: 'current' | 'gap'` selects the timeline decoration (live node / career break)
 - `src/data/projects.ts` — project cards with categories
 - `src/data/resume.ts` — resume availability, supported languages, URL generation
+- `src/data/navigation.ts` — `navPaths` (bar + sheet order: Home, About, Experience, Projects, Contact, Philosophy), `footerPaths`
+- `src/data/social.ts` — social tiles as `{id, href, external}`; `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
+- `src/i18n/strings.ts` — every chrome string as `{en, vi}`; the sheet's group labels, Mode/Language options and the social `aria-label`s live in `strings.nav` / `strings.social`
 
 ## Component Structure
 
 ```
 src/
   components/
-    layout/     — Layout.tsx, Navigation.tsx, Footer.tsx, ThemePaletteMenu.tsx
+    layout/     — Layout.tsx, Navigation.tsx, MobileMenu.tsx, Footer.tsx, ThemePaletteMenu.tsx
     sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume
     ui/         — Badge, Button, SectionHeading, SocialLinks, Tag, Typewriter, AnimatedSection, InView, RollingTextLink, BackToTop
     index.ts    — barrel export
-  data/         — profile, skills, experience, projects, resume, palettes (TS modules)
-  hooks/        — useTheme.tsx, useClickOutside.ts
+  data/         — profile, skills, experience, projects, resume, palettes, navigation, social (TS modules)
+  hooks/        — useTheme.tsx, useLanguage.tsx, useClickOutside.ts
   pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage, index.ts
   types/        — shared TypeScript interfaces
 ```

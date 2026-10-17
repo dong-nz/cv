@@ -91,10 +91,31 @@ App
 
 | Property | Value |
 |---|---|
-| Location | Navigation bar (right side) |
+| Location | Navigation bar (right side); the mobile sheet carries a Dark/Light segmented control instead |
 | Icon | Sun/Moon icon |
-| Tooltip | Current mode (dark/light/system) |
-| Click behavior | Cycle: dark → light → system → dark |
+| Tooltip | Current mode (dark/light) |
+| Click behavior | Toggle: dark ↔ light — the `system` variant was removed (`src/hooks/useTheme.tsx:4`) |
+
+### Theme Palette
+
+| Property | Value |
+|---|---|
+| Location | Navigation bar (right side, after the language toggle) at **every** width — the control is not hidden at ≤1024px (Q14) — plus the Theme color row, the last row of the mobile sheet's Appearance group, while the sheet is open |
+| Control | Bar: `ThemePaletteMenu` (`src/components/layout/ThemePaletteMenu.tsx`), icon-only trigger — a 20px half-circle swatch (active palette's accent left, `--swatch-empty` right), no text and no chevron, name in `aria-label`, hint in `title` — opening the `#palette-menu` panel. Sheet: rendered by `MobileMenu.tsx` from `paletteIds` + `paletteMeta` as `.mobile-menu-swatch-option` buttons — the Mode/Language segmented-row shape, options drawn as colour icons |
+| Options | `red` (default) / `blue` — `src/data/palettes.ts` (`paletteIds`, `paletteMeta.label`/`hint`), written to `data-palette` on `<html>`; the sheet lists both, one colour icon each |
+| Chrome | The bar's three controls share `.nav-control` (44px bordered box, accent border + text on hover/open, one `:focus-visible`); `.nav-actions` order is mode → language → theme color → hamburger at every width, with a `@media (max-width: 420px)` guard so the row fits 320px |
+
+Spec: `specs/v3/spec-v3-theme-palette-switch.md`.
+
+### Mobile Menu Sheet
+
+| Property | Value |
+|---|---|
+| Trigger | Hamburger button in the bar, ≤1024px |
+| Groups | Menu (6 routes) → Appearance (Mode, Language, Theme color) → Connect (GitHub, LinkedIn, email) |
+| Behaviour | `role="dialog"` + `aria-modal="true"`, Escape closes from any focus position, `#main-content` / `.footer` / `.back-to-top` are `inert` while open, body scroll locked |
+
+Spec: `specs/v3/spec-v3-mobile-navigation.md`.
 
 ---
 
@@ -113,6 +134,8 @@ App
 | Mobile | < 768px | Single column, touch-optimized |
 | Tablet | 768–1023px | Adaptive grid |
 | Desktop | >= 1024px | Multi-column, wide layouts |
+
+The navigation bar collapses to the hamburger + sheet at **≤1024px** (`src/App.css` `@media (max-width: 1024px)`), not at 768px. 768px governs single-column content layouts only.
 
 ---
 

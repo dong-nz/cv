@@ -1,31 +1,56 @@
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router'
+import { AnimatePresence, motion } from 'motion/react'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
+import { navPaths } from '@/data/navigation'
 import { RollingTextLink } from '@/components/ui/RollingTextLink'
 import { ThemePaletteMenu } from '@/components/layout/ThemePaletteMenu'
-const navPaths = ['/', '/about', '/experience', '/projects', '/contact', '/philosophy'] as const
+import { MobileMenu } from '@/components/layout/MobileMenu'
+
 export function Navigation() {
   const { cycleTheme, resolvedTheme } = useTheme()
   const { lang, toggleLang } = useLanguage()
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  const closeMenu = useCallback(() => {
+    setMobileOpen(false)
+    // The hamburger is display:none above 1024px — focusing it there would drop focus to <body>.
+    if (triggerRef.current?.offsetParent) triggerRef.current.focus()
+  }, [])
 
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    if (!mobileOpen) return
+    document.body.style.overflow = 'hidden'
+    const covered = [
+      document.getElementById('main-content'),
+      document.querySelector('.footer'),
+      document.querySelector('.back-to-top'),
+    ]
+    covered.forEach((el) => el?.setAttribute('inert', ''))
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') closeMenu()
     }
+    document.addEventListener('keydown', handleKey)
     return () => {
       document.body.style.overflow = ''
+      covered.forEach((el) => el?.removeAttribute('inert'))
+      document.removeEventListener('keydown', handleKey)
     }
-  }, [mobileOpen])
+  }, [mobileOpen, closeMenu])
 
+  // The sheet only exists at <=1024px; crossing upward must close it so aria-expanded stays honest.
   useEffect(() => {
-    setMobileOpen(false)
-  }, [location.pathname])
+    const mobile = window.matchMedia('(max-width: 1024px)')
+    const handleChange = (event: MediaQueryListEvent) => {
+      if (!event.matches) setMobileOpen(false)
+    }
+    mobile.addEventListener('change', handleChange)
+    return () => mobile.removeEventListener('change', handleChange)
+  }, [])
 
   return (
     <>
@@ -45,6 +70,7 @@ export function Navigation() {
                 <li key={path}>
                   <RollingTextLink
                     to={path}
+                    ariaCurrent={path === location.pathname ? 'page' : undefined}
                     className={path === location.pathname ? 'nav-link active' : 'nav-link'}
                   >
                     {label}
@@ -56,7 +82,7 @@ export function Navigation() {
 
           <div className="nav-actions">
             <button
-              className="theme-toggle"
+              className="nav-control theme-toggle"
               onClick={cycleTheme}
               aria-label={`Switch theme (currently ${resolvedTheme})`}
               title={`Theme: ${resolvedTheme}`}
@@ -73,57 +99,56 @@ export function Navigation() {
               )}
             </button>
 
-            <ThemePaletteMenu variant="nav" />
-
             <button
-              className="lang-toggle"
+              className="nav-control lang-toggle"
               onClick={toggleLang}
               aria-label="Switch language"
               title={`Switch to ${lang === 'en' ? 'Tiếng Việt' : 'English'}`}
             >
               {lang === 'en' ? 'VI' : 'EN'}
             </button>
+
+            <ThemePaletteMenu />
+
             <button
+              ref={triggerRef}
               className="mobile-menu-btn"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMobileOpen((prev) => !prev)}
+              aria-label={mobileOpen ? strings.nav.closeMenu[lang] : strings.nav.openMenu[lang]}
               aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
             >
-              {mobileOpen ? (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 12h18M3 6h18M3 18h18" />
-                </svg>
-              )}
+              <AnimatePresence mode="wait" initial={false}>
+                {mobileOpen ? (
+                  <motion.svg
+                    key="close"
+                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    initial={{ opacity: 0, rotate: -90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: 90 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </motion.svg>
+                ) : (
+                  <motion.svg
+                    key="menu"
+                    width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    initial={{ opacity: 0, rotate: 90 }}
+                    animate={{ opacity: 1, rotate: 0 }}
+                    exit={{ opacity: 0, rotate: -90 }}
+                    transition={{ duration: 0.18 }}
+                  >
+                    <path d="M3 12h18M3 6h18M3 18h18" />
+                  </motion.svg>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </div>
       </nav>
 
-      <div className={`mobile-menu ${mobileOpen ? 'open' : ''}`} role="dialog" aria-label="Mobile navigation">
-        <ul className="mobile-menu-list">
-            {navPaths.map((path) => {
-              const navKey = path === '/' ? 'home' : path.replace('/', '') as keyof typeof strings.nav
-              const label = strings.nav[navKey][lang]
-              return (
-                <li key={path}>
-                  <RollingTextLink
-                    to={path}
-                    className={path === location.pathname ? 'mobile-menu-link active' : 'mobile-menu-link'}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {label}
-                  </RollingTextLink>
-                </li>
-              )
-            })}
-        </ul>
-
-        <ThemePaletteMenu key={location.pathname} variant="sheet" />
-      </div>
+      <MobileMenu open={mobileOpen} onClose={closeMenu} />
     </>
   )
 }

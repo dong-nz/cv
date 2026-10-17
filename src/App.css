@@ -1,9 +1,12 @@
 /* ===== Navigation ===== */
+/* 94% + blur(12px) is a contrast floor, not a taste choice: at 85% the bar measured 4.01
+   (red-light --text-muted over an --accent element scrolled beneath it); 94% measures 4.58.
+   Spec: docs/design/specs/v3/spec-v3-mobile-navigation.md §3.2 */
 .nav {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: color-mix(in srgb, var(--bg-surface) 85%, transparent);
+  background: color-mix(in srgb, var(--bg-surface) 94%, transparent);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(12px);
   transition: none;
@@ -83,27 +86,40 @@
   gap: 16px;
 }
 
-.theme-toggle {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: var(--radius-md);
-  transition: color var(--transition-fast), background var(--transition-fast);
+/* One chrome for the three bar controls — mode, theme color, language: a bordered 44px box,
+   accent border + text on hover/open. Per-control rules add only what is specific to them. */
+.nav-control {
   display: flex;
   align-items: center;
   justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
 }
 
-.theme-toggle:hover {
-  color: var(--text-primary);
+.nav-control:hover,
+.nav-control.open {
+  border-color: var(--accent);
+  color: var(--accent);
   background: var(--bg-elevated);
 }
 
-.theme-toggle:focus-visible {
+.nav-control:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* The language control's glyph is chrome: 13px/600 is its own scale step. */
+.lang-toggle {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
 }
 
 .mobile-menu-btn {
@@ -121,56 +137,157 @@
   outline-offset: 2px;
 }
 
-/* Mobile menu */
+/* Mobile menu sheet — mounted only while open, and only at <=1024px (guard below).
+   94% + blur(12px) is a contrast floor, not taste: the worst measured case is --text-muted
+   over an --accent tile behind the glass — 4.58 at 94%, 4.45 at 92% (fails AA), 4.01 at the
+   bar's old 85%. --text-muted is what .mobile-menu-heading and the palette trigger render. */
 .mobile-menu {
-  display: none;
   position: fixed;
   top: 64px;
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--bg-surface);
   z-index: 999;
-  padding: 32px 24px;
+  background: color-mix(in srgb, var(--bg-surface) 94%, transparent);
+  backdrop-filter: blur(12px);
+  padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-.mobile-menu.open {
+.mobile-menu-inner {
+  max-width: var(--max-content);
+  margin: 0 auto;
+}
+
+.mobile-menu-group {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* 12px + one hairline per group is what holds the sheet at 647px closed; 24px would reach
+   667px and push the Connect group past a 375x667 phone (spec §3.3). */
+.mobile-menu-group:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.mobile-menu-heading {
   display: block;
-  animation: slideIn var(--transition-normal) ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  font-family: var(--mono);
+  font-size: var(--text-meta);
+  line-height: 1;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
 }
 
 .mobile-menu-list {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
 .mobile-menu-link {
-  display: block;
-  font-size: 20px;
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 12px 0 10px;
+  border-left: 2px solid transparent;
+  font-size: var(--text-lede);
   font-weight: 500;
   color: var(--text-secondary);
-  padding: 12px 0;
   text-decoration: none;
-  transition: color var(--transition-fast);
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
 }
 
 .mobile-menu-link:hover,
+.mobile-menu-link:active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
 .mobile-menu-link.active {
+  border-left-color: var(--accent);
   color: var(--accent);
+}
+
+.mobile-menu-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.mobile-menu-segment {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+}
+
+.mobile-menu-segment-label {
+  font-size: var(--text-body);
+  color: var(--text-secondary);
+}
+
+.mobile-menu-segment-options {
+  display: flex;
+  gap: 8px;
+}
+
+.mobile-menu-segment-option {
+  min-height: 44px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mobile-menu-segment-option.active {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.mobile-menu-segment-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The palette options use the Mode/Language segmented row's shape — same 44px target, border
+   and radius — drawn as colour icons via the existing .nav-palette-preview dot. */
+.mobile-menu-swatch-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: none;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.mobile-menu-swatch-option:hover {
+  background: var(--bg-elevated);
+}
+
+.mobile-menu-swatch-option.active {
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+}
+
+.mobile-menu-swatch-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 @media (max-width: 1024px) {
@@ -181,8 +298,22 @@
   .mobile-menu-btn {
     display: flex;
   }
+}
 
-  .nav-palette-nav {
+/* Four controls share the bar at ≤1024px. At 320px: {CV} (~70px) + 44×4 controls + 12×3 gaps
+   = 262px inside 288px of content, so the row keeps 26px of slack. */
+@media (max-width: 420px) {
+  .nav-container {
+    padding: 0 16px;
+  }
+
+  .nav-actions {
+    gap: 12px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .mobile-menu {
     display: none;
   }
 }
@@ -193,51 +324,19 @@
   display: flex;
 }
 
-.nav-palette-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: var(--radius-md);
-  font-size: 14px;
-  transition: color var(--transition-fast), background var(--transition-fast);
-}
+/* Nothing specific to declare: the trigger's chrome is `.nav-control` above, it holds a single
+   icon, and its accessible name lives in `aria-label`. The class stays as the hook that ties
+   the trigger to the `#palette-menu` panel it expands. */
 
-.nav-palette-trigger:hover,
-.nav-palette-trigger.open {
-  color: var(--text-primary);
-  background: var(--bg-elevated);
-}
-
-.nav-palette-trigger:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
+/* The palette icon: left half is the active palette's accent, right half the constant empty
+   half (--swatch-empty). The hairline keeps the white half visible on a light surface. */
 .nav-palette-swatch {
   flex: none;
-  width: 14px;
-  height: 14px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: var(--accent);
-  box-shadow: inset 0 0 0 1px var(--border-strong);
-}
-
-/* The group name is redundant in the bar (the trigger is labelled) but needed in the sheet. */
-.nav-palette-group {
-  display: none;
-}
-
-.nav-palette-trigger .chevron {
-  transition: transform 0.2s;
-}
-
-.nav-palette-trigger.open .chevron {
-  transform: rotate(180deg);
+  border: 1px solid var(--border-strong);
+  background: linear-gradient(to right, var(--accent) 0 50%, var(--swatch-empty) 50% 100%);
 }
 
 .nav-palette-panel {
@@ -329,41 +428,6 @@
   margin-left: auto;
   font-size: 12px;
   color: var(--text-muted);
-}
-
-/* Sheet variant: the options expand inline inside the mobile menu, never as a
-   second overlay. .mobile-menu is display:none unless .open, so this block is
-   already unreachable above 1024px. */
-.nav-palette-sheet {
-  display: block;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-.nav-palette-sheet .nav-palette-trigger {
-  width: 100%;
-  min-height: 44px;
-  padding: 12px 0;
-  font-size: var(--text-body);
-}
-
-.nav-palette-sheet .nav-palette-group {
-  display: inline;
-  font-size: var(--text-meta);
-  color: var(--text-muted);
-}
-
-.nav-palette-sheet .nav-palette-panel {
-  position: static;
-  width: 100%;
-  min-width: 0;
-  padding: 0;
-  box-shadow: none;
-}
-
-.nav-palette-sheet .nav-palette-option {
-  border-radius: 0;
 }
 
 /* ===== Buttons ===== */
@@ -554,10 +618,6 @@
   width: 20px;
   height: 20px;
 }
-.social-link span {
-  display: none;
-}
-
 
 /* ===== Section Background Gradient ===== */
 .section {
@@ -820,7 +880,8 @@
     color: var(--text-primary) !important;
     opacity: 1 !important;
   }
-  .social-links {
+  .hero .social-links,
+  .footer .social-links {
     justify-content: center;
   }
   .social-link {

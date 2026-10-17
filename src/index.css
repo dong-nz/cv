@@ -140,13 +140,15 @@
   color-scheme: light;
 }
 
-/* Picker previews: fixed identity colors so a row previews its own palette,
-   not the one currently active. Never referenced outside .nav-palette-preview. */
+/* Fixed identity colours: a picker row previews its own palette rather than the active one,
+   and the bar's palette icon keeps a constant "empty" half in both themes. Referenced only by
+   `.nav-palette-preview` (previews) and `.nav-palette-swatch` (the empty half). */
 :root {
   --preview-red-accent: #b04138;
   --preview-red-bg: #f6f5f2;
   --preview-blue-accent: #2563eb;
   --preview-blue-bg: #f4f6f9;
+  --swatch-empty: #ffffff;
 }
 
 /* Pre-hydration / no-JS: honour an OS light preference */
@@ -346,23 +348,4 @@ pre code {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* Language toggle button */
-.lang-toggle {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-  padding: 6px 10px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  transition: all 0.2s;
-}
-
-.lang-toggle:hover {
-  border-color: var(--accent);
-  color: var(--accent);
 }
