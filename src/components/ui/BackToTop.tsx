@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react"
-import { motion, AnimatePresence } from "motion/react"
+import { motion, AnimatePresence, useReducedMotion } from "motion/react"
+import { strings } from '@/i18n/strings'
+import { useLanguage } from '@/hooks/useLanguage'
 
 const SCROLL_THRESHOLD = 300
 
 export function BackToTop() {
   const [visible, setVisible] = useState(false)
+  const reduceMotion = useReducedMotion()
+  const { lang } = useLanguage()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -16,7 +20,7 @@ export function BackToTop() {
   }, [])
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
   return (
@@ -24,7 +28,7 @@ export function BackToTop() {
       {visible && (
         <motion.button
           className="back-to-top"
-          aria-label="Scroll to top"
+          aria-label={strings.common.backToTop[lang]}
           onClick={scrollToTop}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

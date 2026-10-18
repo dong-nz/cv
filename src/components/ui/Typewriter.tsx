@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useReducedMotion } from "motion/react"
 
 interface TypewriterProps {
   texts: string[]
@@ -13,11 +14,14 @@ export function Typewriter({
   deleteSpeed = 40,
   pauseDuration = 2000,
 }: TypewriterProps) {
+  const reduceMotion = useReducedMotion()
   const [currentTextIndex, setCurrentTextIndex] = useState(0)
   const [currentText, setCurrentText] = useState("")
-
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // Reduced motion: no typing loop at all — the first role is rendered whole below.
   useEffect(() => {
+    if (reduceMotion) return
     const text = texts[currentTextIndex]
     let timeout: number
 
@@ -40,12 +44,16 @@ export function Typewriter({
     }
 
     return () => clearTimeout(timeout)
-  }, [currentText, currentTextIndex, isDeleting, texts, typeSpeed, deleteSpeed, pauseDuration])
+  }, [reduceMotion, currentText, currentTextIndex, isDeleting, texts, typeSpeed, deleteSpeed, pauseDuration])
 
   return (
-    <span>
-      {currentText}
-      <span className="typewriter-cursor" />
-    </span>
+    <>
+      {/* Assistive tech gets the whole role list once; the typed prefix is decoration. */}
+      <span className="sr-only">{texts.join(', ')}</span>
+      <span aria-hidden="true">
+        {reduceMotion ? texts[0] : currentText}
+        <span className="typewriter-cursor" />
+      </span>
+    </>
   )
 }

@@ -1,7 +1,0 @@
-export { HomePage } from './HomePage'
-export { AboutPage } from './AboutPage'
-export { ExperiencePage } from './ExperiencePage'
-export { ProjectsListPage } from './ProjectsListPage'
-export { ProjectDetailPage } from './ProjectDetailPage'
-export { PhilosophyPage } from './PhilosophyPage.tsx'
-export { ContactPage } from './ContactPage'

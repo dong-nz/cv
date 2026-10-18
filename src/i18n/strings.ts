@@ -21,6 +21,9 @@ export const strings = {
         langVi: {en: 'Tiếng Việt', vi: 'Tiếng Việt'},
         langSwitch: {en: 'Switch language', vi: 'Đổi ngôn ngữ'},
         switchTo: {en: 'Switch to', vi: 'Chuyển sang'},
+        mainNav: {en: 'Main navigation', vi: 'Điều hướng chính'},
+        themeSwitch: {en: 'Switch display mode', vi: 'Đổi chế độ hiển thị'},
+        themeMode: {en: 'Display mode', vi: 'Chế độ hiển thị'},
     },
     social: {
         heading: {en: 'Connect', vi: 'Kết nối'},
@@ -113,6 +116,7 @@ export const strings = {
     },
     common: {
         resumeDownload: {en: 'Get Resume', vi: 'Tải CV'},
+        backToTop: {en: 'Scroll to top', vi: 'Cuộn lên đầu trang'},
         contactTag: {en: 'Contact', vi: 'Liên hệ'},
         experienceTag: {en: 'Experience', vi: 'Kinh nghiệm'},
     },

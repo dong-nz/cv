@@ -57,7 +57,7 @@ export function Navigation() {
 
   return (
     <>
-      <nav className="nav" role="navigation" aria-label="Main navigation">
+      <nav className="nav" role="navigation" aria-label={strings.nav.mainNav[lang]}>
         <div className="nav-container">
           <div className="nav-brand">
             {/* Trigger first, brand next: the hamburger is the sheet's own control and sits at
@@ -143,8 +143,8 @@ export function Navigation() {
             <button
               className="nav-control theme-toggle"
               onClick={cycleTheme}
-              aria-label={`Switch theme (currently ${resolvedTheme})`}
-              title={`Theme: ${resolvedTheme}`}
+              aria-label={`${strings.nav.themeSwitch[lang]} (${resolvedTheme === 'dark' ? strings.nav.themeDark[lang] : strings.nav.themeLight[lang]})`}
+              title={`${strings.nav.themeMode[lang]}: ${resolvedTheme === 'dark' ? strings.nav.themeDark[lang] : strings.nav.themeLight[lang]}`}
             >
               {resolvedTheme === 'dark' ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

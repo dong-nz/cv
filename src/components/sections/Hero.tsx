@@ -135,9 +135,12 @@ export function Hero() {
                 >
                     <motion.img
                         src="/profile-photo.webp"
-                        alt="Profile photo"
+                        alt={field(lang, profile.name, profile.nameEn)}
                         className="hero-photo"
                         style={{y}}
+                        width="1200"
+                        height="1600"
+                        fetchPriority="high"
                     />
                 </motion.div>
             </motion.section>
