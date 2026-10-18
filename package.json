@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && pnpm tsx scripts/generate-sitemap.ts",
     "build:resume": "pnpm tsx scripts/generate-resume.ts",
     "build:resume-all": "pnpm tsx scripts/generate-resume.ts --lang=en && pnpm tsx scripts/generate-resume.ts --lang=vi",
     "build:resume-preview": "pnpm tsx scripts/generate-resume.ts --preview",
     "lint": "oxlint",
+    "sitemap": "pnpm tsx scripts/generate-sitemap.ts",
     "preview": "vite preview"
   },
   "dependencies": {
