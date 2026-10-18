@@ -42,15 +42,11 @@ function getInitialPalette(): Palette {
   return 'red'
 }
 
-function resolveTheme(theme: Theme): 'dark' | 'light' {
-  return theme
-}
-
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme)
   const [palette, setPaletteState] = useState<Palette>(getInitialPalette)
 
-  const resolvedTheme = resolveTheme(theme)
+  const resolvedTheme = theme
 
   // Set data-theme during render so it's available before paint
   document.documentElement.setAttribute('data-theme', resolvedTheme)

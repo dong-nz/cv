@@ -4,7 +4,7 @@ import { InView } from '@/components/ui/InView'
 import { experiences } from '@/data/experience'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
-import { useField, useFieldArray } from '@/i18n/useField'
+import { field } from '@/i18n/field'
 
 export function ExperiencePage() {
   const { lang } = useLanguage()
@@ -34,7 +34,7 @@ export function ExperiencePage() {
             >
               <div className="timeline-marker" />
               <div className="timeline-header">
-                <div className="timeline-title">{useField(exp.title, exp.titleEn)}</div>
+                <div className="timeline-title">{field(lang, exp.title, exp.titleEn)}</div>
                 <div className="timeline-company">{exp.company}</div>
                 <div className="timeline-meta">
                   <span className="timeline-duration">{exp.duration}</span>
@@ -42,7 +42,7 @@ export function ExperiencePage() {
                 </div>
               </div>
               <ul className="timeline-responsibilities">
-                {useFieldArray(exp.responsibilities, exp.responsibilitiesEn).map((r) => (
+                {field(lang, exp.responsibilities, exp.responsibilitiesEn).map((r) => (
                   <li key={r}>{r}</li>
                 ))}
               </ul>

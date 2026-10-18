@@ -6,7 +6,7 @@ import { InView } from '@/components/ui/InView'
 import { projects } from '@/data/projects'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
-import { useField } from '@/i18n/useField'
+import { field } from '@/i18n/field'
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -64,7 +64,7 @@ export function ProjectDetailPage() {
           viewport={{ once: true, amount: 0.2 }}
           transition={itemTransition(0)}
         >
-          <h1 id="project-title" style={{ flex: 1 }}>{project.title}</h1>
+          <h1 id="project-title" style={{ flex: 1 }}>{field(lang, project.title, project.titleEn)}</h1>
           <Badge variant="outline">{strings.projects.categories[project.category][lang]}</Badge>
         </motion.div>
 
@@ -75,7 +75,7 @@ export function ProjectDetailPage() {
           viewport={{ once: true, amount: 0.2 }}
           transition={itemTransition(0.08)}
         >
-          {useField(project.summary, project.summaryEn)}
+          {field(lang, project.summary, project.summaryEn)}
         </motion.p>
 
         <div className="prose">
@@ -140,8 +140,8 @@ export function ProjectDetailPage() {
                   viewport={{ once: true, amount: 0.2 }}
                   transition={itemTransition(0.48 + idx * 0.08)}
                 >
-                  <h4>{useField(section.title, section.titleEn)}</h4>
-                  <p>{useField(section.content, section.contentEn)}</p>
+                  <h4>{field(lang, section.title, section.titleEn)}</h4>
+                  <p>{field(lang, section.content, section.contentEn)}</p>
                   <Tag accent>{section.type}</Tag>
                 </motion.div>
               ))}

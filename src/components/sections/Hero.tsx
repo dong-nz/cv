@@ -4,7 +4,7 @@ import {resumeAvailable, resumeLanguages, resumeUrlFor, resumeLanguageLabels} fr
 import type {Language} from '@/types'
 import {useLanguage} from '@/hooks/useLanguage'
 import {strings} from '@/i18n/strings'
-import {useField} from '@/i18n/useField'
+import { field } from '@/i18n/field'
 import {DownloadResumeDropdown} from '@/components/sections/DownloadResume'
 
 
@@ -71,7 +71,7 @@ export function Hero() {
                         viewport={{once: true, amount: 0.2}}
                         transition={{duration: 0.45, ease: "easeOut", delay: 0.08}}
                     >
-                        <span className="name-highlight">{useField(profile.name, profile.nameEn)}</span>
+                        <span className="name-highlight">{field(lang, profile.name, profile.nameEn)}</span>
                     </motion.h1>
                     <motion.p
                         className="hero-title"
@@ -88,7 +88,7 @@ export function Hero() {
                         whileInView={{opacity: 1, y: 0}}
                         viewport={{once: true, amount: 0.2}}
                         transition={{duration: 0.45, ease: "easeOut", delay: 0.24}}
-                        dangerouslySetInnerHTML={{__html: useField(profile.tagline, profile.taglineEn)}}
+                        dangerouslySetInnerHTML={{__html: field(lang, profile.tagline, profile.taglineEn)}}
                     />
                     <motion.div
                         className="hero-cta"

@@ -4,7 +4,7 @@ import { skillGroups } from "@/data/skills"
 import { InView } from "@/components/ui/InView"
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
-import { useField } from '@/i18n/useField'
+import { field } from '@/i18n/field'
 
 export function Expertise() {
   const { lang } = useLanguage()
@@ -34,7 +34,7 @@ export function Expertise() {
               whileHover={{ scale: 1.02, y: -4 }}
               whileTap={{ scale: 0.98 }}
             >
-              <h3>{useField(group.title, group.titleEn)}</h3>
+              <h3>{field(lang, group.title, group.titleEn)}</h3>
               <ul className="expertise-skills">
                 {group.skills.map((skill) => (
                   <li key={skill} className="expertise-skill">

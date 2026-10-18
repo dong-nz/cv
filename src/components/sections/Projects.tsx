@@ -6,7 +6,7 @@ import { projects } from "@/data/projects"
 import { InView } from "@/components/ui/InView"
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
-import { useField } from '@/i18n/useField'
+import { field } from '@/i18n/field'
 
 const MotionLink = motion.create(Link)
 
@@ -49,12 +49,12 @@ export function Projects() {
             >
               <div className="project-card-content">
                 <div className="project-card-header">
-                  <h3>{project.title}</h3>
+                  <h3>{field(lang, project.title, project.titleEn)}</h3>
                   <Badge variant="outline">
                     {strings.projects.categories[project.category][lang]}
                   </Badge>
                 </div>
-                <p className="project-card-summary">{useField(project.summary, project.summaryEn)}</p>
+                <p className="project-card-summary">{field(lang, project.summary, project.summaryEn)}</p>
                 <div className="project-card-techs">
                   {project.technologies.slice(0, 4).map((tech) => (
                     <span key={tech} className="tag">

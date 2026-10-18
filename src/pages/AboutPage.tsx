@@ -6,7 +6,7 @@ import { profile } from '@/data/profile'
 import { skillGroups } from '@/data/skills'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
-import { useField } from '@/i18n/useField'
+import { field } from '@/i18n/field'
 
 export function AboutPage() {
   const { lang } = useLanguage()
@@ -30,7 +30,7 @@ export function AboutPage() {
             tag={strings.about.heading[lang]}
           />
           <p className="prose-lede lede-wide">
-            {useField(profile.bio, profile.bioEn)}
+            {field(lang, profile.bio, profile.bioEn)}
           </p>
 
           <h3 className="subheading">
@@ -48,8 +48,8 @@ export function AboutPage() {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <h3>{point.title}</h3>
-                <p>{point.description}</p>
+                <h3>{field(lang, point.title, point.titleEn)}</h3>
+                <p>{field(lang, point.description, point.descriptionEn)}</p>
                 <div className="philosophy-keywords">
                   {point.keywords.map((kw) => (
                     <Tag key={kw}>{kw}</Tag>
@@ -96,7 +96,7 @@ export function AboutPage() {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <h3>{useField(group.title, group.titleEn)}</h3>
+                <h3>{field(lang, group.title, group.titleEn)}</h3>
                 <ul className="expertise-skills">
                   {group.skills.map((skill: string) => (
                     <li key={skill} className="expertise-skill">

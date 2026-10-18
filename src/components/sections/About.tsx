@@ -5,7 +5,7 @@ import { Tag } from '@/components/ui/Tag'
 import { profile } from '@/data/profile'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
-import { useField } from '@/i18n/useField'
+import { field } from '@/i18n/field'
 export function About() {
   const { lang } = useLanguage()
   return (
@@ -23,7 +23,7 @@ export function About() {
       >
         <SectionHeading title={strings.about.heading[lang]} tag={strings.about.heading[lang]} />
         <p className="prose-lede lede-wide">
-          {useField(profile.bio, profile.bioEn)}
+          {field(lang, profile.bio, profile.bioEn)}
         </p>
 
         <h3 className="subheading">
@@ -41,8 +41,8 @@ export function About() {
               whileHover={{ scale: 1.02, y: -4 }}
               whileTap={{ scale: 0.98 }}
             >
-              <h3>{point.title}</h3>
-              <p>{point.description}</p>
+              <h3>{field(lang, point.title, point.titleEn)}</h3>
+              <p>{field(lang, point.description, point.descriptionEn)}</p>
               <div className="philosophy-keywords">
                 {point.keywords.map((kw) => (
                   <Tag key={kw}>{kw}</Tag>
