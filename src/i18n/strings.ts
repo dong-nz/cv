@@ -43,7 +43,6 @@ export const strings = {
         greeting: {en: "Hi, I'm", vi: 'Xin chào, tôi là'},
         ctaProjects: {en: 'View Projects', vi: 'Xem dự án'},
         ctaContact: {en: 'Contact Me', vi: 'Liên hệ'},
-        downloadResume: {en: 'Download Resume', vi: 'Tải CV'},
         scroll: {en: 'Scroll', vi: 'Cuộn'},
     },
     about: {
@@ -98,11 +97,6 @@ export const strings = {
     },
     philosophy: {
         heading: {en: 'Philosophy', vi: 'Triết lý'},
-        categories: {
-            architecture: {en: 'Architecture', vi: 'Kiến trúc'},
-            ai_ml: {en: 'AI / ML', vi: 'AI / ML'},
-            experiments: {en: 'Experiments', vi: 'Thử nghiệm'},
-        },
         quotes: [
             {
                 title: {en: 'Time is priceless', vi: 'Thời gian là vô giá'},
@@ -116,13 +110,8 @@ export const strings = {
                 },
             }
         ],
-        comingSoon: {
-            en: 'Content coming soon. This section will showcase deep technical exploration in %s.',
-            vi: 'Nội dung sắp ra mắt. Phần này sẽ giới thiệu các khám phá kỹ thuật chuyên sâu về %s.'
-        },
     },
     common: {
-        backTo: {en: 'Back to %s', vi: 'Quay lại %s'},
         resumeDownload: {en: 'Get Resume', vi: 'Tải CV'},
         contactTag: {en: 'Contact', vi: 'Liên hệ'},
         experienceTag: {en: 'Experience', vi: 'Kinh nghiệm'},

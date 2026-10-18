@@ -97,22 +97,6 @@ function renderExperience(exps: typeof experiences): string {
       <ul class="exp-responsibilities">
         ${resolveField(exp.responsibilitiesEn, exp.responsibilities).map(r => `<li>${r}</li>`).join('')}
       </ul>
-      ${exp.achievements?.map(ach => `
-        <div class="achievement avoid-break">
-          <div class="achievement-title">${resolveField(ach.titleEn, ach.title)}</div>
-          <div class="achievement-context">${resolveField(ach.contextEn, ach.context)}</div>
-          ${ach.technicalWork?.length ? `
-            <ul class="achievement-technical">
-              ${ach.technicalWork.map(t => `<li>${t}</li>`).join('')}
-            </ul>
-          ` : ''}
-          <div class="achievement-tech">
-            ${ach.technologies.map(t => `<span>${t}</span>`).join('')}
-          </div>
-          ${ach.impact ? `<div class="achievement-impact">${resolveField(ach.impactEn, ach.impact)}</div>` : ''}
-          ${ach.metrics?.length ? `<div class="achievement-metrics">${ach.metrics.join(', ')}</div>` : ''}
-        </div>
-      `).join('')}
     </div>
   `).join('');
 }

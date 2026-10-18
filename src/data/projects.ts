@@ -17,7 +17,6 @@ export const projects: ProjectDetail[] = [
     sections: [
       {
         id: "context",
-        number: 1,
         title: "Context",
         titleEn: "Context",
         content:
@@ -28,7 +27,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "problem",
-        number: 2,
         title: "Problem",
         titleEn: "Problem",
         content:
@@ -39,7 +37,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "solution",
-        number: 4,
         title: "Solution",
         titleEn: "Solution",
         content:
@@ -50,7 +47,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "architecture",
-        number: 5,
         title: "Architecture",
         titleEn: "Architecture",
         content:
@@ -61,7 +57,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "challenges",
-        number: 7,
         title: "Challenges",
         titleEn: "Challenges",
         content:
@@ -72,7 +67,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "result",
-        number: 8,
         title: "Result",
         titleEn: "Result",
         content:
@@ -99,7 +93,6 @@ export const projects: ProjectDetail[] = [
     sections: [
       {
         id: "context",
-        number: 1,
         title: "Context",
         titleEn: "Context",
         content:
@@ -110,7 +103,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "problem",
-        number: 2,
         title: "Problem",
         titleEn: "Problem",
         content:
@@ -121,7 +113,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "pipeline",
-        number: 4,
         title: "Pipeline",
         titleEn: "Pipeline",
         content:
@@ -132,7 +123,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "challenges",
-        number: 7,
         title: "Challenges",
         titleEn: "Challenges",
         content:
@@ -143,7 +133,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "result",
-        number: 8,
         title: "Result",
         titleEn: "Result",
         content:
@@ -169,7 +158,6 @@ export const projects: ProjectDetail[] = [
     sections: [
       {
         id: "vision",
-        number: 1,
         title: "Vision",
         titleEn: "Vision",
         content:
@@ -180,7 +168,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "architecture",
-        number: 5,
         title: "Architecture",
         titleEn: "Architecture",
         content:
@@ -191,7 +178,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "result",
-        number: 8,
         title: "Result",
         titleEn: "Result",
         content:
@@ -217,7 +203,6 @@ export const projects: ProjectDetail[] = [
     sections: [
       {
         id: "exploration",
-        number: 1,
         title: "Exploration",
         titleEn: "Exploration",
         content:
@@ -228,7 +213,6 @@ export const projects: ProjectDetail[] = [
       },
       {
         id: "learnings",
-        number: 9,
         title: "Lessons Learned",
         titleEn: "Lessons Learned",
         content:

@@ -1115,28 +1115,20 @@
 
 
 /* Desktop: show dropdown, hide mobile buttons */
-.download-resume-desktop,
 .hero-download-desktop {
   display: block;
 }
 
-.download-resume-mobile,
 .hero-download-mobile {
   display: none;
 }
 
 /* Mobile: show 2 buttons, hide dropdown */
 @media (max-width: 768px) {
-  .download-resume-desktop,
   .hero-download-desktop {
     display: none;
   }
 
-  .download-resume-mobile {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
   .hero-download-mobile {
     display: flex;
     flex-direction: column;

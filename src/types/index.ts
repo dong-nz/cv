@@ -27,7 +27,6 @@ export interface Project {
 
 export interface ProjectSection {
   id: string;
-  number: number;
   title: string;
   titleEn?: string;
   content: string;
@@ -48,22 +47,7 @@ export interface ExperienceEntry {
   location?: string;
   responsibilities: string[];
   responsibilitiesEn?: string[];
-  achievements?: FeaturedAchievement[];
   variant?: 'current' | 'gap';
-}
-
-export interface FeaturedAchievement {
-  id: string;
-  title: string;
-  titleEn?: string;
-  context: string;
-  contextEn?: string;
-  technicalWork: string[];
-  impact: string;
-  impactEn?: string;
-  metrics?: string[];
-  technologies: string[];
-  featured: boolean;
 }
 
 export interface SkillGroup {
