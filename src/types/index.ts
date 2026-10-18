@@ -23,8 +23,6 @@ export interface Project {
   technologies: string[];
   metrics?: string[];
   featured: boolean;
-  githubUrl?: string;
-  demoUrl?: string;
 }
 
 export interface ProjectSection {
@@ -96,7 +94,8 @@ export interface Profile {
   email: string;
   githubUrl: string;
   linkedinUrl: string;
-  resumeUrl?: string;
+  githubHandle: string;
+  linkedinHandle: string;
   currentInterests: string[];
   roles: string[];
   philosophy: PhilosophyPoint[];

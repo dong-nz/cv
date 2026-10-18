@@ -58,7 +58,7 @@ export function ContactPage() {
           </svg>
           <div>
             <div className="link-label">{strings.contact.github[lang]}</div>
-            <div className="contact-link-sub">@dong-nz</div>
+            <div className="contact-link-sub">@{profile.githubHandle}</div>
           </div>
         </motion.a>
         <motion.a
@@ -78,7 +78,7 @@ export function ContactPage() {
           </svg>
           <div>
             <div className="link-label">{strings.contact.linkedin[lang]}</div>
-            <div className="contact-link-sub">@dong-nz</div>
+            <div className="contact-link-sub">@{profile.linkedinHandle}</div>
           </div>
         </motion.a>
       </div>

@@ -16,6 +16,8 @@ export const profile: Profile = {
     email: "nguyendong_bkdn@yahoo.com",
     githubUrl: "https://github.com/dong-nz",
     linkedinUrl: "https://www.linkedin.com/in/dong-nz",
+    githubHandle: "dong-nz",
+    linkedinHandle: "dong-nz",
     currentInterests: [
         "AI in logistics",
         "Digital twins",

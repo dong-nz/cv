@@ -3,7 +3,7 @@ import type { ProjectDetail } from "@/types";
 export const projects: ProjectDetail[] = [
   {
     id: "iot-dws-integration",
-    title: "IoT-DWS Integration System",
+    title: "Tích hợp hệ thống IoT-DWS",
     titleEn: "IoT-DWS Integration System",
     summary:
       "Thiết kế và triển khai hệ thống integration giữa IoT devices và DWS (Dimensioning Weighing Scanning) machines cho 16 sortations.",
@@ -14,7 +14,6 @@ export const projects: ProjectDetail[] = [
     technologies: ["Java", "HTTP", "HMAC", "RocketMQ", "DWS"],
     metrics: ["16 sortations deployed"],
     featured: true,
-    githubUrl: "https://github.com/yourusername",
     sections: [
       {
         id: "context",

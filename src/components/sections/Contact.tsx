@@ -79,7 +79,7 @@ export function Contact() {
                 {strings.contact.github[lang]}
               </div>
               <div className="contact-link-sub">
-                @yourusername
+                @{profile.githubHandle}
               </div>
             </div>
           </motion.a>
@@ -108,7 +108,7 @@ export function Contact() {
                 {strings.contact.linkedin[lang]}
               </div>
               <div className="contact-link-sub">
-                Your Name
+                @{profile.linkedinHandle}
               </div>
             </div>
           </motion.a>
