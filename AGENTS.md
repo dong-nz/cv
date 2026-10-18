@@ -22,10 +22,11 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 | Command | Description |
 |---------|-------------|
 | `pnpm dev` | Start dev server with HMR |
-| `pnpm build` | Type-check (`tsc -b`) then build for production |
+| `pnpm build` | Type-check (`tsc -b`), build for production, then generate `dist/sitemap.xml` |
 | `pnpm build:resume` | Generate resume PDF (default EN) via Playwright |
 | `pnpm build:resume-all` | Generate bilingual resume PDFs (EN + VI) |
 | `pnpm lint` | Run Oxlint |
+| `pnpm sitemap` | Regenerate `dist/sitemap.xml` on its own (also run by `pnpm build`) |
 | `pnpm preview` | Preview production build locally |
 
 ## Routing
@@ -34,6 +35,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 - Layout: `<Navigation>` (top) → `<main id="main-content">` → `<Footer>` (bottom)
 - All internal navigation MUST use `<Link>`/`<NavLink>`, never `<a href>` (causes full page reload)
 - Footer internal links also use `<Link>`; external links (GitHub, LinkedIn, email) keep `<a>` with `target="_blank"`
+- Route-level splitting: `HomePage` is imported eagerly because it owns the LCP; the other six pages load through `React.lazy` inside one `<Suspense fallback={null}>` boundary in `App.tsx`. Pages export named components, so each factory maps the named export to `default`
 
 ## Pages
 
@@ -64,7 +66,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 
 ## Data Layer
 
-- `src/data/profile.ts` — name, title, bio, links
+- `src/data/profile.ts` — name, title, bio, links, social handles (`githubHandle`, `linkedinHandle`) — the Contact cards render `@{profile.githubHandle}`, never a literal
 - `src/data/skills.ts` — skill groups → skills
 - `src/data/experience.ts` — work history entries; optional `variant: 'current' | 'gap'` selects the timeline decoration (live node / career break)
 - `src/data/projects.ts` — project cards with categories
@@ -72,6 +74,8 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 - `src/data/navigation.ts` — `navPaths` (bar + sheet order: Home, About, Experience, Projects, Contact, Philosophy), `footerPaths`
 - `src/data/social.ts` — social tiles as `{id, href, external}`; `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
 - `src/i18n/strings.ts` — every chrome string as `{en, vi}`; the sheet's group labels, the Mode options, the language names (`langEn` / `langVi`, each named in its own language) and the language action labels (`langSwitch`, `switchTo`) live in `strings.nav`, the social `aria-label`s in `strings.social`
+- `src/data/site.ts` — `siteUrl` (the canonical origin) and `siteName`; every absolute URL the site publishes — canonical, Open Graph, JSON-LD, `robots.txt`, `sitemap.xml` — derives from it
+- `src/i18n/field.ts` — `field(lang, value, valueEn)` is a plain function, not a hook: `lang` is read once at component top level with `useLanguage()`, so bilingual selection is legal inside `.map()` callbacks. Convention: `value` is Vietnamese, `valueEn` English
 
 ## Component Structure
 
@@ -81,10 +85,9 @@ src/
     layout/     — Layout.tsx, Navigation.tsx, MobileMenu.tsx, Footer.tsx, ThemePaletteMenu.tsx
     sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume
     ui/         — Badge, Button, LanguageIcon, SectionHeading, SocialLinks, Tag, Typewriter, InView, RollingTextLink, BackToTop
-    index.ts    — barrel export
-  data/         — profile, skills, experience, projects, resume, palettes, navigation, social (TS modules)
+  data/         — profile, skills, experience, projects, resume, palettes, navigation, social, site (TS modules)
   hooks/        — useTheme.tsx, useLanguage.tsx, useClickOutside.ts
-  pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage, index.ts
+  pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage
   types/        — shared TypeScript interfaces
 ```
 
@@ -103,13 +106,14 @@ src/
 ## External Assets
 
 - `public/fonts/` — Source Sans 3 woff2 (Regular, Medium, Semibold, Bold); used by the resume generator only — the SPA renders `system-ui`
-- `public/icons.svg` — SVG sprite for icons
 - `public/resume-template.html` — HTML template for resume PDF generation
 - `public/profile-photo.webp` — profile photo
+- `public/robots.txt` — allow-all crawler rules plus the `Sitemap:` pointer to the canonical origin
 
 ## Scripts
 
 - `scripts/generate-resume.ts` — Playwright-based PDF resume generator (bilingual en/vi)
+- `scripts/generate-sitemap.ts` — writes `dist/sitemap.xml` from `src/data/site.ts`, `navPaths` and the project list; fails if `dist/` is missing or if `dist/index.html` no longer contains `siteUrl`
 
 ## Deployment
 
@@ -149,6 +153,8 @@ docker-compose.yaml
 2. **Import path:** All router imports use `react-router` (not `react-router-dom`) — e.g., `import { Link, useLocation } from 'react-router'`
 3. **Animation imports:** Use `motion/react` (v14 ESM), NOT `framer-motion` — e.g., `import { motion, AnimatePresence } from 'motion/react'`
 4. **Footer/Nav links:** Must use `<Link to>`, not `<a href>` for client-side navigation
+5. **Bilingual plumbing is done, the content is not:** `field(lang, value, valueEn)` resolves correctly, but most content has no second language — `skills.ts` group titles are identical in both languages, `projects.ts` titles differ for 1 of 4 projects, and `role` / `technologies` / `metrics` / `duration` / `company` in `experience.ts` have no `*En` variants at all. Translating means adding data, never changing a component
+6. **`lazy()` needs a default export:** pages export named components, so each factory must map `{ default: m.XPage }` — a bare `import('@/pages/XPage')` fails `tsc` with `TS2322: Property 'default' is missing`. There is no `src/pages/index.ts` barrel: importing it would pull every route back into the entry chunk
 
 ## Design Specs
 
@@ -161,7 +167,7 @@ All specification documents are in `docs/design/`:
 | `spec-v2.md` | v2 index — overview, implementation order, feature list |
 | `specs/ui/spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
 | `specs/v2/spec-v2-*.md` | v2 feature specs (resume, seo, blog, analytics, testing, cicd) |
-| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, theme palette switch, UI enhancements, mobile navigation, nav & CTA enhancements) |
+| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, theme palette switch, palette reference, UI enhancements, mobile navigation, nav & CTA enhancements, nav swatch & hamburger, typography, i18n, resume improvements, review fixes) |
 
 Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 

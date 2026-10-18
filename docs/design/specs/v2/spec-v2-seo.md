@@ -64,9 +64,11 @@ Mỗi page có OG tags:
 
 ## Acceptance
 
-- [ ] Mỗi page có `<title>` và `<meta description>` riêng
-- [ ] OG tags đúng trên mỗi page
-- [ ] `sitemap.xml` generated tại build
-- [ ] `robots.txt` có trong `public/`
-- [ ] JSON-LD structured data
-- [ ] Canonical URL đúng
+- [~] Homepage `<title>` + `<meta description>` are real (Bundle D of `specs/v3/spec-v3-review-fixes.md`). Per-route titles/descriptions are still open: the SPA serves one head for every route, so `/about` and `/projects/{id}` report the homepage metadata. Closing this needs head management in React or build-time prerender
+- [~] OG tags are correct for the homepage URL, including `og:image` with explicit 1200×1600 and alt text. Per-page `og:title` / `og:url` are not emitted, for the same reason
+- [x] `sitemap.xml` generated at build — `scripts/generate-sitemap.ts`, chained into `pnpm build`, 10 urls (6 `navPaths` + 4 `/projects/{id}`), each with `lastmod`
+- [x] `robots.txt` in `public/` — allow-all plus the `Sitemap:` pointer to the canonical origin
+- [x] JSON-LD structured data — `Person` on the homepage with `sameAs` GitHub/LinkedIn and a `PostalAddress`. `BreadcrumbList` and the blog `Article` schema remain open
+- [x] Canonical URL correct — `https://cv.vugado.com/` in `index.html`; `src/data/site.ts` is the single source the sitemap derives from, and the generator fails the build if `dist/index.html` no longer contains it
+
+Measurements and HTTP probes: `specs/v3/spec-v3-review-fixes.md` §5.1.
