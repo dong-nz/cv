@@ -66,13 +66,13 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 
 ## Data Layer
 
-- `src/data/profile.ts` — name, title, bio, links, social handles (`githubHandle`, `linkedinHandle`) — the Contact cards render `@{profile.githubHandle}`, never a literal
+- `src/data/profile.ts` — name, title, bio, links, social handles (`githubHandle`, `linkedinHandle`, `telegramHandle`), messaging URLs (`telegramUrl`, `zaloUrl`) — the Contact cards render `@{profile.githubHandle}`, never a literal
 - `src/data/skills.ts` — skill groups → skills
 - `src/data/experience.ts` — work history entries; optional `variant: 'current' | 'gap'` selects the timeline decoration (live node / career break)
 - `src/data/projects.ts` — project cards with categories
 - `src/data/resume.ts` — resume availability, supported languages, URL generation
 - `src/data/navigation.ts` — `navPaths` (bar + sheet order: Home, About, Experience, Projects, Contact, Philosophy), `footerPaths`
-- `src/data/social.ts` — social tiles as `{id, href, external}`; `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
+- `src/data/social.ts` — social tiles as `{id, href, external}` (github, linkedin, email, telegram, zalo); `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
 - `src/i18n/strings.ts` — every chrome string as `{en, vi}`; the sheet's group labels, the Mode options, the language names (`langEn` / `langVi`, each named in its own language) and the language action labels (`langSwitch`, `switchTo`) live in `strings.nav`, the social `aria-label`s in `strings.social`
 - `src/data/site.ts` — `siteUrl` (the canonical origin) and `siteName`; every absolute URL the site publishes — canonical, Open Graph, JSON-LD, `robots.txt`, `sitemap.xml` — derives from it
 - `src/i18n/field.ts` — `field(lang, value, valueEn)` is a plain function, not a hook: `lang` is read once at component top level with `useLanguage()`, so bilingual selection is legal inside `.map()` callbacks. Convention: `value` is Vietnamese, `valueEn` English
@@ -84,7 +84,7 @@ src/
   components/
     layout/     — Layout.tsx, Navigation.tsx, MobileMenu.tsx, Footer.tsx, ThemePaletteMenu.tsx
     sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume
-    ui/         — Badge, Button, LanguageIcon, SectionHeading, SocialLinks, Tag, Typewriter, InView, RollingTextLink, BackToTop
+    ui/         — Badge, Button, ContactLinks, LanguageIcon, SectionHeading, SocialLinks, Tag, Typewriter, InView, RollingTextLink, BackToTop, icons
   data/         — profile, skills, experience, projects, resume, palettes, navigation, social, site (TS modules)
   hooks/        — useTheme.tsx, useLanguage.tsx, useClickOutside.ts
   pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage
@@ -107,6 +107,8 @@ src/
 
 - `public/fonts/` — Source Sans 3 woff2 (Regular, Medium, Semibold, Bold); used by the resume generator only — the SPA renders `system-ui`
 - `public/resume-template.html` — HTML template for resume PDF generation
+- `public/resume-logos/` — official company logo SVGs (Lazada, SAP from Wikimedia Commons), embedded in the resume timeline via `ExperienceEntry.logo`
+- `public/resume-qr/` — owner-supplied QR images (`telegram.png`, `zalo.png`) embedded in the resume header via `resumeQr` in `src/data/resume.ts`; private assets, NOT committed — a missing file prints a warning and the QR is skipped
 - `public/profile-photo.webp` — profile photo
 - `public/robots.txt` — allow-all crawler rules plus the `Sitemap:` pointer to the canonical origin
 
@@ -167,7 +169,7 @@ All specification documents are in `docs/design/`:
 | `spec-v2.md` | v2 index — overview, implementation order, feature list |
 | `specs/ui/spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
 | `specs/v2/spec-v2-*.md` | v2 feature specs (resume, seo, blog, analytics, testing, cicd) |
-| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, theme palette switch, palette reference, UI enhancements, mobile navigation, nav & CTA enhancements, nav swatch & hamburger, typography, i18n, resume improvements, review fixes) |
+| `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, theme palette switch, palette reference, UI enhancements, mobile navigation, nav & CTA enhancements, nav swatch & hamburger, typography, i18n, resume improvements, resume redesign, review fixes) |
 
 Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 

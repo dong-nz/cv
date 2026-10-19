@@ -1,19 +1,32 @@
 import { chromium } from 'playwright';
-import { readFileSync, existsSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { profile } from '../src/data/profile.js';
 import { experiences } from '../src/data/experience.js';
 import { skillGroups } from '../src/data/skills.js';
 import { projects } from '../src/data/projects.js';
+import { resumeQr } from '../src/data/resume.js';
+import { siteUrl } from '../src/data/site.js';
+import { strings } from '../src/i18n/strings.js';
 import type { Language } from '../src/types/index.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
 // --- CLI args ---
 const args = process.argv.slice(2);
-const langArg = (args.find(a => a.startsWith('--lang=')) || '').replace('--lang=', '') as Language;
-const lang: Language = (langArg === 'en' || langArg === 'vi') ? langArg : 'en';
+const langArg = (args.find(a => a.startsWith('--lang=')) || '').replace('--lang=', '');
 const previewMode = args.includes('--preview');
+
+let langs: Language[];
+if (langArg === 'all') {
+  if (previewMode) {
+    console.error('❌ --lang=all cannot be combined with --preview (preview renders one language)');
+    process.exit(1);
+  }
+  langs = ['en', 'vi'];
+} else {
+  langs = [langArg === 'vi' ? 'vi' : 'en'];
+}
 
 // --- Validate required files ---
 const requiredFiles = [
@@ -42,7 +55,7 @@ const fonts: Record<string, string> = {};
 for (const [name, weight] of [
   ['REGULAR', 'SourceSans3-Regular.woff2'],
   ['MEDIUM', 'SourceSans3-Medium.woff2'],
-  ['SEMIBOLD', 'SourceSans3-Semibold.woff2'],
+  ['SEMIBOLD', 'SourceSans3-Semibold.woff2',],
   ['BOLD', 'SourceSans3-Bold.woff2'],
 ] as const) {
   fonts[name] = readFileSync(join(ROOT, 'public/fonts', weight)).toString('base64');
@@ -60,6 +73,34 @@ const fontFaces = Object.entries(fonts).map(([key, b64]) => {
 }`;
 }).join('\n');
 
+// --- Company logos: load every logo referenced by experience entries ---
+const logoIds = [...new Set(experiences.map(exp => exp.logo).filter((id): id is string => id !== undefined))];
+const logos: Record<string, string> = {};
+for (const id of logoIds) {
+  const logoFile = join(ROOT, 'public/resume-logos', `${id}.svg`);
+  if (!existsSync(logoFile)) {
+    console.error(`❌ Missing logo asset: public/resume-logos/${id}.svg`);
+    process.exit(1);
+  }
+  logos[id] = readFileSync(logoFile).toString('base64');
+}
+
+// --- QR codes: owner-exported images from the Telegram/Zalo apps ---
+// These are private, owner-supplied assets (not committed). A missing file is
+// reported loudly but does not block the build — the resume still ships without it.
+const qrMime: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg' };
+const qrAssets: { label: string; dataUri: string }[] = [];
+for (const q of resumeQr) {
+  const file = join(ROOT, 'public/resume-qr', q.file);
+  if (!existsSync(file)) {
+    console.warn(`⚠️  QR asset missing: public/resume-qr/${q.file} — ${q.label} QR skipped`);
+    continue;
+  }
+  const ext = q.file.split('.').pop() ?? '';
+  const mime = qrMime[ext] ?? 'image/png';
+  qrAssets.push({ label: q.label, dataUri: `data:${mime};base64,${readFileSync(file).toString('base64')}` });
+}
+
 // --- Version stamp date ---
 const updatedDate = new Date().toISOString().slice(0, 10);
 
@@ -69,103 +110,163 @@ const labels: Record<Language, Record<string, string>> = {
     EXPERIENCE: 'Experience',
     SKILLS: 'Skills',
     PROJECTS: 'Projects',
-    ABOUT_ME: 'About me',
+    UPDATED: 'Last updated',
+    QR_ALT: 'QR code',
   },
   vi: {
     EXPERIENCE: 'Kinh nghiệm',
     SKILLS: 'Kỹ năng',
     PROJECTS: 'Dự án',
-    ABOUT_ME: 'Về tôi',
+    UPDATED: 'Cập nhật lần cuối',
+    QR_ALT: 'mã QR',
   },
 };
 
 // --- Resolve bilingual field ---
-function resolveField<T>(en?: T, vi?: T): T {
-  return lang === 'en' && en !== undefined ? en : (vi !== undefined ? vi : en as T);
+function resolveField<T>(en: T | undefined, vi: T | undefined, lang: Language): T {
+  return lang === 'en' && en !== undefined ? en : (vi !== undefined ? vi : (en as T));
+}
+
+// --- Escape data strings before injection ---
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// QR block: owner-exported Telegram/Zalo QR images, right side of the header
+function renderQr(lang: Language): string {
+  return qrAssets
+    .map(q => `
+      <div class="qr-item">
+        <img class="qr-img" src="${q.dataUri}" alt="${escapeHtml(`${q.label} ${labels[lang].QR_ALT}`)}" />
+        <span class="qr-label">${escapeHtml(q.label)}</span>
+      </div>`)
+    .join('');
 }
 
 // --- Render HTML helpers ---
-function renderExperience(exps: typeof experiences): string {
-  return exps.map(exp => `
-    <div class="exp-entry avoid-break">
+function renderExperience(exps: typeof experiences, lang: Language): string {
+  return exps
+    // open-to-work (variant 'current') is excluded from the resume PDF entirely
+    .filter(exp => exp.variant !== 'current')
+    .map(exp => {
+      const variantClass = exp.variant ? ` ${exp.variant}` : '';
+      const companyLine = [exp.company, exp.location].filter(Boolean).join(' · ');
+      const responsibilities = resolveField(exp.responsibilitiesEn, exp.responsibilities, lang);
+      return `
+    <div class="exp-entry avoid-break${variantClass}">
       <div class="exp-header">
-        <span class="exp-title">${resolveField(exp.titleEn, exp.title)}</span>
-        <span class="exp-duration">${exp.duration}</span>
+        <span class="exp-title">${escapeHtml(resolveField(exp.titleEn, exp.title, lang))}</span>
+        <span class="exp-duration">${escapeHtml(exp.duration)}</span>
       </div>
-      <div class="exp-company">${exp.company}</div>
-      ${exp.location ? `<div class="exp-location">${exp.location}</div>` : ''}
+      <div class="exp-company">${exp.logo ? `<img class="exp-logo" src="data:image/svg+xml;base64,${logos[exp.logo]}" alt="" />` : ''}${escapeHtml(companyLine)}</div>
       <ul class="exp-responsibilities">
-        ${resolveField(exp.responsibilitiesEn, exp.responsibilities).map(r => `<li>${r}</li>`).join('')}
+        ${responsibilities.map(r => `<li>${escapeHtml(r)}</li>`).join('')}
       </ul>
     </div>
-  `).join('');
+  `;
+    })
+    .join('');
 }
 
-function renderSkills(groups: typeof skillGroups): string {
+function renderTldr(lang: Language): string {
+  return `
+    <div class="timeline-tldr avoid-break">
+      <div class="timeline-tldr-chip">${escapeHtml(strings.experience.tldr[lang])}</div>
+      <div class="timeline-tldr-text">${escapeHtml(strings.experience.tldrText[lang])}</div>
+    </div>
+  `;
+}
+
+function renderSkills(groups: typeof skillGroups, lang: Language): string {
   return groups.map(group => `
-    <div class="avoid-break">
-      <div class="skill-group-title">${resolveField(group.titleEn, group.title)}</div>
-      <div class="skill-list">${group.skills.join(' · ')}</div>
+    <div class="skill-group avoid-break">
+      <div class="skill-group-title">${escapeHtml(resolveField(group.titleEn, group.title, lang))}</div>
+      <div class="skill-list">${group.skills.map(skill => escapeHtml(skill)).join(' · ')}</div>
     </div>
   `).join('');
 }
 
-function renderProjects(projs: typeof projects): string {
+function renderProjects(projs: typeof projects, lang: Language): string {
   return projs.map(project => `
     <div class="project avoid-break">
-      <div class="project-title">${resolveField(project.titleEn, project.title)}</div>
-      <div class="project-role">${project.role}</div>
-      <div class="project-summary">${resolveField(project.summaryEn, project.summary)}</div>
+      <div class="project-title">${escapeHtml(resolveField(project.titleEn, project.title, lang))}</div>
+      <div class="project-role">${escapeHtml(project.role)}</div>
+      <div class="project-summary">${escapeHtml(resolveField(project.summaryEn, project.summary, lang))}</div>
       <div class="project-tech">
-        ${project.technologies.map(t => `<span>${t}</span>`).join('')}
+        ${project.technologies.map(t => `<span>${escapeHtml(t)}</span>`).join('')}
       </div>
-      ${project.metrics?.length ? `<div class="project-metrics">${project.metrics.join(', ')}</div>` : ''}
     </div>
   `).join('');
 }
 
 // --- Assemble HTML ---
-const html = template
-  .replace('{{NAME}}', resolveField(profile.nameEn, profile.name))
-  .replace('{{TITLE}}', resolveField(profile.titleEn, profile.title))
-  .replace('{{BIO}}', resolveField(profile.bioEn, profile.bio))
-  .replace('{{EMAIL}}', profile.email)
-  .replace('{{GITHUB}}', profile.githubUrl)
-  .replace('{{LINKEDIN}}', profile.linkedinUrl)
-  .replace('{{PHOTO_BASE64}}', photoBase64)
-  .replace('{{FONT_FACES}}', fontFaces)
-  .replace('{{UPDATED_DATE}}', updatedDate)
-  .replace('{{LANG}}', lang)
-  .replace('{{ABOUT_ME_LABEL}}', labels[lang].ABOUT_ME)
-  .replace('{{EXPERIENCE_LABEL}}', labels[lang].EXPERIENCE)
-  .replace('{{SKILLS_LABEL}}', labels[lang].SKILLS)
-  .replace('{{PROJECTS_LABEL}}', labels[lang].PROJECTS)
-  .replace('{{EXPERIENCE}}', renderExperience(experiences))
-  .replace('{{SKILLS}}', renderSkills(skillGroups))
-  .replace('{{PROJECTS}}', renderProjects(projects));
+function buildHtml(lang: Language): string {
+  const fills: Array<[string, string]> = [
+    ['{{NAME}}', escapeHtml(resolveField(profile.nameEn, profile.name, lang))],
+    ['{{TITLE}}', escapeHtml(resolveField(profile.titleEn, profile.title, lang))],
+    ['{{BIO}}', escapeHtml(resolveField(profile.bioEn, profile.bio, lang))],
+    ['{{EMAIL}}', escapeHtml(profile.email)],
+    ['{{GITHUB_URL}}', escapeHtml(profile.githubUrl)],
+    ['{{LINKEDIN_URL}}', escapeHtml(profile.linkedinUrl)],
+    ['{{PHOTO_BASE64}}', photoBase64],
+    ['{{FONT_FACES}}', fontFaces],
+    ['{{UPDATED_DATE}}', updatedDate],
+    ['{{UPDATED_LABEL}}', labels[lang].UPDATED],
+    ['{{SITE_URL}}', escapeHtml(siteUrl)],
+    ['{{LANG}}', lang],
+    ['{{EXPERIENCE_LABEL}}', labels[lang].EXPERIENCE],
+    ['{{SKILLS_LABEL}}', labels[lang].SKILLS],
+    ['{{PROJECTS_LABEL}}', labels[lang].PROJECTS],
+    ['{{EXPERIENCE}}', renderExperience(experiences, lang)],
+    ['{{TLDR}}', renderTldr(lang)],
+    ['{{SKILLS}}', renderSkills(skillGroups, lang)],
+    ['{{PROJECTS}}', renderProjects(projects, lang)],
+    ['{{QR_CODES}}', renderQr(lang)],
+  ];
+  return fills.reduce((html, [key, value]) => html.split(key).join(value), template);
+}
+
+// --- Build per language; fail fast on unresolved placeholders ---
+const pages: Record<Language, string> = { en: '', vi: '' };
+for (const lang of langs) {
+  const html = buildHtml(lang);
+  const leftover = html.match(/\{\{[A-Z_]+\}\}/g);
+  if (leftover) {
+    console.error(`❌ Unresolved placeholders in resume HTML [${lang}]: ${[...new Set(leftover)].join(', ')}`);
+    process.exit(1);
+  }
+  pages[lang] = html;
+}
 
 // --- Generate output ---
 const browser = await chromium.launch({ headless: !previewMode });
 
 if (previewMode) {
+  const lang = langs[0];
   const page = await browser.newPage();
-  await page.setContent(html);
+  await page.setContent(pages[lang]);
   await page.bringToFront();
   console.log(`Preview opened in browser [${lang}] — Ctrl+C to exit`);
   await Promise.withResolvers<void>().promise;
 } else {
-  const langSuffix = lang === 'en' ? '' : `-${lang}`;
-  const outputPath = join(ROOT, `dist/resume${langSuffix}.pdf`);
   const page = await browser.newPage();
-  await page.setContent(html);
-  await page.pdf({
-    path: outputPath,
-    format: 'A4',
-    printBackground: true,
-    title: `Resume - ${profile.name} (${lang === 'en' ? 'English' : 'Vietnamese'})`,
-    author: profile.name,
-  });
-
+  for (const lang of langs) {
+    const langSuffix = lang === 'en' ? '' : `-${lang}`;
+    const outputPath = join(ROOT, `dist/resume${langSuffix}.pdf`);
+    mkdirSync(dirname(outputPath), { recursive: true });
+    await page.setContent(pages[lang]);
+    await page.pdf({
+      path: outputPath,
+      format: 'A4',
+      printBackground: true,
+      preferCSSPageSize: true,
+      tagged: true,
+    });
+    console.log(`resume${langSuffix}.pdf generated at ${outputPath} [${lang}]`);
+  }
   await browser.close();
-  console.log(`resume${langSuffix}.pdf generated at ${outputPath} [${lang}]`);
 }

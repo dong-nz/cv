@@ -18,6 +18,9 @@ export const profile: Profile = {
     linkedinUrl: "https://www.linkedin.com/in/dong-nz",
     githubHandle: "dong-nz",
     linkedinHandle: "dong-nz",
+    telegramUrl: "https://t.me/dongdn",
+    telegramHandle: "dongdn",
+    zaloUrl: "https://zaloapp.com/qr/p/14ic4cmkuegf",
     currentInterests: [
         "AI in logistics",
         "Digital twins",

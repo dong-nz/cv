@@ -31,6 +31,8 @@ export const strings = {
             github: {en: 'View GitHub profile', vi: 'Xem hồ sơ GitHub'},
             linkedin: {en: 'View LinkedIn profile', vi: 'Xem hồ sơ LinkedIn'},
             email: {en: 'Send email', vi: 'Gửi email'},
+            telegram: {en: 'Open Telegram chat', vi: 'Mở chat Telegram'},
+            zalo: {en: 'Open Zalo profile', vi: 'Mở hồ sơ Zalo'},
         },
     },
     footer: {
@@ -66,8 +68,8 @@ export const strings = {
         heading: {en: 'Experience', vi: 'Kinh nghiệm'},
         tldr: {en: 'TL;DR', vi: 'TL;DR'},
         tldrText: {
-            en: '15 years of experience, more than 5 companies along the way. Too long to tell.',
-            vi: '15 năm kinh nghiệm, hơn 5 công ty đã đi qua. Quá dài để kể hết.'
+            en: '15 years of experience, more than 8 companies along the way. Too long to tell.',
+            vi: '15 năm kinh nghiệm, hơn 8 công ty đã đi qua. Quá dài để kể hết.'
         },
     },
     projects: {
@@ -89,6 +91,9 @@ export const strings = {
         email: {en: 'Email', vi: 'Email'},
         github: {en: 'GitHub', vi: 'GitHub'},
         linkedin: {en: 'LinkedIn', vi: 'LinkedIn'},
+        telegram: {en: 'Telegram', vi: 'Telegram'},
+        zalo: {en: 'Zalo', vi: 'Zalo'},
+        zaloSub: {en: 'Chat on Zalo', vi: 'Chat qua Zalo'},
     },
     projectDetail: {
         notFound: {en: 'Project Not Found', vi: 'Không tìm thấy dự án'},

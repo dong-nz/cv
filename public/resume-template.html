@@ -2,121 +2,192 @@
 <html lang="{{LANG}}">
 <head>
   <meta charset="UTF-8">
-  <title>Resume - Dong Nguyen</title>
+  <title>Resume - {{NAME}}</title>
   <style>
     /* Font faces — injected at build time */
     {{FONT_FACES}}
 
-    /* Page layout */
+    /* Page layout — applied by page.pdf({ preferCSSPageSize: true }) */
     @page {
       size: A4;
-      margin: 20mm 18mm 20mm 18mm;
+      margin: 16mm 15mm 14mm 15mm;
     }
 
     /* Reset */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* Brand tokens — mirrors the portfolio's light-mode red palette (src/index.css) */
+    :root {
+      --ink: #151914;
+      --muted: #4b4f4a;
+      --meta: #756b62;
+      --accent: #b04138;
+      --accent-soft: rgba(176, 65, 56, 0.35);
+      --hairline: #d9d6d0;
+      --paper: #ffffff;
+    }
+
     body {
       font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
       font-size: 10pt;
-      line-height: 1.5;
-      color: #151914;
+      line-height: 1.45;
+      color: var(--ink);
     }
+
+    /* Print hygiene */
+    p, li { orphans: 2; widows: 2; }
+    .avoid-break { break-inside: avoid; }
+
+    a { color: inherit; text-decoration: none; }
 
     /* Header */
     .header {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 18px;
       padding-bottom: 12px;
-      border-bottom: 2px solid #151914;
-      margin-bottom: 16px;
+      border-bottom: 1px solid var(--hairline);
+      margin-bottom: 12px;
     }
 
     .header-photo {
-      width: 75px;
-      height: 95px;
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
       object-fit: cover;
+      object-position: center top;
+      border: 2px solid var(--accent);
       flex-shrink: 0;
     }
 
+    .header-info { margin-left: 12px; }
     .header-info h1 {
-      font-size: 18pt;
+      font-size: 20pt;
       font-weight: 700;
-      color: #151914;
+      letter-spacing: -0.01em;
+      line-height: 1.2;
+      color: var(--ink);
     }
 
     .header-info .title {
       font-size: 11pt;
-      font-weight: 500;
-      color: #4b4f4a;
-      margin-bottom: 4px;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 1px 0 5px;
     }
 
     .header-info .contact {
+      display: grid;
+      grid-template-columns: 12px 1fr;
+      column-gap: 8px;
+      row-gap: 3px;
+      align-items: center;
       font-size: 9pt;
-      color: #6b6d68;
-      line-height: 1.6;
+      color: var(--meta);
     }
+    .header-info .contact svg { width: 12px; height: 12px; color: var(--meta); }
+    .header-info .contact a { color: var(--muted); }
 
-    /* About me */
-    .about-summary {
-      font-size: 9.5pt;
-      color: #4b4f4a;
-      line-height: 1.6;
-      margin-bottom: 12px;
-    }
+    .header-qr { display: flex; gap: 18px; margin-left: auto; }
+    .qr-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .qr-img { width: 18mm; height: 18mm; object-fit: contain; }
+    .qr-label { font-size: 7pt; letter-spacing: 0.08em; text-transform: uppercase; color: var(--meta); }
+
+    /* Sections */
+    .section { margin-bottom: 14px; }
 
     .section-title {
-      font-size: 12pt;
-      font-weight: 700;
+      font-size: 11pt;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.5pt;
-      color: #151914;
-      padding-bottom: 4px;
-      border-bottom: 1px solid #d9d6d0;
+      letter-spacing: 0.05em;
+      color: var(--ink);
+      border-left: 3px solid var(--accent);
+      padding-left: 8px;
       margin-bottom: 10px;
+      line-height: 1.2;
+      break-after: avoid;
     }
-    /* Experience */
+
+    /* Summary — sits directly under the header, no title (modern resume convention) */
+    .about-summary {
+      font-size: 9.5pt;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* Experience — timeline mirroring the site's ExperiencePage */
+    .timeline {
+      border-left: 2px solid var(--hairline);
+      margin-left: 4px;
+      padding-left: 16px;
+    }
+
     .exp-entry {
+      position: relative;
       margin-bottom: 12px;
     }
+
+    .exp-entry:last-child { margin-bottom: 0; }
+
+    .exp-entry::before {
+      content: '';
+      position: absolute;
+      left: -21px;
+      top: 5px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--ink);
+    }
+
+    .exp-entry.gap::before {
+      background: var(--paper);
+      border: 2px solid var(--meta);
+    }
+
+    .exp-entry.gap .exp-title { color: var(--meta); font-style: italic; }
+    .exp-entry.gap .exp-company { font-style: italic; }
+    .exp-entry.gap .exp-responsibilities li { color: var(--muted); font-style: italic; }
 
     .exp-header {
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
       align-items: baseline;
-      margin-bottom: 2px;
+      gap: 8px;
     }
 
     .exp-title {
       font-weight: 600;
       font-size: 11pt;
-      color: #151914;
+      color: var(--ink);
+      line-height: 1.3;
     }
 
     .exp-duration {
-      font-size: 9pt;
-      color: #6b6d68;
+      font-size: 8.5pt;
+      color: var(--meta);
       white-space: nowrap;
+      border: 1px solid var(--hairline);
+      border-radius: 999px;
+      padding: 1px 8px;
     }
 
     .exp-company {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       font-size: 10pt;
-      color: #4b4f4a;
-      margin-bottom: 2px;
+      color: var(--muted);
+      margin-top: 1px;
     }
 
-    .exp-location {
-      font-size: 9pt;
-      color: #756b62;
-      margin-bottom: 4px;
-    }
+    .exp-logo { height: 12px; width: auto; }
 
     .exp-responsibilities {
       list-style: disc;
       padding-left: 16px;
-      margin-bottom: 6px;
+      margin-top: 4px;
     }
 
     .exp-responsibilities li {
@@ -124,160 +195,143 @@
       margin-bottom: 2px;
     }
 
-    /* Achievement */
-    .achievement {
-      margin-left: 12px;
-      margin-bottom: 8px;
+    .exp-responsibilities li::marker { color: var(--accent); }
+
+    /* TL;DR — mirrors the site timeline's TLDR panel (strings.experience) */
+    .timeline-tldr {
+      position: relative;
+      background: #f5f3ef;
+      border: 1px solid var(--hairline);
+      border-radius: 6px;
+      padding: 8px 12px;
     }
 
-    .achievement-title {
-      font-weight: 600;
-      font-size: 10pt;
-      color: #151914;
+    .timeline-tldr::before {
+      content: '';
+      position: absolute;
+      left: -21px;
+      top: 10px;
+      width: 8px;
+      height: 8px;
+      background: var(--accent);
+      transform: rotate(45deg);
+    }
+
+    .timeline-tldr-chip {
+      font-size: 8pt;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent);
       margin-bottom: 2px;
     }
 
-    .achievement-context {
+    .timeline-tldr-text {
+      font-size: 9.5pt;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    /* Projects */
+    .project { margin-bottom: 12px; }
+    .project:last-child { margin-bottom: 0; }
+
+    .project-title {
+      font-weight: 600;
+      font-size: 11pt;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    .project-role {
       font-size: 9pt;
-      color: #4b4f4a;
-      margin-bottom: 4px;
-      font-style: italic;
+      color: var(--meta);
+      margin-bottom: 2px;
     }
 
-    .achievement-technical {
-      list-style: disc;
-      padding-left: 20px;
-      margin-bottom: 4px;
+    .project-summary {
+      font-size: 9.5pt;
+      color: var(--muted);
+      margin-bottom: 5px;
     }
 
-    .achievement-technical li {
-      font-size: 9pt;
-      color: #4b4f4a;
-      margin-bottom: 1px;
-    }
-
-    .achievement-tech {
-      font-size: 8.5pt;
-      color: #6b6d68;
-    }
-
-    .achievement-tech span {
+    .project-tech span {
       display: inline-block;
-      background: #efece6;
-      padding: 0 4px;
-      border-radius: 2px;
-      margin-right: 4px;
-    }
-
-    .achievement-impact {
-      font-size: 9pt;
-      color: #4b4f4a;
-      margin-top: 2px;
-    }
-
-    .achievement-metrics {
-      font-size: 9pt;
-      color: #4b4f4a;
-      margin-top: 1px;
+      font-size: 8.5pt;
+      font-weight: 600;
+      color: var(--accent);
+      border: 1px solid var(--accent-soft);
+      border-radius: 999px;
+      padding: 1px 8px;
+      margin: 0 4px 4px 0;
     }
 
     /* Skills */
     .skills-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 8px 24px;
+      gap: 0 24px;
+    }
+
+    .skill-group {
+      padding: 6px 0;
+      border-top: 1px solid var(--hairline);
     }
 
     .skill-group-title {
       font-weight: 600;
-      font-size: 10pt;
-      color: #151914;
-      margin-bottom: 2px;
+      font-size: 9.5pt;
+      color: var(--accent);
+      margin-bottom: 1px;
     }
 
     .skill-list {
       font-size: 9pt;
-      color: #4b4f4a;
+      color: var(--muted);
       line-height: 1.5;
     }
 
-    /* Projects */
-    .project {
-      margin-bottom: 12px;
-    }
-
-    .project-title {
-      font-weight: 600;
-      font-size: 11pt;
-      color: #151914;
-    }
-
-    .project-role {
-      font-size: 9pt;
-      color: #6b6d68;
-      margin-bottom: 2px;
-    }
-
-    .project-summary {
-      font-size: 9.5pt;
-      color: #4b4f4a;
-      margin-bottom: 4px;
-    }
-
-    .project-tech {
-      font-size: 8.5pt;
-      color: #6b6d68;
-    }
-
-    .project-tech span {
-      display: inline-block;
-      background: #efece6;
-      padding: 0 4px;
-      border-radius: 2px;
-      margin-right: 4px;
-    }
-
-    .project-metrics {
-      font-size: 9pt;
-      color: #4b4f4a;
-      margin-top: 2px;
-    }
-
-    /* Version stamp footer */
+    /* Footer */
     .pdf-footer {
       text-align: center;
       font-size: 8pt;
-      color: #756b62;
+      color: var(--meta);
       margin-top: 16px;
       padding-top: 8px;
-      border-top: 1px solid #e3e1dc;
+      border-top: 1px solid var(--hairline);
     }
   </style>
 </head>
 <body>
   <!-- Header -->
-  <div class="header">
-    <img class="header-photo" src="data:image/webp;base64,{{PHOTO_BASE64}}" alt="Dong Nguyen" />
+  <div class="header avoid-break">
+    <img class="header-photo" src="data:image/webp;base64,{{PHOTO_BASE64}}" alt="{{NAME}}" />
     <div class="header-info">
       <h1>{{NAME}}</h1>
       <div class="title">{{TITLE}}</div>
       <div class="contact">
-        {{EMAIL}}<br>
-        {{GITHUB}}<br>
-        {{LINKEDIN}}
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m22 7l-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect width="20" height="16" x="2" y="4" rx="2"/></g></svg>
+        <a href="mailto:{{EMAIL}}">{{EMAIL}}</a>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20a14.5 14.5 0 0 0 0-20M2 12h20"/></g></svg>
+        <a href="{{SITE_URL}}">{{SITE_URL}}</a>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5c.08-1.25-.27-2.48-1-3.5c.28-1.15.28-2.35 0-3.5c0 0-1 0-3 1.5c-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5c-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></g></svg>
+        <a href="{{GITHUB_URL}}">{{GITHUB_URL}}</a>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2a2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6M2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></g></svg>
+        <a href="{{LINKEDIN_URL}}">{{LINKEDIN_URL}}</a>
       </div>
     </div>
+    <div class="header-qr">{{QR_CODES}}</div>
   </div>
 
-  <!-- About me -->
-  <div class="section">
+  <!-- Summary -->
+  <div class="section avoid-break">
     <div class="about-summary">{{BIO}}</div>
   </div>
 
   <!-- Experience -->
   <div class="section">
     <div class="section-title">{{EXPERIENCE_LABEL}}</div>
-    {{EXPERIENCE}}
+    <div class="timeline">{{EXPERIENCE}}{{TLDR}}</div>
   </div>
 
   <!-- Projects -->
@@ -289,14 +343,12 @@
   <!-- Skills -->
   <div class="section">
     <div class="section-title">{{SKILLS_LABEL}}</div>
-    <div class="skills-grid">
-      {{SKILLS}}
-    </div>
+    <div class="skills-grid">{{SKILLS}}</div>
   </div>
 
-  <!-- Version stamp footer -->
+  <!-- Footer -->
   <div class="pdf-footer">
-    Last updated: {{UPDATED_DATE}}
+    {{UPDATED_LABEL}}: {{UPDATED_DATE}}
   </div>
 </body>
 </html>

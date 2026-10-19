@@ -1679,7 +1679,8 @@
 
 /* ===== Contact ===== */
 .contact-links {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
   margin-top: 32px;
 }
@@ -1713,6 +1714,7 @@
   font-size: var(--text-meta);
   line-height: 1.5;
   color: var(--text-muted);
+  overflow-wrap: anywhere;
 }
 
 /* Resume download button variant of the contact tile */
@@ -1722,9 +1724,15 @@
   color: var(--text-primary);
 }
 
+@media (max-width: 1024px) {
+  .contact-links {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .contact-links {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 }
 

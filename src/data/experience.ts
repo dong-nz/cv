@@ -35,6 +35,7 @@ export const experiences: ExperienceEntry[] = [
     title: "Senior Software Engineer",
     titleEn: "Senior Software Engineer",
     company: "Lazada Tech Hub Vietnam",
+    logo: "lazada",
     duration: "Jan 2020 – Aug 2026",
     location: "Ho Chi Minh City, Vietnam",
     responsibilities: [
@@ -70,6 +71,7 @@ export const experiences: ExperienceEntry[] = [
     id: "sap-senior-swe",
     title: "Senior Software Engineer",
     titleEn: "Senior Software Engineer",
+    logo: "sap",
     company: "SAP Lab Vietnam",
     duration: "2017 – 12/2019",
     location: "Ho Chi Minh City, Vietnam",

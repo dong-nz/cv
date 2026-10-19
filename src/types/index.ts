@@ -2,7 +2,7 @@ export type Language = 'en' | 'vi';
 
 export type Palette = 'red' | 'blue';
 
-export type SocialId = 'github' | 'linkedin' | 'email';
+export type SocialId = 'github' | 'linkedin' | 'email' | 'telegram' | 'zalo';
 
 export type ProjectCategory =
   | "software-engineering"
@@ -48,6 +48,7 @@ export interface ExperienceEntry {
   responsibilities: string[];
   responsibilitiesEn?: string[];
   variant?: 'current' | 'gap';
+  logo?: string;
 }
 
 export interface SkillGroup {
@@ -80,6 +81,9 @@ export interface Profile {
   linkedinUrl: string;
   githubHandle: string;
   linkedinHandle: string;
+  telegramUrl: string;
+  telegramHandle: string;
+  zaloUrl: string;
   currentInterests: string[];
   roles: string[];
   philosophy: PhilosophyPoint[];

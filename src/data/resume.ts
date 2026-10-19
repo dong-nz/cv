@@ -8,5 +8,12 @@ export const resumeLanguageLabels: Record<Language, string> = {
   vi: 'Tiếng Việt',
 }
 
+// QR codes embedded in the resume header — images exported from the
+// Telegram/Zalo apps, stored in public/resume-qr/ (owner-provided assets)
+export const resumeQr: { id: string; file: string; label: string }[] = [
+  { id: 'telegram', file: 'telegram.jpg', label: 'Telegram' },
+  { id: 'zalo', file: 'zalo.jpg', label: 'Zalo' },
+]
+
 export const resumeUrlFor = (lang: Language): string =>
   lang === 'en' ? '/resume.pdf' : `/resume-${lang}.pdf`
