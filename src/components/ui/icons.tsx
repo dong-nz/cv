@@ -43,3 +43,15 @@ export function TelegramIcon({ size = 20 }: IconProps) {
     </svg>
   )
 }
+
+// CV lettering, same 2px stroke language as the bar's other glyphs: a C arc open to the right and
+// a V, sized to fill the 24 grid. A document outline with small lettering inside was rasterized
+// first and merged into mush at the bar's 20px, so the letters carry the meaning alone.
+export function ResumeIcon({ size = 20 }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" {...strokeProps}>
+      <path d="M13.5 7.8A6.5 6.5 0 1 0 13.5 16.2" />
+      <path d="M15 6l3.5 12L22 6" />
+    </svg>
+  )
+}

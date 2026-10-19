@@ -9,6 +9,7 @@ import { RollingTextLink } from '@/components/ui/RollingTextLink'
 import { ThemePaletteMenu } from '@/components/layout/ThemePaletteMenu'
 import { LanguageIcon } from '@/components/ui/LanguageIcon'
 import { MobileMenu } from '@/components/layout/MobileMenu'
+import { ResumeNavButton } from '@/components/layout/ResumeNavButton'
 
 export function Navigation() {
   const { cycleTheme, resolvedTheme } = useTheme()
@@ -107,6 +108,9 @@ export function Navigation() {
                 <polyline points="9 22 9 12 15 12 15 22" />
               </svg>
             </Link>
+            {/* Resume lives next to home: it is a site-wide action, not an appearance control, so
+                it belongs in the brand group and stays put when the sheet takes over the bar. */}
+            <ResumeNavButton />
           </div>
 
           <ul className="nav-menu">

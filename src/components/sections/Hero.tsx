@@ -1,11 +1,9 @@
 import {motion, useScroll, useTransform} from "motion/react"
 import {InView} from "@/components/ui/InView"
-import {resumeAvailable, resumeLanguages, resumeUrlFor, resumeLanguageLabels} from "@/data/resume"
-import type {Language} from '@/types'
 import {useLanguage} from '@/hooks/useLanguage'
 import {strings} from '@/i18n/strings'
 import { field } from '@/i18n/field'
-import {DownloadResumeDropdown} from '@/components/sections/DownloadResume'
+import {DownloadResume} from '@/components/sections/DownloadResume'
 
 
 import {Button} from "@/components/ui/Button"
@@ -13,21 +11,6 @@ import {Typewriter} from '@/components/ui/Typewriter'
 import {HeroParticles} from '@/components/sections/HeroParticles'
 import {SocialLinks} from "@/components/ui/SocialLinks"
 import {profile} from "@/data/profile"
-
-function HeroDownloadButton({lang}: { lang: Language }) {
-    const {lang: currentLang} = useLanguage()
-    return (
-        <a
-            href={resumeUrlFor(lang)}
-            download
-            target="_blank"
-            className="btn btn-primary hero-download-mobile-btn"
-        >
-            {strings.common.resumeDownload[currentLang]} ({resumeLanguageLabels[lang]})
-        </a>
-    )
-}
-
 
 export function Hero() {
     const {scrollY} = useScroll()
@@ -103,19 +86,7 @@ export function Hero() {
                         <Button href="/contact" variant="primary">
                             {strings.hero.ctaContact[lang]}
                         </Button>
-                        {resumeAvailable && (
-                            <>
-                                <div className="hero-download-desktop">
-                                    <DownloadResumeDropdown className="hero-download-dropdown"
-                                                            wrapperClassName="hero-download-summary" targetBlank/>
-                                </div>
-                                <div className="hero-download-mobile">
-                                    {resumeLanguages.map(lang => (
-                                        <HeroDownloadButton key={lang} lang={lang} />
-                                    ))}
-                                </div>
-                            </>
-                        )}
+                        <DownloadResume />
 
                         <SocialLinks />
                     </motion.div>

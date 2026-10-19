@@ -1,6 +1,7 @@
 export const strings = {
     nav: {
         home: {en: 'Home', vi: 'Trang chủ'},
+        resume: {en: 'Get resume', vi: 'Tải CV'},
         about: {en: 'About', vi: 'Giới thiệu'},
         experience: {en: 'Experience', vi: 'Kinh nghiệm'},
         projects: {en: 'Projects', vi: 'Dự án'},
@@ -118,6 +119,10 @@ export const strings = {
     },
     common: {
         resumeDownload: {en: 'Get Resume', vi: 'Tải CV'},
+        resumeModalTitle: {en: 'Get Resume', vi: 'Tải CV'},
+        resumeModalAria: {en: 'Choose resume language', vi: 'Chọn ngôn ngữ CV'},
+        resumeModalHint: {en: 'Choose a language — the PDF downloads to your device.', vi: 'Chọn ngôn ngữ — PDF sẽ tải về máy của bạn.'},
+        resumeModalClose: {en: 'Close resume options', vi: 'Đóng tùy chọn tải CV'},
         backToTop: {en: 'Scroll to top', vi: 'Cuộn lên đầu trang'},
         contactTag: {en: 'Contact', vi: 'Liên hệ'},
         experienceTag: {en: 'Experience', vi: 'Kinh nghiệm'},
