@@ -61,7 +61,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 - Accent has two tiers: `--accent` / `--accent-hover` / `--accent-active` are the bright signal colours (links, underlines, borders, glows) and the fill of the pale accent surfaces (palette-option hover, `.tag-accent`, `.back-to-top`, resume summary bar); `--accent-solid` / `-hover` / `-active` plus `--text-on-accent-solid` are the deeper fill and light text used by `.btn-primary` and `.badge-accent`, which is what lets a dark-mode button carry light text. The solid family is declared in all five blocks of `src/index.css` (dark red, light red, dark blue, light blue, the `prefers-color-scheme` bridge); the two light blocks duplicate the plain accent values verbatim, so light mode does not move. Spec: `docs/design/specs/v3/spec-v3-nav-cta-enhancements.md`
 - Picker, two renderings, both present at every width: the bar uses `src/components/layout/ThemePaletteMenu.tsx` — icon-only trigger (`nav-control nav-palette-trigger`, a 20px half-circle swatch: active palette's accent on the left, `--swatch-empty` on the right; no text, no chevron; the name lives in `aria-label`, the hint in `title`) opening the `#palette-menu` panel. The sheet renders its own Theme color row inside `MobileMenu.tsx` from `paletteIds` + `paletteMeta` as `.mobile-menu-icon-option` buttons — the 44px icon-only square the Language row shares; the Mode row keeps `.mobile-menu-segment-option`, because its options are words. `ThemePaletteMenu` has no `variant` prop and is never mounted in the sheet
 - Preview chips are theme-aware: `--preview-red-accent` / `--preview-blue-accent` are declared per theme — `:root` dark pair, `:root[data-theme='light']` light pair, repeated in the `prefers-color-scheme` bridge — and mirror that block's `--accent`, so a submenu dot and the bar swatch's accent half are the same colour in the same theme. Each chip names its own palette through `data-preview`, so the two `[data-palette='blue']` blocks declare no preview token; `--swatch-empty` stays one constant. Spec: `docs/design/specs/v3/spec-v3-nav-swatch-and-hamburger.md`
-- Bar controls share one chrome: `.nav-control` covers the language toggle, the mode toggle and the palette trigger (44px bordered box, accent border + icon on hover/open, one `:focus-visible`). The hamburger leads the bar at every width it appears: `.nav-brand` (`display: flex; gap: 12px`) holds it first and the brand home icon right after, at the bar's left edge — `.nav-logo` is a 24px stroke house in a 44px target, a `<Link to="/">` named by the translated `strings.nav.home` label with the svg `aria-hidden`, so it carries its own `:focus-visible` ring. `.nav-actions` then carries the three appearance controls in that order (language, mode, theme color) at the right end. The sheet's Appearance group follows the same order (Language row, Mode row, Theme color row). `@media (max-width: 420px)` tightens the container padding and the action gap so the row fits a 320px viewport (40 + 12 + 44 + 44×3 + 12×2 = 252px inside 288px)
+- Bar controls share one chrome: `.nav-control` covers the language toggle, the mode toggle and the palette trigger (44px bordered box, accent border + icon on hover/open, one `:focus-visible`). The hamburger leads the bar at every width it appears: `.nav-brand` (`display: flex; gap: 12px`) holds it first and the brand home icon right after, at the bar's left edge — `.nav-logo` is a 24px stroke house in a 44px target, a `<Link to="/">` named by the translated `strings.nav.home` label with the svg `aria-hidden`, so it carries its own `:focus-visible` ring. Third in the brand group is the resume entry — `src/components/layout/ResumeNavButton.tsx`, a `nav-control nav-resume-trigger` 44px target that **carries no border** (`border-color: transparent` at rest, on hover and while open, because it sits beside the borderless home icon; the hover fill and the `:focus-visible` ring stay), holding `ResumeIcon`: CV lettering in the bar's 2px stroke language — a C arc open to the right (`M13.5 7.8A6.5 6.5 0 1 0 13.5 16.2`) and a V (`M15 6l3.5 12L22 6`) filling the 24 grid, because a document outline with lettering inside rasterized into mush at the bar's 20px. Named by `strings.nav.resume`, `aria-haspopup="dialog"` on its own `#resume-modal-nav`; `.nav-resume` is the wrapper that ties trigger to dialog and is what `useClickOutside` watches. `.nav-actions` then carries the three appearance controls in that order (language, mode, theme color) at the right end. The sheet's Appearance group follows the same order (Language row, Mode row, Theme color row). Six controls now share the bar at ≤1024px: `@media (max-width: 420px)` keeps 16px padding and drops both group gaps to 8px, `@media (max-width: 360px)` drops the padding to 12px — 40 + 44×5 = 260px of controls plus 4×8px gaps = 292px inside 296px, and every target stays 44px
 - Language control is icon-only in both renderings — `src/components/ui/LanguageIcon.tsx` draws both languages as line art in the bar's stroke language (`currentColor`, no fills): English a 20px globe (circle r=10 + equator + meridian ellipse, 2px round joins, so it follows the control's hover accent), Tiếng Việt a flag outline (21×17.5 band `rx=2` at 1.5/3.25 — drawn 23×19.5 against the globe's 22×22; width is already at the limit, so the size step came from height, which drags the constitutional 2:3 to 1.2 — with a centred five-point mullet at r=3.6, deliberately smaller than the flag's own 0.6 × height construction, stroked 1.5px round joins so its interior stays open). The bar's `nav-control lang-toggle` shows the language it switches TO (`lang === 'en' ? 'vi' : 'en'`): translated action in `aria-label`, the target's own-language name in `title`. `.lang-toggle` now carries no CSS rules of its own — it marks the button in the DOM and nothing else. The sheet's Language row uses `.mobile-menu-icon-option` squares with `aria-pressed` and the own-language `aria-label` / `title`. Spec: `docs/design/specs/v3/spec-v3-i18n.md`
 
 ## Data Layer
@@ -70,7 +70,7 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 - `src/data/skills.ts` — skill groups → skills
 - `src/data/experience.ts` — work history entries; optional `variant: 'current' | 'gap'` selects the timeline decoration (live node / career break)
 - `src/data/projects.ts` — project cards with categories
-- `src/data/resume.ts` — resume availability, supported languages, URL generation
+- `src/data/resume.ts` — resume availability, supported languages, URL generation, and `resumeQr` (the `{id, file, label}` descriptors the resume header renders as QR codes)
 - `src/data/navigation.ts` — `navPaths` (bar + sheet order: Home, About, Experience, Projects, Contact, Philosophy), `footerPaths`
 - `src/data/social.ts` — social tiles as `{id, href, external}` (github, linkedin, email, telegram); `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
 - `src/i18n/strings.ts` — every chrome string as `{en, vi}`; the sheet's group labels, the Mode options, the language names (`langEn` / `langVi`, each named in its own language) and the language action labels (`langSwitch`, `switchTo`) live in `strings.nav`, the social `aria-label`s in `strings.social`
@@ -82,11 +82,11 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 ```
 src/
   components/
-    layout/     — Layout.tsx, Navigation.tsx, MobileMenu.tsx, Footer.tsx, ThemePaletteMenu.tsx
-    sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume
-    ui/         — Badge, Button, ContactLinks, LanguageIcon, SectionHeading, SocialLinks, Tag, Typewriter, InView, RollingTextLink, BackToTop, icons
+    layout/     — Layout.tsx, Navigation.tsx, MobileMenu.tsx, Footer.tsx, ThemePaletteMenu.tsx, ResumeNavButton.tsx
+    sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume (the hero lazer CTA; it gates itself on `resumeAvailable`)
+    ui/         — Badge, Button, ContactLinks, LanguageIcon, ResumeDialog, SectionHeading, SocialLinks, Tag, Typewriter, InView, RollingTextLink, BackToTop, icons
   data/         — profile, skills, experience, projects, resume, palettes, navigation, social, site (TS modules)
-  hooks/        — useTheme.tsx, useLanguage.tsx, useClickOutside.ts
+  hooks/        — useTheme.tsx, useLanguage.tsx, useClickOutside.ts, useResumeDialog.ts
   pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage
   types/        — shared TypeScript interfaces
 ```
@@ -108,7 +108,7 @@ src/
 - `public/fonts/` — Source Sans 3 woff2 (Regular, Medium, Semibold, Bold); used by the resume generator only — the SPA renders `system-ui`
 - `public/resume-template.html` — HTML template for resume PDF generation
 - `public/resume-logos/` — official company logo SVGs (Lazada, SAP from Wikimedia Commons), embedded in the resume timeline via `ExperienceEntry.logo`
-- `public/resume-qr/` — owner-supplied QR images (`telegram.png`, `zalo.png`) embedded in the resume header via `resumeQr` in `src/data/resume.ts`; private assets, NOT committed — a missing file prints a warning and the QR is skipped
+- `public/resume-qr/` — owner-supplied QR images (`telegram.jpg`, `zalo.jpg`) embedded in the resume header via `resumeQr` in `src/data/resume.ts`; committed like the other resume assets, so CI renders the QR block too — a missing file prints a warning and that QR is skipped
 - `public/profile-photo.webp` — profile photo
 - `public/robots.txt` — allow-all crawler rules plus the `Sitemap:` pointer to the canonical origin
 
@@ -120,6 +120,7 @@ src/
 ## Deployment
 
 - Deployment is triggered automatically by gitea workflow `.gitea/workflows/deploy.yml`
+- Three jobs: `build` (`pnpm build` → `dist/` artifact) → `generate-resume` (`pnpm tsx scripts/generate-resume.ts --lang=en`, then `--lang=vi`) → `deploy` rsyncs `dist/`, both PDFs included, to `/opt/stacks/dong-site/dist/`
 - `nginx.conf` — production Nginx SPA routing + caching config
 - `docker-compose.yaml` — Docker service for local nginx deployment
 
@@ -157,6 +158,7 @@ docker-compose.yaml
 4. **Footer/Nav links:** Must use `<Link to>`, not `<a href>` for client-side navigation
 5. **Bilingual plumbing is done, the content is not:** `field(lang, value, valueEn)` resolves correctly, but most content has no second language — `skills.ts` group titles are identical in both languages, `projects.ts` titles differ for 1 of 4 projects, and `role` / `technologies` / `metrics` / `duration` / `company` in `experience.ts` have no `*En` variants at all. Translating means adding data, never changing a component
 6. **`lazy()` needs a default export:** pages export named components, so each factory must map `{ default: m.XPage }` — a bare `import('@/pages/XPage')` fails `tsc` with `TS2322: Property 'default' is missing`. There is no `src/pages/index.ts` barrel: importing it would pull every route back into the entry chunk
+7. **A locked `dist/resume*.pdf` blocks the build:** while a generated PDF is open in a viewer, `pnpm build:resume-all` fails with `EBUSY` on that file and `pnpm build` fails too (vite `emptyDir` → `EPERM`). Close the viewer first
 
 ## Design Specs
 
