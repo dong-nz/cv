@@ -1717,13 +1717,6 @@
   overflow-wrap: anywhere;
 }
 
-/* Resume download button variant of the contact tile */
-.download-resume-button {
-  justify-content: center;
-  padding: 12px 20px;
-  color: var(--text-primary);
-}
-
 @media (max-width: 1024px) {
   .contact-links {
     grid-template-columns: repeat(2, 1fr);

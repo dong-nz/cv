@@ -10,5 +10,4 @@ export const socialLinks: {
   { id: 'linkedin', href: profile.linkedinUrl, external: true },
   { id: 'email', href: `mailto:${profile.email}`, external: false },
   { id: 'telegram', href: profile.telegramUrl, external: true },
-  { id: 'zalo', href: profile.zaloUrl, external: true },
 ]

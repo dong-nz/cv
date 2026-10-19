@@ -114,7 +114,7 @@ Nút Resume trong nav chỉ hiện khi có `/resume` route (HTML resume page).
 ## Acceptance
 
 - [x] Nút "Download Resume" hiển thị trong Hero CTA row
-- [x] DownloadResume component riêng, dùng lại trong Contact section và ContactPage
+- [x] ~~DownloadResume component riêng, dùng lại trong Contact section và ContactPage~~ — superseded 2026-10-19: the button was removed from both contact surfaces (follow-up 12 in `specs/v3/spec-v3-resume-redesign.md`); Hero keeps the CTA
 - [x] Click → download PDF từ `/resume.pdf`
 - [x] Khi chưa có PDF → ẩn hoàn toàn ở cả 2 vị trí
 - [x] Responsive trên mobile

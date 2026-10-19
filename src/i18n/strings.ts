@@ -32,7 +32,6 @@ export const strings = {
             linkedin: {en: 'View LinkedIn profile', vi: 'Xem hồ sơ LinkedIn'},
             email: {en: 'Send email', vi: 'Gửi email'},
             telegram: {en: 'Open Telegram chat', vi: 'Mở chat Telegram'},
-            zalo: {en: 'Open Zalo profile', vi: 'Mở hồ sơ Zalo'},
         },
     },
     footer: {
@@ -92,8 +91,6 @@ export const strings = {
         github: {en: 'GitHub', vi: 'GitHub'},
         linkedin: {en: 'LinkedIn', vi: 'LinkedIn'},
         telegram: {en: 'Telegram', vi: 'Telegram'},
-        zalo: {en: 'Zalo', vi: 'Zalo'},
-        zaloSub: {en: 'Chat on Zalo', vi: 'Chat qua Zalo'},
     },
     projectDetail: {
         notFound: {en: 'Project Not Found', vi: 'Không tìm thấy dự án'},

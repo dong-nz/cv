@@ -66,13 +66,13 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 
 ## Data Layer
 
-- `src/data/profile.ts` — name, title, bio, links, social handles (`githubHandle`, `linkedinHandle`, `telegramHandle`), messaging URLs (`telegramUrl`, `zaloUrl`) — the Contact cards render `@{profile.githubHandle}`, never a literal
+- `src/data/profile.ts` — name, title, bio, links, social handles (`githubHandle`, `linkedinHandle`, `telegramHandle`), messaging URLs (`telegramUrl`) — the Contact cards render `@{profile.githubHandle}`, never a literal
 - `src/data/skills.ts` — skill groups → skills
 - `src/data/experience.ts` — work history entries; optional `variant: 'current' | 'gap'` selects the timeline decoration (live node / career break)
 - `src/data/projects.ts` — project cards with categories
 - `src/data/resume.ts` — resume availability, supported languages, URL generation
 - `src/data/navigation.ts` — `navPaths` (bar + sheet order: Home, About, Experience, Projects, Contact, Philosophy), `footerPaths`
-- `src/data/social.ts` — social tiles as `{id, href, external}` (github, linkedin, email, telegram, zalo); `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
+- `src/data/social.ts` — social tiles as `{id, href, external}` (github, linkedin, email, telegram); `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
 - `src/i18n/strings.ts` — every chrome string as `{en, vi}`; the sheet's group labels, the Mode options, the language names (`langEn` / `langVi`, each named in its own language) and the language action labels (`langSwitch`, `switchTo`) live in `strings.nav`, the social `aria-label`s in `strings.social`
 - `src/data/site.ts` — `siteUrl` (the canonical origin) and `siteName`; every absolute URL the site publishes — canonical, Open Graph, JSON-LD, `robots.txt`, `sitemap.xml` — derives from it
 - `src/i18n/field.ts` — `field(lang, value, valueEn)` is a plain function, not a hook: `lang` is read once at component top level with `useLanguage()`, so bilingual selection is legal inside `.map()` callbacks. Convention: `value` is Vietnamese, `valueEn` English

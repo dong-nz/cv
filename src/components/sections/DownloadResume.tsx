@@ -1,5 +1,4 @@
-import { resumeAvailable, resumeUrlFor, resumeLanguages, resumeLanguageLabels } from '@/data/resume'
-import type { Language } from '@/types'
+import { resumeUrlFor, resumeLanguages, resumeLanguageLabels } from '@/data/resume'
 import { useState, useRef, useEffect } from 'react'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
@@ -10,7 +9,7 @@ interface DownloadResumeDropdownProps {
   targetBlank?: boolean
 }
 
-function DownloadResumeDropdown({ className, wrapperClassName, targetBlank = false }: DownloadResumeDropdownProps) {
+export function DownloadResumeDropdown({ className, wrapperClassName, targetBlank = false }: DownloadResumeDropdownProps) {
   const { lang } = useLanguage()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -70,35 +69,3 @@ function DownloadResumeDropdown({ className, wrapperClassName, targetBlank = fal
     </div>
   )
 }
-
-function DownloadButton({ lang }: { lang: Language }) {
-  const { lang: currentLang } = useLanguage()
-  return (
-    <a
-      href={resumeUrlFor(lang)}
-      download
-      className="contact-link download-resume-button"
-    >
-      <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
-        <path d="M12 2a1 1 0 0 1 1 1v9.586l2.707-2.707a1 1 0 1 1 1.414 1.414l-4.5 4.5a1 1 0 0 1-1.414 0l-4.5-4.5a1 1 0 0 1 1.414-1.414L11 12.586V3a1 1 0 0 1 1-1zm-7 16a1 1 0 1 1 0 2h14a1 1 0 1 1 0-2H5z" />
-      </svg>
-      <div className="link-label">{strings.common.resumeDownload[currentLang]} {resumeLanguageLabels[lang]}</div>
-    </a>
-  )
-}
-
-export function DownloadResume() {
-  if (!resumeAvailable) return null
-
-  return (
-    <div style={{ marginTop: '32px' }}>
-      {resumeLanguages.length > 1 ? (
-        <DownloadResumeDropdown />
-      ) : (
-        <DownloadButton lang={resumeLanguages[0]} />
-      )}
-    </div>
-  )
-}
-
-export { DownloadResumeDropdown , DownloadButton}

@@ -1,5 +1,4 @@
 import { SectionHeading } from '@/components/ui/SectionHeading'
-import { DownloadResume } from '@/components/sections/DownloadResume'
 import { ContactLinks } from '@/components/ui/ContactLinks'
 import { motion } from 'motion/react'
 import { InView } from '@/components/ui/InView'
@@ -22,7 +21,6 @@ export function ContactPage() {
       >
       <SectionHeading title={strings.contact.heading[lang]} tag={strings.common.contactTag[lang]} />
       <ContactLinks />
-      <DownloadResume />
       </motion.section>
     </InView>
   )

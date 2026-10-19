@@ -2,7 +2,7 @@ export type Language = 'en' | 'vi';
 
 export type Palette = 'red' | 'blue';
 
-export type SocialId = 'github' | 'linkedin' | 'email' | 'telegram' | 'zalo';
+export type SocialId = 'github' | 'linkedin' | 'email' | 'telegram';
 
 export type ProjectCategory =
   | "software-engineering"
@@ -83,7 +83,6 @@ export interface Profile {
   linkedinHandle: string;
   telegramUrl: string;
   telegramHandle: string;
-  zaloUrl: string;
   currentInterests: string[];
   roles: string[];
   philosophy: PhilosophyPoint[];

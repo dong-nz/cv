@@ -2,14 +2,14 @@ import { motion } from "motion/react"
 import { profile } from "@/data/profile"
 import { useLanguage } from "@/hooks/useLanguage"
 import { strings } from "@/i18n/strings"
-import { GithubIcon, LinkedinIcon, MailIcon, TelegramIcon, ZaloIcon } from "@/components/ui/icons"
+import { GithubIcon, LinkedinIcon, MailIcon, TelegramIcon } from "@/components/ui/icons"
 import type { Language, SocialId } from "@/types"
 
 type ContactEntry = {
   id: SocialId
   href: string
   external: boolean
-  labelKey: 'email' | 'github' | 'linkedin' | 'telegram' | 'zalo'
+  labelKey: 'email' | 'github' | 'linkedin' | 'telegram'
   sub: Record<Language, string>
   icon: React.ReactNode
 }
@@ -19,7 +19,6 @@ const entries: ContactEntry[] = [
   { id: 'github', href: profile.githubUrl, external: true, labelKey: 'github', sub: { en: `@${profile.githubHandle}`, vi: `@${profile.githubHandle}` }, icon: <GithubIcon size={24} /> },
   { id: 'linkedin', href: profile.linkedinUrl, external: true, labelKey: 'linkedin', sub: { en: `@${profile.linkedinHandle}`, vi: `@${profile.linkedinHandle}` }, icon: <LinkedinIcon size={24} /> },
   { id: 'telegram', href: profile.telegramUrl, external: true, labelKey: 'telegram', sub: { en: `@${profile.telegramHandle}`, vi: `@${profile.telegramHandle}` }, icon: <TelegramIcon size={24} /> },
-  { id: 'zalo', href: profile.zaloUrl, external: true, labelKey: 'zalo', sub: strings.contact.zaloSub, icon: <ZaloIcon size={24} /> },
 ]
 
 export function ContactLinks() {

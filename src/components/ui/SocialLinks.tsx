@@ -2,7 +2,7 @@ import { motion } from "motion/react"
 import { socialLinks } from "@/data/social"
 import { useLanguage } from "@/hooks/useLanguage"
 import { strings } from "@/i18n/strings"
-import { GithubIcon, LinkedinIcon, MailIcon, TelegramIcon, ZaloIcon } from "@/components/ui/icons"
+import { GithubIcon, LinkedinIcon, MailIcon, TelegramIcon } from "@/components/ui/icons"
 import type { SocialId } from "@/types"
 
 const icons: Record<SocialId, React.ReactNode> = {
@@ -10,7 +10,6 @@ const icons: Record<SocialId, React.ReactNode> = {
   linkedin: <LinkedinIcon size={20} />,
   email: <MailIcon size={20} />,
   telegram: <TelegramIcon size={20} />,
-  zalo: <ZaloIcon size={20} />,
 }
 
 export function SocialLinks() {
