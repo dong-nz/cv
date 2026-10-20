@@ -274,31 +274,9 @@
   gap: 8px;
 }
 
-.mobile-menu-segment-option {
-  min-height: 44px;
-  padding: 8px 16px;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  background: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast);
-}
-
-.mobile-menu-segment-option.active {
-  background: var(--bg-elevated);
-  border-color: var(--accent);
-  color: var(--text-primary);
-}
-
-.mobile-menu-segment-option:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* Icon-only options in the sheet share this shape — the segmented row's 44px target, border and
-   radius — for the Theme color dots (.nav-palette-preview) and the Language globe/flag. The Mode
-   row keeps .mobile-menu-segment-option, because its options are words. */
+/* Icon-only options in the sheet share this shape — the 44px target, border and radius — for
+   the Theme color dots (.nav-palette-preview), the Language globe/flag, and the Mode row's
+   sun/moon, which is the same line art the bar's theme control draws. */
 .mobile-menu-icon-option {
   display: flex;
   align-items: center;

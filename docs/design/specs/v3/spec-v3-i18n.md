@@ -442,8 +442,9 @@ switches TO — the same contract the old glyph had.
 | CSS | `.nav-control` chrome only; `.lang-toggle` carries no rules of its own — it marks the button in the DOM |
 
 **Sheet** (`src/components/layout/MobileMenu.tsx`): the Language row's two options are
-`.mobile-menu-icon-option` — the 44px icon-only square the Theme color row uses. The Mode row keeps
-`.mobile-menu-segment-option`, because its options are words. Each option carries `aria-pressed` and
+`.mobile-menu-icon-option` — the 44px icon-only square the Theme color and Mode rows use as
+well (the Mode row's word options and `.mobile-menu-segment-option` were retired 2026-10-20,
+see `spec-v3-mobile-navigation.md` Q18). Each option carries `aria-pressed` and
 its own-language name in `aria-label` and `title`: an icon alone cannot say which language it is.
 
 `langEn` / `langVi` stay flat `{en, vi}` records. A nested `langName: { en: …, vi: … }` record inside

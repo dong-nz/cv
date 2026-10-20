@@ -9,6 +9,7 @@ import { strings } from '@/i18n/strings'
 import { RollingTextLink } from '@/components/ui/RollingTextLink'
 import { SocialLinks } from '@/components/ui/SocialLinks'
 import { LanguageIcon } from '@/components/ui/LanguageIcon'
+import { MoonIcon, SunIcon } from '@/components/ui/icons'
 
 interface MobileMenuProps {
   open: boolean
@@ -102,21 +103,28 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
               <div className="mobile-menu-segment">
                 <span className="mobile-menu-segment-label">{strings.nav.themeGroup[lang]}</span>
                 <div className="mobile-menu-segment-options" role="group" aria-label={strings.nav.themeGroup[lang]}>
+                  {/* Icons, not words — the bar's own line art: moon for dark, sun for light.
+                      An icon alone cannot name a mode, so each option carries the translated
+                      mode name in aria-label and title. */}
                   <button
                     type="button"
-                    className={resolvedTheme === 'dark' ? 'mobile-menu-segment-option active' : 'mobile-menu-segment-option'}
+                    className={resolvedTheme === 'dark' ? 'mobile-menu-icon-option active' : 'mobile-menu-icon-option'}
                     aria-pressed={resolvedTheme === 'dark'}
+                    aria-label={strings.nav.themeDark[lang]}
+                    title={strings.nav.themeDark[lang]}
                     onClick={() => setTheme('dark')}
                   >
-                    {strings.nav.themeDark[lang]}
+                    <MoonIcon />
                   </button>
                   <button
                     type="button"
-                    className={resolvedTheme === 'light' ? 'mobile-menu-segment-option active' : 'mobile-menu-segment-option'}
+                    className={resolvedTheme === 'light' ? 'mobile-menu-icon-option active' : 'mobile-menu-icon-option'}
                     aria-pressed={resolvedTheme === 'light'}
+                    aria-label={strings.nav.themeLight[lang]}
+                    title={strings.nav.themeLight[lang]}
                     onClick={() => setTheme('light')}
                   >
-                    {strings.nav.themeLight[lang]}
+                    <SunIcon />
                   </button>
                 </div>
               </div>
