@@ -295,9 +295,14 @@
   background: var(--bg-elevated);
 }
 
+/* Every glyph in the sheet is `currentColor` line art — the globe/flag, the moon/sun — so the
+   selected option carries the theme's accent exactly as the bar's `.nav-control.open` does, and
+   the colour follows `data-theme` + `data-palette` the way the border already does. The Theme
+   color dots paint their own `--preview-*-accent` background, so they are unaffected. */
 .mobile-menu-icon-option.active {
   border-color: var(--accent);
   background: var(--bg-elevated);
+  color: var(--accent);
 }
 
 .mobile-menu-icon-option:focus-visible {
