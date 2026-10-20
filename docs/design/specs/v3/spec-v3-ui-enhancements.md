@@ -81,7 +81,6 @@ export const profile: Profile = {
     "Full-Stack Developer",
     "System Architect",
     "AI/ML Engineer",
-    "Open Source Contributor",
   ],
 }
 export interface Profile {

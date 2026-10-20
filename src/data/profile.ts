@@ -33,7 +33,6 @@ export const profile: Profile = {
         "Full-Stack Developer",
         "System Engineer",
         "AI/ML Application Engineer",
-        "Open Source Contributor",
     ],
     philosophy: [
         {
