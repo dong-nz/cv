@@ -1332,6 +1332,47 @@
   transition: border-color var(--transition-normal), background var(--transition-normal);
 }
 
+/* Horizontal link from the node into the title — the same treatment `.timeline-tldr::after` gives
+   the terminal diamond. Drawn from the marker rather than from the entry or the header: the
+   current-role entry pads its own content box (16px top), so the header's coordinates move with
+   that padding, while the marker is pinned to the spine. The 12px marker is border-box at x 0–12,
+   y 6–18 and its 2px border makes the padding box start at (2, 8): left 10px puts the link at
+   x 12, the ring's outer edge, top 3px puts it on the ring's centre line (y 11), and width 24px
+   ends at x 36 — the content edge where the title starts. Same arithmetic as the TLDR link, which
+   sits at left -24px (x 12) and runs 24px to the panel.
+
+   The link carries the node's own ink, never a colour of its own: `--border-strong` for an
+   ordinary ring, `--accent` where the marker itself is accent — the two ends of the timeline, the
+   first node and the TLDR diamond, whose link already lives in `.timeline-tldr::after` — and it
+   follows the ring through the same hover transition the ring uses. */
+.timeline-marker::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 3px;
+  width: 24px;
+  height: 1px;
+  background: var(--border-strong);
+  transition: background var(--transition-normal);
+}
+
+/* The current role is the accent end that is not the TLDR node. Its panel's accent left edge sits
+   at x 28 (inset -8 against the 36px gutter), so the link stops there: 16px from x 12, meeting the
+   panel's own border with no ink inside it. */
+.timeline-entry-current .timeline-marker::after {
+  width: 16px;
+  background: var(--accent);
+}
+
+/* A break keeps its quiet chrome: the 10px ring spans x 1–11, its padding box starting at x 3, so
+   the link starts at the ring's outer edge and reaches 1px further. Its ink needs no declaration —
+   the base value is already the `--border-strong` of the dashed spine, the shrunk ring and the
+   italic title. */
+.timeline-entry-gap .timeline-marker::after {
+  left: 8px;
+  width: 25px;
+}
+
 /* Data is newest-first, so the first entry is the current role: filled marker with a soft halo. */
 .timeline-entry:first-child .timeline-marker {
   background: var(--accent);
@@ -1339,8 +1380,20 @@
   box-shadow: 0 0 0 4px var(--accent-soft);
 }
 
+/* The first node is the other accent end of the timeline: the link carries the same accent as the
+   filled marker and halo above it. */
+.timeline-entry:first-child .timeline-marker::after {
+  background: var(--accent);
+}
+
 .timeline-entry:hover .timeline-marker {
   border-color: var(--accent);
+}
+
+/* The link follows the ring it belongs to: hovering an entry turns both to accent at once, so a
+   node never lights up while its own link stays grey. */
+.timeline-entry:hover .timeline-marker::after {
+  background: var(--accent);
 }
 
 .timeline-entry:hover {
@@ -1601,6 +1654,20 @@
   .timeline-marker,
   .timeline-tldr-marker {
     left: -28px;
+  }
+
+  /* 28px gutter: the link runs x 12 → 28, the same 16px the TLDR link uses at this width. The
+     panel's accent edge is at x 24 (inset -4), and the 10px gap ring ends at x 11 → 17px. */
+  .timeline-marker::after {
+    width: 16px;
+  }
+
+  .timeline-entry-current .timeline-marker::after {
+    width: 12px;
+  }
+
+  .timeline-entry-gap .timeline-marker::after {
+    width: 17px;
   }
 
   /* 10px ring at the 28px gutter: L = 6 − 28 − 10/2 = −27. */
