@@ -44,14 +44,22 @@ export function TelegramIcon({ size = 20 }: IconProps) {
   )
 }
 
-// CV lettering, same 2px stroke language as the bar's other glyphs: a C arc open to the right and
-// a V, sized to fill the 24 grid. A document outline with small lettering inside was rasterized
-// first and merged into mush at the bar's 20px, so the letters carry the meaning alone.
+// Resume document glyph — the canonical shape lives in public/cv-icon.svg; keep the two in step.
+// The owner's CV artwork (a 30-grid draft, spec follow-up 19) adapted to the bar's 24 grid: a
+// page outline split on the left edge by a visible dash (4px endpoint gaps stay open under 2px
+// round caps), a folded
+// corner, and stroked CV lettering replacing the content lines — the only arrangement that
+// keeps the lettering readable at the bar's size, because the page is otherwise empty.
+// The translated aria-label on the trigger carries the action; the glyph stays aria-hidden.
 export function ResumeIcon({ size = 20 }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true" {...strokeProps}>
-      <path d="M13.5 7.8A6.5 6.5 0 1 0 13.5 16.2" />
-      <path d="M15 6l3.5 12L22 6" />
+      <path d="M14 2 H6 a2 2 0 0 0 -2 2 V6" />
+      <path d="M4 10 V12" />
+      <path d="M4 16 v4 a2 2 0 0 0 2 2 h12 a2 2 0 0 0 2 -2 V8 L14 2" />
+      <path d="M14 2 v4 a2 2 0 0 0 2 2 h4" />
+      <path d="M9.5 12 A3 3 0 0 0 9.5 18" />
+      <path d="M12.5 12 L15 18 L17.5 12" />
     </svg>
   )
 }

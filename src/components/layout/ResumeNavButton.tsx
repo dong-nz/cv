@@ -28,7 +28,7 @@ export function ResumeNavButton() {
         title={strings.common.resumeModalHint[lang]}
         onClick={openDialog}
       >
-        <ResumeIcon />
+        <ResumeIcon size={24} />
       </button>
 
       <ResumeDialog open={open} close={close} panelRef={panelRef} dialogId="resume-modal-nav" />

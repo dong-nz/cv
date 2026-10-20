@@ -28,7 +28,10 @@ export function useResumeDialog() {
 
   const openDialog = useCallback(() => setOpen(true), [])
 
-  useClickOutside(containerRef, close)
+  // The dialog panels portal themselves to document.body (the nav bar's backdrop-filter would
+  // otherwise clip their fixed overlay to the bar), so the panel is no longer inside
+  // containerRef — it is passed as the second watched ref so clicks in it are not "outside".
+  useClickOutside(containerRef, close, panelRef)
 
   useEffect(() => {
     if (!open) return

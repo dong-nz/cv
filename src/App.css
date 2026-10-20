@@ -37,11 +37,14 @@
 
 /* The hamburger and the brand travel together on the left of the bar so the sheet's trigger
    sits where a left-handed thumb reaches it. Above 1024px the button is display:none, so this
-   group renders as the home icon alone. */
+   group renders as the home icon alone. Its icons carry no borders, so the spacing that reads
+   is measured between glyphs, not boxes: 4px between 44px targets leaves 24px between the 24px
+   glyphs — a tight brand cluster while the hover fills and the 2px-offset focus rings (2+2px)
+   still stay clear of each other. The bordered action controls keep their wider 16px gap. */
 .nav-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 4px;
 }
 
 .nav-logo:hover {
@@ -135,9 +138,12 @@
 
 /* The resume entry keeps the `.nav-control` 44px target and its hover fill, but carries no
    outline: it sits in the brand group beside the borderless home icon, and a framed box there
-   reads as a second frame next to the home glyph. `:focus-visible` above still rings it. */
+   reads as a second frame next to the home glyph. `:focus-visible` above still rings it. Its
+   glyph is `--accent` at every state — rest, hover, open — so the entry always carries the
+   active theme's signal colour and follows the palette switch like the other accent signals. */
 .nav-resume-trigger {
   border-color: transparent;
+  color: var(--accent);
 }
 
 .nav-resume-trigger:hover,
@@ -332,21 +338,21 @@
 }
 
 /* Six controls share the bar at ≤1024px: hamburger, home, resume, then the three appearance
-   controls. At 390px the old gaps leave the row flush (260px of controls + 48px of gaps inside
-   358px of content), so the brand and action gaps both drop to 8px here: 292px used, 66px slack. */
+   controls. The brand group keeps its 4px at every width; only the bordered action controls
+   drop from 16px to 8px here: 260px of controls + 8px of brand gaps + 16px of action gaps =
+   284px used inside 358px of content at 390px. */
 @media (max-width: 420px) {
   .nav-container {
     padding: 0 16px;
   }
 
-  .nav-brand,
   .nav-actions {
     gap: 8px;
   }
 }
 
 /* 320px keeps every 44px target intact and pays for them out of the gutter instead: 12px padding
-   leaves 296px of content for 260px of controls + 32px of gaps — 4px of slack. */
+   leaves 296px of content for 260px of controls + 24px of gaps — 12px of slack. */
 @media (max-width: 360px) {
   .nav-container {
     padding: 0 12px;

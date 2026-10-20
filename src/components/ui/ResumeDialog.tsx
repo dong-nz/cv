@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { resumeUrlFor, resumeLanguages, resumeLanguageLabels } from '@/data/resume'
 import { useLanguage } from '@/hooks/useLanguage'
 import { strings } from '@/i18n/strings'
@@ -13,7 +14,9 @@ type ResumeDialogProps = {
 
 /**
  * The language picker. Mounted by every trigger with its own `dialogId` so `aria-controls` never
- * points at a duplicated id when two triggers are on the same page.
+ * points at a duplicated id when two triggers are on the same page. The overlay portals to
+ * `document.body`: the nav bar's `backdrop-filter` makes `.nav` a containing block for fixed
+ * descendants, which would size the viewport overlay to the bar and clip the panel.
  */
 export function ResumeDialog({ open, close, panelRef, dialogId }: ResumeDialogProps) {
   const { lang } = useLanguage()
@@ -27,7 +30,7 @@ export function ResumeDialog({ open, close, panelRef, dialogId }: ResumeDialogPr
     return () => cancelAnimationFrame(frame)
   }, [open, panelRef])
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -83,6 +86,7 @@ export function ResumeDialog({ open, close, panelRef, dialogId }: ResumeDialogPr
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
