@@ -53,13 +53,13 @@ sudo install -d -m 700 -o gitea-deployer -g gitea-deployer /home/gitea-deployer/
 Because no ssh-copy-id is available on Windows, you need to copy the public key to the server manually.
 
 ```powershell
-type $HOME\.ssh\gitea_deploy_key.pub | ssh gitea-deployer@112.213.91.239 -p 2212 "cat >> ~/.ssh/authorized_keys"
+type $HOME\.ssh\gitea_deploy_key.pub | ssh gitea-deployer@vps.example.com -p 2222 "cat >> ~/.ssh/authorized_keys"
 ```
 
 Test ssh connected with a private key
 
 ```powershell
-ssh gitea-deployer@112.213.91.239 -p 2212 -i "$HOME\.ssh\gitea_deploy_key" -o IdentitiesOnly=yes
+ssh gitea-deployer@vps.example.com -p 2222 -i "$HOME\.ssh\gitea_deploy_key" -o IdentitiesOnly=yes
 ```
 
 Get content of private key
