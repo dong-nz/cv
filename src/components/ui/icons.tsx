@@ -44,7 +44,8 @@ export function TelegramIcon({ size = 20 }: IconProps) {
   )
 }
 
-// Resume document glyph — the canonical shape lives in public/cv-icon.svg; keep the two in step.
+// Resume document glyph — the only copy of this geometry, drawn inline: the bar icon must
+// inherit the control's colour, and an <img> resolves currentColor to black, so no asset file.
 // The owner's CV artwork (a 30-grid draft, spec follow-up 19) adapted to the bar's 24 grid: a
 // page outline split on the left edge by a visible dash (4px endpoint gaps stay open under 2px
 // round caps), a folded
