@@ -108,7 +108,9 @@ export function ProjectDetailPage() {
             transition={itemTransition(0.24)}
           >
             <h3>{s.projectDetail.role}</h3>
-            <p>{project.role}</p>
+            <EditableText as="p" path={`projects.${project.id}.role`} label={s.edit.fields.projectRole}>
+              {project.role}
+            </EditableText>
           </motion.div>
 
           <motion.div

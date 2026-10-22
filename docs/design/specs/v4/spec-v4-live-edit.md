@@ -135,13 +135,16 @@ Structure (language-neutral) and text (per language) are separate documents join
 
 ```ts
 // --- structure (src/data/*.json) ---
+// Shapes as implemented, incl. the row 18–19 follow-up (2026-10-22): display
+// strings that are language-dependent (company labels, durations, roles,
+// metrics, interests, roles, keywords) moved from structure to text.
 export type ProjectStructure = {
-  id: ProjectId; category: ProjectCategory; role: string; technologies: string[];
-  metrics?: string[]; featured: boolean;
+  id: ProjectId; category: ProjectCategory; technologies: string[];
+  featured: boolean;
   sections: Array<{ id: string; type: 'text' | 'diagram' | 'metrics' | 'code' }>;
 };
 export type ExperienceStructure = {
-  id: ExperienceId; company: string; duration: string; location?: string;
+  id: ExperienceId; location?: string;
   variant?: 'current' | 'gap'; logo?: string;
 };
 export type SkillGroupStructure = { id: SkillGroupId; skills: string[] };
@@ -149,22 +152,24 @@ export type ProfileStructure = {
   firstName: string; lastName: string; email: string;
   githubUrl: string; linkedinUrl: string; githubHandle: string; linkedinHandle: string;
   telegramUrl: string; telegramHandle: string;
-  currentInterests: string[]; roles: string[];
-  philosophy: Array<{ id: PhilosophyId; keywords: string[] }>;
+  philosophy: Array<{ id: PhilosophyId }>;
 };
 
 // --- text (src/i18n/locales/{vi,en}/content.json) ---
 export type SectionText = { title: string; content: string };
 export type ProjectText = {
-  title: string; summary: string;
+  title: string; summary: string; role: string; metrics?: string[];
   sections: Record<string, SectionText>;   // keys validated against the structure's section ids
 };
-export type ExperienceText = { title: string; responsibilities: string[] };
+export type ExperienceText = { title: string; company: string; duration: string; responsibilities: string[] };
 export type SkillGroupText = { title: string };
 export type ProfileText = {
   name: string; title: string; bio: string;
-  tagline: Array<{ text: string; emphasis?: boolean }>;   // D9 — markup lives in Hero.tsx, never in content
-  philosophy: Record<PhilosophyId, { title: string; description: string }>;
+  subtitle: string; tldr: string;                                   // row 18 — moved out of ui.json
+  tagline: Array<{ text: string; emphasis?: boolean }>;             // D9 — markup lives in Hero.tsx, never in content
+  currentInterests: string[]; roles: string[];                      // row 19 — term lists, EN-only until translated per language
+  philosophyQuotes: Array<{ title: string; details: string[] }>;    // row 18 — the owner's essays
+  philosophy: Record<PhilosophyId, { title: string; description: string; keywords: string[] }>;
 };
 
 export type ContentVi = {
@@ -301,6 +306,18 @@ Field-by-field disposition. "structure" = `src/data/<module>.json`; "text" = `co
 | `scripts/generate-resume.ts` `labels` map | — | EXPERIENCE / SKILLS / PROJECTS / UPDATED / QR_ALT → `ui.{vi,en}.json` `resume` section | — |
 | `resume.ts`, `navigation.ts`, `palettes.ts`, `social.ts`, `site.ts` | unchanged — code config, not content | resume language labels already in `strings.nav` → move with ui | — |
 
+Follow-up — rows 18–19 (2026-10-22 dictionary-boundary audit, implemented). The table above stays as the original migration record; this is the cutover it deferred:
+
+| Moved | From | To |
+|---|---|---|
+| `about.subtitle`, `experience.tldrText`, `philosophy.quotes` | `ui.{vi,en}.json` | `profile.subtitle`, `profile.tldr`, `profile.philosophyQuotes` in `content.{vi,en}.json` — person text is content: validated, editable in edit mode |
+| `experience.company`, `experience.duration` | `experience.json` | `experience[id].company` / `.duration` in the text documents. VI carries localized values ("11/2026 – nay", "Sẵn sàng cho cơ hội mới", "Nghỉ giữa chặng"); en overrides with the original strings; proper company names are identical per language (en omits); numeric date ranges are locale-neutral and inherited |
+| `projects.role`, `projects.metrics` | `projects.json` | `projects[id].role` / `.metrics` in the text documents — role keeps EN (the owner's title convention, same as `profile.title`), metrics localized ("Đã triển khai tại 16 sortations") |
+| `profile.currentInterests`, `profile.roles`, `philosophy[].keywords` | `profile.json` | `profile.currentInterests` / `profile.roles` / `profile.philosophy[id].keywords` in the text documents — term lists follow the technologies/skills EN-only convention, now localizable per-field by JSON edit |
+
+Structure documents now carry only language-neutral fields (§3.2). The join keeps resolved records identical for consumers: components iterate resolved records and never noticed the move. `ui.json` keeps only chrome; `edit.fields` gained labels for the new inline-editable paths.
+
+
 Type changes in `src/types/index.ts`: every `*En` optional is deleted from the 6 interfaces; id unions added (§3.1); structure/text/resolved types as §3.2. The old `Project` / `ProjectDetail` / `ExperienceEntry` interfaces are replaced by `*Structure` + `Resolved*` types — no shim left behind.
 
 ---
@@ -315,7 +332,7 @@ The site itself gains an edit mode. There is no second preview machinery — the
 - **Draft initialization:** the draft is initialized from **live repository files fetched through the proxy** (`GET` per document + its `last_commit_sha`), not from the bundle — the bundle may be older than master if anyone edited via Gitea web since the last build, and a bundle-seeded draft would silently revert those edits. The static bundle is used only as an offline fallback, with a visible "stale" warning.
 - **Mechanism:** edit mode wraps `<Layout>` in `<I18nProvider override={draft}>`. All pages, all components, both languages render the draft — text **and** structure.
 - **Inline text editing:** rendered text nodes bound to a text-document path become editable on focus (`contentEditable`); blur writes `{ path, value }` into the draft. Editing `projects['iot-dws-integration'].title` updates the card on `/projects`, the header on `/projects/:id`, and the featured block on the home page **simultaneously** — one draft, every consumer.
-- **Editable surface (curated scope):** inline editing covers **text documents only** — profile bio and tagline (each tagline segment is an individually editable span; the `emphasis` toggle is edited in the JSON panel), project titles/summaries/section content, experience titles/responsibilities, skill group titles, philosophy titles/descriptions. `ui.json` is **read-only** in v4 (labels/aria are low-frequency chrome). This bounds the wrapping work to the ~40 content render sites, not the 130+ UI-string sites. Adjacent tagline segments are separate edit targets — the caret does not cross a segment boundary; intended behavior (D9), not a bug.
+- **Editable surface (curated scope):** inline editing covers **text documents only** — profile bio and tagline (each tagline segment is an individually editable span; the `emphasis` toggle is edited in the JSON panel), profile subtitle / career TL;DR / philosophy quote titles+paragraphs (row 18), project titles/summaries/section content/role, experience titles/companies/durations/responsibilities (row 19), skill group titles, philosophy titles/descriptions. Tag arrays (`currentInterests`, `roles`, `keywords`, `metrics`) are JSON-panel-only — tag chips are not inline-edit targets. `ui.json` is **read-only** in v4 (labels/aria are low-frequency chrome). This bounds the wrapping work to the ~40 content render sites, not the 130+ UI-string sites. Adjacent tagline segments are separate edit targets — the caret does not cross a segment boundary; intended behavior (D9), not a bug.
 - **Structural editing:** add/remove/edit records in the structure documents and their text entries happens in a JSON panel docked beside the page (the panel edits the draft documents directly; the live page re-renders on every valid change). The panel validates against §3.2/§3.6 before accepting — an invalid draft never reaches the preview.
 - **Language/theme:** the existing language, theme, and palette controls work unchanged inside edit mode — the owner previews exactly what visitors will see.
 - **Save:** a persistent save bar lists the diff (changed paths per document), runs the §3.6 validator on the full draft, then PUTs each touched document through the proxy (§6). Unsaved draft is invisible to visitors.
@@ -538,7 +555,7 @@ Resolved by owner decision during the 2026-10-22 review:
 - **`profile.tagline`** → Decision D9 (segment the value; markup moves to `Hero.tsx`).
 - Display name (rev.1 Q3) → Decision D6. `ui.json` editability (rev.1 Q4) → §5.1 editable surface: read-only in v4.
 
-Open — recorded by the 2026-10-22 dictionary-boundary audit (owner decision: record now, fix later):
+Resolved — 2026-10-22 dictionary-boundary audit, implemented the same day (rows 18–19):
 
 An audit of every key in `ui.{vi,en}.json` against the D1/D2 boundary (language-neutral structure / per-language text / chrome) found exactly three keys that hold person content inside the chrome document — and because §3.3/§5.1 keep `ui.json` read-only in edit mode, the owner cannot edit these own texts through `?edit`:
 
@@ -548,9 +565,9 @@ An audit of every key in `ui.{vi,en}.json` against the D1/D2 boundary (language-
 
 Everything else in `ui.json` is chrome (nav/aria/CTA labels, section headings, category labels, resume and edit-mode strings); conversely nothing in `content.json` belongs in the structure documents — `profile.name` is localized by D6, `experience.*.title` is language-dependent by nature.
 
-Fix when scheduled (Plan A, row 18): move the three values into the `profile` record of the text documents — `profile.subtitle`, `profile.tldr`, `profile.philosophyQuotes: [{ title, details: [string] }]` — a fixed record, not id-keyed, so §3.6 rule 2 is untouched; extend `ProfileText` in `dict-types.ts` (vi required, en optional per-field); repoint the four call sites; wrap them with `EditableText` (`SectionHeading`'s `subtitle` prop becomes `ReactNode`); update the JsonPanel content-tab shape hint; delete the keys from both `ui` documents — `UIDict = typeof uiViJson` makes `tsc` the migration net.
+Fix applied (Plan A, row 18): the three values now live in the `profile` record of the text documents — `profile.subtitle`, `profile.tldr`, `profile.philosophyQuotes` (a fixed record, not id-keyed, so §3.6 rule 2 was untouched); `ProfileText` extended (vi required, en optional per-field); the four call sites repointed and wrapped with `EditableText`; `SectionHeading`'s `subtitle` prop is `ReactNode`; the JsonPanel content-tab hint updated; the keys deleted from both `ui` documents. `UIDict = typeof uiViJson` proved to be the migration net — every stale call site was a tsc error.
 
-Owner decision still open (row 19 — not a rule violation, §4 assigns these to structure deliberately): language-dependent strings rendered untranslated on Vietnamese pages — `experience.company` of the two non-company entries ("Open to new opportunities", "Career break"), `duration` month names, `profile.currentInterests` / `roles` / `philosophy[].keywords`, `projects.role` / `metrics`. Localizing them reverses §4 (types, loaders, validator, resume generator): data would keep machine-readable dates (`start`/`end`) with the display string moved to the text documents.
+Row 19 implemented: `experience.company`/`.duration`, `projects.role`/`.metrics`, `profile.currentInterests`/`roles`, and `philosophy[].keywords` moved from structure documents to the text documents (disposition table in §4, follow-up). Recorded decisions: human-language strings are localized into Vietnamese (numeric date ranges + "nay", descriptive company labels, metrics); proper nouns stay identical per language (en omits); term lists and job titles (`currentInterests`, `roles`, `keywords`, `role`) follow the technologies/skills EN-only convention — the owner's own titles render EN in both languages today — and each is now localizable by a JSON edit alone. No machine-readable date model: the display strings moved as-is, ordering remains array order, `variant` still marks the live entry.
 
 Deferred (not v4):
 
@@ -577,5 +594,5 @@ Deferred (not v4):
 | 15 | Edit mode 3c: save bar, conflicts, failure recovery | 3 | ✅ Done 2026-10-22 (automated) — `EditBar.tsx`: changed-path diff with per-path revert and per-document discard, validate-before-save, sequential-PUT progress lines (written / conflict / failed), resume after partial failure, conflict actions (rebase / take-theirs / hand-merge), exit confirm when dirty. Verified via the same (now deleted) SSR smoke — vi markup carried the conflict controls, save statuses, and the resume button. ⬜ Browser + Gitea: save → commit → queued CI deploy → live change; full 412 flow against a real stale sha |
 | 16 | Layout designer research (WYSIWYG / layout config) | deferred | ⬜ Out of v4 scope |
 | 17 | Target-branch editing (D10): `?edit=<branch>`, `?ref=` on GET, `branch` on PUT, branch chip + merge hint | 3 | ✅ Done 2026-10-22 (automated) — tri-state URL parsing with git-ref validation (`edit-mode.ts`), `?ref=` on every document GET and `branch` in every PUT body (`draft.ts`, incl. the 412-refresh and id-union legs), branch persisted beside the session flag, EditBar branch chip + merge hint on non-default branches (`ui.json` `branchLabel`/`mergeHint`). Verified: `pnpm build`, `pnpm lint` (no new warnings), `scripts/smoke-draft.ts` 7/7, throwaway wiring smoke (URL tri-state, ref/branch transport, EditBar render for branch vs master) — deleted after the run. ⬜ Browser + Gitea: edit on a non-master branch → commits land there; merge → deploy |
-| 18 | Move the three person-content keys out of `ui.json` (§11 Open item): `about.subtitle` → `profile.subtitle`, `experience.tldrText` → `profile.tldr`, `philosophy.quotes` → `profile.philosophyQuotes`; extend `ProfileText`, repoint 4 call sites, `EditableText` wrap + `SectionHeading` `subtitle: ReactNode`, JsonPanel hint update; `tsc` is the migration net | post-v4 | ⬜ TODO — recorded 2026-10-22 by the dictionary-boundary audit; owner chose record-only |
-| 19 | Owner decision: localize the §4 structure-assigned strings (`experience.company` of non-company entries, `duration`, `currentInterests`, `roles`, `keywords`, `projects.role`/`metrics`) or keep them EN-only like `technologies` | open question | ⬜ Open — recorded 2026-10-22; reverses §4 if adopted |
+| 18 | Move the three person-content keys out of `ui.json` (§11): `about.subtitle` → `profile.subtitle`, `experience.tldrText` → `profile.tldr`, `philosophy.quotes` → `profile.philosophyQuotes`; extend `ProfileText`, repoint 4 call sites, `EditableText` wrap + `SectionHeading` `subtitle: ReactNode`, JsonPanel hint update; `tsc` is the migration net | post-v4 | ✅ Done 2026-10-22 (automated) — values in both `content.{vi,en}.json`, keys deleted from both `ui` documents, `edit.fields` labels added; verified: `pnpm build`, `pnpm validate:content`, `pnpm lint` (no new warnings), `scripts/smoke-draft.ts` 7/7, throwaway SSR smoke asserting the subtitle / TL;DR / essay markers on `/about`, home + `/experience`, `/philosophy` in both languages — deleted after the run. ⬜ Browser: inline-edit the three fields in `?edit` |
+| 19 | Localize the §4 structure-assigned strings (`experience.company` of non-company entries, `duration`, `currentInterests`, `roles`, `keywords`, `projects.role`/`metrics`) or keep them EN-only like `technologies` | post-v4 | ✅ Done 2026-10-22 (automated) — fields moved to the text documents (§4 follow-up); VI document carries localized values (numeric dates + "nay", "Sẵn sàng cho cơ hội mới", "Nghỉ giữa chặng", "Đã triển khai tại 16 sortations", "Xử lý 70.000 ảnh/tháng"), en overrides with the originals, proper nouns and term lists identical (en omits); company/duration/role inline-editable, tag arrays JSON-panel-only; templates in `draft.ts` and JsonPanel hints follow the new shapes; resume generator reads `profile.tldr` from content. Verified: `pnpm build`, `pnpm validate:content`, `pnpm lint` (no new warnings), `pnpm build:resume-all` (both PDFs), SSR smoke marker sets per language incl. localized durations/companies/metrics/roles on home + `/experience` + project detail — deleted after the run. ⬜ Browser: VI pages show the localized timeline; `?edit` company/duration/role |

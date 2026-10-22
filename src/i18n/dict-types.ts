@@ -21,17 +21,16 @@ export type ProjectSectionStructure = {
 export type ProjectStructure = {
   id: ProjectId;
   category: ProjectCategory;
-  role: string;
   technologies: string[];
-  metrics?: string[];
   featured: boolean;
   sections: ProjectSectionStructure[];
 };
 
+// Only language-neutral fields stay: location is a proper noun, `variant` and
+// `logo` are decoration switches. Company and duration are display strings and
+// therefore text (row 19) — the timeline renders them per language.
 export type ExperienceStructure = {
   id: ExperienceId;
-  company: string;
-  duration: string;
   location?: string;
   variant?: 'current' | 'gap';
   logo?: string;
@@ -49,11 +48,10 @@ export type ProfileStructure = {
   linkedinHandle: string;
   telegramUrl: string;
   telegramHandle: string;
-  currentInterests: string[];
-  roles: string[];
   // The display name is localized (D6) and therefore lives in the text
   // documents, never here; only the language-neutral name parts stay.
-  philosophy: Array<{ id: PhilosophyId; keywords: string[] }>;
+  // Philosophy keeps only the ordered ids — keywords are display text (row 19).
+  philosophy: Array<{ id: PhilosophyId }>;
 };
 
 // --- text (src/i18n/locales/{vi,en}/content.json) ---
@@ -69,10 +67,17 @@ export type SectionText = { title: string; content: string };
 export type ProjectText = {
   title: string;
   summary: string;
+  role: string;
+  metrics?: string[];
   sections: Record<string, SectionText>;
 };
 
-export type ExperienceText = { title: string; responsibilities: string[] };
+export type ExperienceText = {
+  title: string;
+  company: string;
+  duration: string;
+  responsibilities: string[];
+};
 
 export type SkillGroupText = { title: string };
 
@@ -80,8 +85,22 @@ export type ProfileText = {
   name: string;
   title: string;
   bio: string;
+  // Row 18: the /about heading subtitle, the timeline TL;DR line, and the
+  // philosophy essays are person text, not chrome — they moved out of ui.json
+  // so edit mode can edit them like any other content.
+  subtitle: string;
+  tldr: string;
   tagline: TaglineSegment[];
-  philosophy: Record<PhilosophyId, { title: string; description: string }>;
+  // Row 19: tag lists are display text. Term lists (interests, roles) follow
+  // the technologies/skills convention — EN-only until the owner translates
+  // them in the text document; the field is now localizable per language.
+  currentInterests: string[];
+  roles: string[];
+  philosophyQuotes: Array<{ title: string; details: string[] }>;
+  philosophy: Record<
+    PhilosophyId,
+    { title: string; description: string; keywords: string[] }
+  >;
 };
 
 export type ContentVi = {

@@ -3,6 +3,8 @@
     "name": "Nguyễn Đông",
     "title": "Senior Software Engineer",
     "bio": "Senior Software Engineer với kinh nghiệm xây dựng hệ thống phân tán, logistics technology, và ứng dụng AI/ML vào bài toán thực tế. Tập trung vào system architecture, integration, và production-grade solutions.",
+    "subtitle": "Kỹ sư phần mềm cao cấp với chuyên môn sâu về hệ thống phân tán, công nghệ logistics và ứng dụng AI thực tiễn.",
+    "tldr": "15 năm kinh nghiệm, hơn 8 công ty đã đi qua. Quá dài để kể hết.",
     "tagline": [
       {
         "text": "Phần lớn thời gian tôi là Backend Software Engineer. Muốn tôi là Full Stack Developer, "
@@ -15,26 +17,77 @@
         "text": ", có thể."
       }
     ],
+    "currentInterests": [
+      "AI in logistics",
+      "Digital twins",
+      "Simulation",
+      "LLM",
+      "Computer Vision",
+      "High-performance systems"
+    ],
+    "roles": [
+      "System Architect",
+      "Full-Stack Developer",
+      "System Engineer",
+      "AI/ML Application Engineer"
+    ],
+    "philosophyQuotes": [
+      {
+        "title": "Thời gian là vô giá",
+        "details": [
+          "Thời gian là vô giá. Bạn không thể mua nó bằng tiền, không thể khiến nó dừng lại, cũng chẳng thể quay ngược về quá khứ. Một khi thời gian đã trôi qua, nó sẽ mãi mãi không trở lại.",
+          "Chúng ta dành quá nhiều thời gian trong cuộc đời để theo đuổi những thứ như tiền bạc, địa vị và sự công nhận từ người khác. Nhưng thời gian là thứ duy nhất mà chúng ta không bao giờ có thể lấy lại.",
+          "Vì vậy, hãy luôn ý thức về cách bạn sử dụng thời gian của mình. Hãy dành thời gian cho những điều thực sự quan trọng: những người bạn yêu thương, những mục tiêu truyền cảm hứng cho bạn và những khoảnh khắc nuôi dưỡng tâm hồn bạn."
+        ]
+      }
+    ],
     "philosophy": {
       "build-for-the-real-problem": {
         "title": "Giải pháp được xây dựng dựa trên vấn đề thực tế",
-        "description": "Không bắt đầu bằng technology. Bắt đầu bằng problem."
+        "description": "Không bắt đầu bằng technology. Bắt đầu bằng problem.",
+        "keywords": [
+          "Problem-first",
+          "Business value",
+          "Measurement"
+        ]
       },
       "think-in-systems": {
         "title": "Think in systems",
-        "description": "Quan tâm đến kiến trúc tổng thể, không chỉ từng component."
+        "description": "Quan tâm đến kiến trúc tổng thể, không chỉ từng component.",
+        "keywords": [
+          "Architecture",
+          "Integration",
+          "Scalability",
+          "Reliability"
+        ]
       },
       "measure-impact": {
         "title": "Measure impact",
-        "description": "Technical implementation phải gắn với measurable outcome."
+        "description": "Technical implementation phải gắn với measurable outcome.",
+        "keywords": [
+          "Performance",
+          "Reliability",
+          "Cost",
+          "Efficiency"
+        ]
       },
       "keep-learning": {
         "title": "Keep learning",
-        "description": "Continuous exploration of new technologies and approaches."
+        "description": "Continuous exploration of new technologies and approaches.",
+        "keywords": [
+          "AI/ML",
+          "Computer Vision",
+          "LLM",
+          "Distributed systems"
+        ]
       },
       "business-domain-knowledge-is-a-key-of-success": {
         "title": "Kiến thức nghiệp vụ là chìa khóa thành công",
-        "description": "Hiểu sâu về business domain giúp hiểu rõ vấn đề và đưa ra giải pháp phù hợp."
+        "description": "Hiểu sâu về business domain giúp hiểu rõ vấn đề và đưa ra giải pháp phù hợp.",
+        "keywords": [
+          "Biz knowledge",
+          "Business value"
+        ]
       }
     }
   },
@@ -61,12 +114,16 @@
   "experience": {
     "open-to-work": {
       "title": "Đang tìm nơi làm việc mới",
+      "company": "Sẵn sàng cho cơ hội mới",
+      "duration": "11/2026 – nay",
       "responsibilities": [
         "Sẵn sàng cho vai trò Senior Engineer: system architecture, integration platform, full-stack delivery"
       ]
     },
     "relax-gap": {
       "title": "Nghỉ ngơi",
+      "company": "Nghỉ giữa chặng",
+      "duration": "08/2026 – 10/2026",
       "responsibilities": [
         "Nghỉ có chủ đích giữa hai vai trò — lấy lại nhịp trước khi nhận hệ thống tiếp theo",
         "Tự thử nghiệm theo nhịp riêng: local LLM với llama.cpp, đọc về Computer Vision"
@@ -74,6 +131,8 @@
     },
     "lazada-senior-swe": {
       "title": "Senior Software Engineer",
+      "company": "Lazada Tech Hub Vietnam",
+      "duration": "01/2020 – 08/2026",
       "responsibilities": [
         "System ownership và architecture design cho logistics integration systems",
         "Developed IoT-DWS integration solution deployed across 16 sortations",
@@ -84,12 +143,16 @@
     },
     "nexts-founder": {
       "title": "Người sáng lập",
+      "company": "Nexts Limited Company",
+      "duration": "06/2019 – 12/2019",
       "responsibilities": [
         "Phát triển giải pháp cho xe tự hành, thu thập dữ liệu thời gian thực từ cảm biến và hệ thống onboard: LiDAR, camera, GPS, CAN bus."
       ]
     },
     "sap-senior-swe": {
       "title": "Senior Software Engineer",
+      "company": "SAP Lab Vietnam",
+      "duration": "2017 – 12/2019",
       "responsibilities": [
         "Team leader quản lý sản phẩm B1 Integration"
       ]
@@ -99,6 +162,10 @@
     "iot-dws-integration": {
       "title": "Tích hợp hệ thống IoT-DWS",
       "summary": "Thiết kế và triển khai hệ thống integration giữa IoT devices và DWS (Dimensioning Weighing Scanning) machines cho 16 sortations.",
+      "role": "Senior Software Engineer — System Owner",
+      "metrics": [
+        "Đã triển khai tại 16 sortations"
+      ],
       "sections": {
         "context": {
           "title": "Context",
@@ -129,6 +196,10 @@
     "awb-detection": {
       "title": "AWB Detection / Computer Vision",
       "summary": "Ứng dụng Computer Vision và Machine Learning để tự động phát hiện và OCR shipping label từ hình ảnh camera trên sortation.",
+      "role": "Senior Software Engineer — ML Engineering",
+      "metrics": [
+        "Xử lý 70.000 ảnh/tháng"
+      ],
       "sections": {
         "context": {
           "title": "Context",
@@ -155,6 +226,7 @@
     "facility-management": {
       "title": "Facility Management Platform",
       "summary": "Xây dựng nền tảng digital twin cho logistics facilities — mô hình hóa facility, theo dõi real-time, và recommendation system.",
+      "role": "Senior Software Engineer — Platform Design",
       "sections": {
         "vision": {
           "title": "Vision",
@@ -173,6 +245,7 @@
     "local-llm-experiments": {
       "title": "Local LLM Experiments",
       "summary": "Technical exploration về running local MoE LLMs với llama.cpp — GPU offloading, VRAM optimization, performance tracing.",
+      "role": "Engineering Experiment",
       "sections": {
         "exploration": {
           "title": "Exploration",

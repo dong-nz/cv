@@ -18,6 +18,7 @@ import type {
   ProfileText,
   ProjectSectionStructure,
   ProjectStructure,
+  ProjectText,
   SectionText,
   SkillGroupStructure,
   SkillGroupText,
@@ -71,15 +72,14 @@ export const UI: Record<Language, UIDict> = { vi: uiVi, en: uiEn };
 // Resolved records: structure joined with text. These are the shapes every
 // component consumes.
 export type ResolvedProjectSection = ProjectSectionStructure & SectionText;
-export type ResolvedProject = Omit<ProjectStructure, 'sections'> & {
-  title: string;
-  summary: string;
-  sections: ResolvedProjectSection[];
-};
+export type ResolvedProject = Omit<ProjectStructure, 'sections'> &
+  Pick<ProjectText, 'title' | 'summary' | 'role' | 'metrics'> & {
+    sections: ResolvedProjectSection[];
+  };
 export type ResolvedExperienceEntry = ExperienceStructure & ExperienceText;
 export type ResolvedSkillGroup = SkillGroupStructure & SkillGroupText;
-// Structure carries philosophy as an ordered {id, keywords} array, text as a
-// Record keyed by id — the join merges them back into one ordered array.
+// Structure carries philosophy as the ordered id array, text as a Record
+// keyed by id — the join merges them back into one ordered array.
 export type ResolvedPhilosophyPoint = {
   id: PhilosophyId;
   keywords: string[];
@@ -120,6 +120,8 @@ function joinContent(structures: ContentStructures, text: ContentVi): ResolvedCo
         ...project,
         title: text_.title,
         summary: text_.summary,
+        role: text_.role,
+        metrics: text_.metrics,
         sections: project.sections.map((section) => ({
           ...section,
           ...text_.sections[section.id],

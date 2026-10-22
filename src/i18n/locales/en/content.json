@@ -2,9 +2,21 @@
   "profile": {
     "name": "Dong Nguyen",
     "bio": "Senior Software Engineer with experience building distributed systems, logistics technology, and AI/ML applications for real-world problems. Focused on system architecture, integration, and production-grade solutions.",
+    "subtitle": "Senior Software Engineer with deep expertise in distributed systems, logistics technology, and practical AI applications.",
+    "tldr": "15 years of experience, more than 8 companies along the way. Too long to tell.",
     "tagline": [
       {
         "text": "Building scalable software systems, intelligent logistics solutions, and practical AI applications."
+      }
+    ],
+    "philosophyQuotes": [
+      {
+        "title": "Time is priceless",
+        "details": [
+          "Time is priceless. You can’t buy it, pause it, or rewind it. Once it’s gone, it’s gone for good.",
+          "We spend so much of our lives chasing things—money, status, validation—but time is the one thing we can never earn back.",
+          "So be mindful of how you use it. Invest it in what truly matters: the people you love, the goals that inspire you, the moments that feed your soul."
+        ]
       }
     ],
     "philosophy": {
@@ -27,17 +39,22 @@
   "experience": {
     "open-to-work": {
       "title": "Seeking a New Place",
+      "company": "Open to new opportunities",
+      "duration": "Nov 2026 – Present",
       "responsibilities": [
         "Open to Senior Engineer roles: system architecture, integration platforms, full-stack delivery"
       ]
     },
     "relax-gap": {
       "title": "Relax",
+      "company": "Career break",
+      "duration": "Aug 2026 – Oct 2026",
       "responsibilities": [
         "Intentional break between roles — recovering the rhythm before the next system"
       ]
     },
     "lazada-senior-swe": {
+      "duration": "Jan 2020 – Aug 2026",
       "responsibilities": [
         "System ownership and architecture design for logistics integration systems",
         "Developed IoT-DWS integration solution deployed across 16 sortations",
@@ -62,6 +79,9 @@
     "iot-dws-integration": {
       "title": "IoT-DWS Integration System",
       "summary": "Designed and deployed an integration system between IoT devices and DWS (Dimensioning Weighing Scanning) machines across 16 sortations.",
+      "metrics": [
+        "16 sortations deployed"
+      ],
       "sections": {
         "context": {
           "content": "Took over and rapidly mastered an IoT-DWS system after the previous responsible team member left the project. Needed to quickly understand the current architecture and continue developing the integration solution."
@@ -82,6 +102,9 @@
     },
     "awb-detection": {
       "summary": "Applied Computer Vision and Machine Learning to automatically detect and OCR shipping labels from camera images on sortation lines.",
+      "metrics": [
+        "70,000 images/month processed"
+      ],
       "sections": {
         "context": {
           "content": "Sortation machines capture images of packages as they move on conveyor belts. Need to automatically read AWB (Air Waybill) from images for tracking and sorting."

@@ -154,7 +154,7 @@ function renderTldr(lang: Language): string {
   return `
     <div class="timeline-tldr avoid-break">
       <div class="timeline-tldr-chip">${escapeHtml(UI[lang].experience.tldr)}</div>
-      <div class="timeline-tldr-text">${escapeHtml(UI[lang].experience.tldrText)}</div>
+      <div class="timeline-tldr-text">${escapeHtml(CONTENT[lang].profile.tldr)}</div>
     </div>
   `;
 }

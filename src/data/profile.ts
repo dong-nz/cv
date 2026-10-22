@@ -1,4 +1,5 @@
 // Typed loader for the profile structure document (spec-v4 D2). Localized text
+// — including interests, roles, and philosophy keywords/quotes (row 19) —
 // lives in src/i18n/locales and is joined in src/i18n/index.ts; this module
 // exports the language-neutral structure under today's name, for the i18n
 // loader and for scripts/generate-sitemap.ts.

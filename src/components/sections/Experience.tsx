@@ -36,9 +36,13 @@ export function Experience() {
                 <EditableText as="div" className="timeline-title" path={`experience.${exp.id}.title`} label={s.edit.fields.expTitle}>
                   {exp.title}
                 </EditableText>
-                <div className="timeline-company">{exp.company}</div>
+                <EditableText as="div" className="timeline-company" path={`experience.${exp.id}.company`} label={s.edit.fields.company}>
+                  {exp.company}
+                </EditableText>
                 <div className="timeline-meta">
-                  <span className="timeline-duration">{exp.duration}</span>
+                  <EditableText as="span" className="timeline-duration" path={`experience.${exp.id}.duration`} label={s.edit.fields.duration}>
+                    {exp.duration}
+                  </EditableText>
                   {exp.location && (
                     <span className="timeline-location">{exp.location}</span>
                   )}
@@ -61,7 +65,9 @@ export function Experience() {
         <div className="timeline-tldr">
           <span className="timeline-tldr-marker" aria-hidden="true" />
           <span className="timeline-tldr-chip">{s.experience.tldr}</span>
-          <p className="timeline-tldr-text">{s.experience.tldrText}</p>
+          <EditableText as="p" className="timeline-tldr-text" path="profile.tldr" label={s.edit.fields.tldr}>
+            {c.profile.tldr}
+          </EditableText>
         </div>
         </div>
         </div>

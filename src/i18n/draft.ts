@@ -410,17 +410,17 @@ export class DraftStore {
     if (kind === 'project') {
       const projects = structuredClone(this.dataOf('projects')) as Record<string, any>[];
       const id = uniqueId('new-project', projects.map((p) => p.id));
-      projects.push({ id, category: 'experiment', role: 'Owner', technologies: [], featured: false, sections: [] });
+      projects.push({ id, category: 'experiment', technologies: [], featured: false, sections: [] });
       candidates.set('projects', projects);
-      const stub = { title: 'New project', summary: 'Write the summary here.', sections: {} };
+      const stub = { title: 'New project', summary: 'Write the summary here.', role: 'Owner', sections: {} };
       vi.projects = { ...vi.projects, [id]: structuredClone(stub) };
       en.projects = { ...en.projects, [id]: structuredClone(stub) };
     } else if (kind === 'experience') {
       const experiences = structuredClone(this.dataOf('experience')) as Record<string, any>[];
       const id = uniqueId('new-experience', experiences.map((e) => e.id));
-      experiences.push({ id, company: 'New company', duration: 'present' });
+      experiences.push({ id });
       candidates.set('experience', experiences);
-      const stub = { title: 'New role', responsibilities: ['Write a responsibility here.'] };
+      const stub = { title: 'New role', company: 'New company', duration: 'present', responsibilities: ['Write a responsibility here.'] };
       vi.experience = { ...vi.experience, [id]: structuredClone(stub) };
       en.experience = { ...en.experience, [id]: structuredClone(stub) };
     } else if (kind === 'skill-group') {
@@ -434,9 +434,9 @@ export class DraftStore {
       const profile = structuredClone(this.dataOf('profile')) as Record<string, any>;
       const points = profile.philosophy as Record<string, any>[];
       const id = uniqueId('new-philosophy-point', points.map((p) => p.id));
-      points.push({ id, keywords: ['new-keyword'] });
+      points.push({ id });
       candidates.set('profile', profile);
-      const stub = { title: 'New principle', description: 'Write the principle here.' };
+      const stub = { title: 'New principle', description: 'Write the principle here.', keywords: ['new-keyword'] };
       vi.profile = { ...vi.profile, philosophy: { ...vi.profile.philosophy, [id]: structuredClone(stub) } };
       en.profile = { ...en.profile, philosophy: { ...en.profile.philosophy, [id]: structuredClone(stub) } };
     } else {

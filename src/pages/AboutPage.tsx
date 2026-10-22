@@ -23,7 +23,15 @@ export function AboutPage() {
         >
           <SectionHeading
             title={s.about.heading}
-            subtitle={s.about.subtitle}
+            subtitle={
+              <EditableText
+                as="p"
+                path="profile.subtitle"
+                label={s.edit.fields.subtitle}
+              >
+                {c.profile.subtitle}
+              </EditableText>
+            }
             tag={s.about.heading}
           />
           <EditableText

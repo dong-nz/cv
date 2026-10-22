@@ -22,14 +22,14 @@ const PANEL_TABS: PanelTab[] = [...DRAFT_DOCS.map((d) => d.id), 'ui.vi', 'ui.en'
 // discoverable without reading the spec (§5.4).
 const SHAPES: Record<PanelTab, string> = {
   profile:
-    'profile.json — { firstName, lastName, email, githubUrl, linkedinUrl, githubHandle, linkedinHandle, telegramUrl, telegramHandle, currentInterests: [string], roles: [string], philosophy: [{ id, keywords: [string] }] }',
+    'profile.json — { firstName, lastName, email, githubUrl, linkedinUrl, githubHandle, linkedinHandle, telegramUrl, telegramHandle, philosophy: [{ id }] }',
   skills: 'skills.json — [{ id, skills: [string] }]',
   experience:
-    'experience.json — [{ id, company, duration, location?, variant?: "current" | "gap", logo? }]',
+    'experience.json — [{ id, location?, variant?: "current" | "gap", logo? }]',
   projects:
-    'projects.json — [{ id, category, role, technologies: [string], metrics?: [string], featured, sections: [{ id, type: "text" | "diagram" | "metrics" | "code" }] }]',
+    'projects.json — [{ id, category, technologies: [string], featured, sections: [{ id, type: "text" | "diagram" | "metrics" | "code" }] }]',
   'content.vi':
-    'content.vi.json — { profile: { name, title, tagline: [{ text, emphasis? }], bio, philosophy: { <id>: { title, description } } }, skills: { <id>: { title } }, experience: { <id>: { title, responsibilities: [string] } }, projects: { <id>: { title, summary, sections: { <id>: { title, content } } } } }',
+    'content.vi.json — { profile: { name, title, tagline: [{ text, emphasis? }], bio, subtitle, tldr, currentInterests: [string], roles: [string], philosophyQuotes: [{ title, details: [string] }], philosophy: { <id>: { title, description, keywords: [string] } } }, skills: { <id>: { title } }, experience: { <id>: { title, company, duration, responsibilities: [string] } }, projects: { <id>: { title, summary, role, metrics?: [string], sections: { <id>: { title, content } } } } }',
   'content.en':
     'content.en.json — same tree; every field optional, a missing field renders the Vietnamese value',
   'ui.vi': 'locales/vi/ui.json — chrome strings; read-only in edit mode (Phase 4)',

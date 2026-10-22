@@ -52,7 +52,6 @@
   },
   "about": {
     "heading": "About Me",
-    "subtitle": "Senior Software Engineer with deep expertise in distributed systems, logistics technology, and practical AI applications.",
     "engineeringTitle": "How I Think About Engineering",
     "exploringTitle": "What I'm Exploring",
     "exploringTitlePage": "What I'm Currently Exploring",
@@ -63,8 +62,7 @@
   },
   "experience": {
     "heading": "Experience",
-    "tldr": "TL;DR",
-    "tldrText": "15 years of experience, more than 8 companies along the way. Too long to tell."
+    "tldr": "TL;DR"
   },
   "projects": {
     "featured": "Featured Projects",
@@ -96,17 +94,7 @@
     "experiments": "Engineering Experiments"
   },
   "philosophy": {
-    "heading": "Philosophy",
-    "quotes": [
-      {
-        "title": "Time is priceless",
-        "details": [
-          "Time is priceless. You can’t buy it, pause it, or rewind it. Once it’s gone, it’s gone for good.",
-          "We spend so much of our lives chasing things—money, status, validation—but time is the one thing we can never earn back.",
-          "So be mindful of how you use it. Invest it in what truly matters: the people you love, the goals that inspire you, the moments that feed your soul."
-        ]
-      }
-    ]
+    "heading": "Philosophy"
   },
   "common": {
     "resumeDownload": "Get Resume",
@@ -176,6 +164,8 @@
       "title": "title",
       "summary": "summary",
       "bio": "bio",
+      "subtitle": "about subtitle",
+      "tldr": "career TL;DR",
       "tagline": "tagline segment",
       "groupTitle": "skill group title",
       "expTitle": "role title",
@@ -183,7 +173,12 @@
       "sectionTitle": "section title",
       "sectionContent": "section content",
       "pointTitle": "philosophy title",
-      "pointDescription": "philosophy description"
+      "pointDescription": "philosophy description",
+      "quoteTitle": "quote title",
+      "quoteDetail": "quote paragraph",
+      "company": "company",
+      "duration": "duration",
+      "projectRole": "project role"
     }
   }
 }
