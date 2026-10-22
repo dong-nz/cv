@@ -26,6 +26,20 @@ export type ContentStructures = {
 
 const hasHtml = (value: string) => value.includes('<') || value.includes('>');
 
+// Walks every string value of a text document, collecting the document paths
+// of empty strings — an empty required value is a half-finished edit, never
+// content (rule 6). Mirrors the walk in findHtmlStrings.
+function findEmptyStrings(value: unknown, docPath: string): string[] {
+  if (typeof value === 'string') return value.trim() === '' ? [docPath] : [];
+  if (Array.isArray(value))
+    return value.flatMap((item, i) => findEmptyStrings(item, `${docPath}[${i}]`));
+  if (value && typeof value === 'object')
+    return Object.entries(value).flatMap(([key, item]) =>
+      findEmptyStrings(item, `${docPath}.${key}`),
+    );
+  return [];
+}
+
 // Walks every string value of a text document, collecting its document path.
 function findHtmlStrings(value: unknown, docPath: string): string[] {
   if (typeof value === 'string') return hasHtml(value) ? [docPath] : [];
@@ -125,6 +139,15 @@ export function collectContentIssues(
   for (const [lang, doc] of [['vi', vi], ['en', en]] as const) {
     for (const path of findHtmlStrings(doc, `content.${lang}.json`)) {
       issues.push({ path, message: 'text value contains HTML markup' });
+    }
+  }
+
+  // Rule 6: no empty text values in either language document. Every string in
+  // a text document is a required field; the editor rejects an empty commit
+  // with exactly this rule, and CI keeps an emptied field out of master.
+  for (const [lang, doc] of [['vi', vi], ['en', en]] as const) {
+    for (const path of findEmptyStrings(doc, `content.${lang}.json`)) {
+      issues.push({ path, message: 'empty text value' });
     }
   }
 

@@ -1,6 +1,7 @@
 import './App.css'
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router'
+import type { ReactNode } from 'react'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router'
 import { ThemeProvider } from '@/hooks/useTheme'
 import { Layout } from '@/components/layout/Layout'
 import { LanguageProvider } from '@/hooks/useLanguage'
@@ -14,7 +15,24 @@ const ExperiencePage = lazy(() => import('@/pages/ExperiencePage').then((m) => (
 const ProjectsListPage = lazy(() => import('@/pages/ProjectsListPage').then((m) => ({ default: m.ProjectsListPage })))
 const ProjectDetailPage = lazy(() => import('@/pages/ProjectDetailPage').then((m) => ({ default: m.ProjectDetailPage })))
 const PhilosophyPage = lazy(() => import('@/pages/PhilosophyPage').then((m) => ({ default: m.PhilosophyPage })))
+
 const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ default: m.ContactPage })))
+
+// Edit mode is lazy too: visitors never download the draft store, the panel
+// or the save pipeline (spec-v4 §7 P3.4). The gate only mounts the shell when
+// `?edit` is present; the shell then authenticates or strips the query again.
+const EditModeShell = lazy(() => import('@/components/layout/EditModeShell'))
+
+function MaybeEditMode({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  const editing = new URLSearchParams(location.search).has('edit')
+  if (!editing) return <>{children}</>
+  return (
+    <Suspense fallback={null}>
+      <EditModeShell>{children}</EditModeShell>
+    </Suspense>
+  )
+}
 
 function App() {
   return (
@@ -24,21 +42,23 @@ function App() {
           {/* I18nProvider sits below LanguageProvider: it resolves the language
               through useLanguage and hands every consumer the UI/CONTENT of it. */}
           <I18nProvider>
-            <Layout>
-            {/* A null fallback keeps the shell (nav, footer) painted without reserving a
-                box that would shift the page when the route chunk lands. */}
-            <Suspense fallback={null}>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/experience" element={<ExperiencePage />} />
-                <Route path="/projects" element={<ProjectsListPage />} />
-                <Route path="/projects/:id" element={<ProjectDetailPage />} />
-                <Route path="/philosophy" element={<PhilosophyPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-              </Routes>
-            </Suspense>
-            </Layout>
+            <MaybeEditMode>
+              <Layout>
+                {/* A null fallback keeps the shell (nav, footer) painted without reserving a
+                    box that would shift the page when the route chunk lands. */}
+                <Suspense fallback={null}>
+                  <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route path="/experience" element={<ExperiencePage />} />
+                    <Route path="/projects" element={<ProjectsListPage />} />
+                    <Route path="/projects/:id" element={<ProjectDetailPage />} />
+                    <Route path="/philosophy" element={<PhilosophyPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
+                  </Routes>
+                </Suspense>
+              </Layout>
+            </MaybeEditMode>
           </I18nProvider>
         </LanguageProvider>
       </ThemeProvider>

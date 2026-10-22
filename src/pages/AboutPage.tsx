@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { InView } from '@/components/ui/InView'
+import { EditableText } from '@/components/ui/EditableText'
 import { useI18n } from '@/i18n/provider'
 
 export function AboutPage() {
@@ -25,9 +26,15 @@ export function AboutPage() {
             subtitle={s.about.subtitle}
             tag={s.about.heading}
           />
-          <p className="prose-lede lede-wide">
+          <EditableText
+            as="p"
+            className="prose-lede lede-wide"
+            path="profile.bio"
+            label={s.edit.fields.bio}
+            multiline
+          >
             {c.profile.bio}
-          </p>
+          </EditableText>
 
           <h3 className="subheading">
             {s.about.engineeringTitle}
@@ -44,8 +51,12 @@ export function AboutPage() {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <h3>{point.title}</h3>
-                <p>{point.description}</p>
+                <EditableText as="h3" path={`profile.philosophy.${point.id}.title`} label={s.edit.fields.pointTitle}>
+                  {point.title}
+                </EditableText>
+                <EditableText as="p" path={`profile.philosophy.${point.id}.description`} label={s.edit.fields.pointDescription} multiline>
+                  {point.description}
+                </EditableText>
                 <div className="philosophy-keywords">
                   {point.keywords.map((kw) => (
                     <Tag key={kw}>{kw}</Tag>
@@ -92,7 +103,9 @@ export function AboutPage() {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <h3>{group.title}</h3>
+                <EditableText as="h3" path={`skills.${group.id}.title`} label={s.edit.fields.groupTitle}>
+                  {group.title}
+                </EditableText>
                 <ul className="expertise-skills">
                   {group.skills.map((skill: string) => (
                     <li key={skill} className="expertise-skill">

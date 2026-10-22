@@ -1,0 +1,343 @@
+// EditModeShell (spec-v4 §5.1, §5.2): the lazy edit-mode wrapper around the
+// real site. It authenticates through the protected proxy, fetches the live
+// master documents, holds the draft, and re-wraps the tree in an
+// I18nProvider override — the seven routes ARE the preview. Visitors never
+// mount this component; its code is never in the entry chunk (§7 P3.4).
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { useLanguage } from '@/hooks/useLanguage';
+import { I18nProvider } from '@/i18n/provider';
+import { UI, resolveContent } from '@/i18n';
+import type { ResolvedContent } from '@/i18n';
+import {
+  DRAFT_DOCS,
+  DraftStore,
+  TYPES_FILE,
+  bundledBase,
+  fetchDoc,
+  fetchTextFile,
+  saveDraft,
+  saveIdUnions,
+} from '@/i18n/draft';
+import type { DocBase, DocSaveResult, DraftDocId } from '@/i18n/draft';
+import {
+  DEFAULT_BRANCH,
+  DRAFT_STORAGE,
+  clearDraftStorage,
+  ensureEditorAuth,
+  getEditBranch,
+  requestedBranch,
+  setEditBranch,
+  setEditFlag,
+} from '@/i18n/edit-mode';
+import { EditContext } from '@/hooks/useEdit';
+import type { EditApi } from '@/hooks/useEdit';
+import type { ContentIssue } from '@/i18n/validate';
+import { EditBar } from './EditBar';
+import { JsonPanel, type PanelTab } from './JsonPanel';
+
+type Phase = 'authenticating' | 'loading' | 'ready' | 'offline';
+
+export default function EditModeShell({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { lang } = useLanguage();
+
+  // The store object itself is stable once created; `store` state exists so
+  // render reads it legally, and `revision` is the invalidation counter that
+  // re-derives everything the draft feeds to the UI.
+  const [store, setStore] = useState<DraftStore | null>(null);
+  const typesRef = useRef<{ source: string; sha: string } | null>(null);
+  const [phase, setPhase] = useState<Phase>('authenticating');
+  const [branch, setBranch] = useState<string>(DEFAULT_BRANCH);
+  const [resolved, setResolved] = useState<Record<'vi' | 'en', ResolvedContent> | null>(null);
+  const [revision, setRevision] = useState(0);
+  const [dirty, setDirty] = useState(false);
+  const [issues, setIssues] = useState<ContentIssue[]>([]);
+  const [conflicts, setConflicts] = useState<DraftDocId[]>([]);
+  const [draftRestored, setDraftRestored] = useState(false);
+  const [saveResults, setSaveResults] = useState<DocSaveResult[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saveStopped, setSaveStopped] = useState(false);
+  const [unionNote, setUnionNote] = useState<'ok' | 'failed' | null>(null);
+  const [panelOpen, setPanelOpen] = useState(false);
+  const [panelTab, setPanelTab] = useState<PanelTab>('profile');
+
+  const stripEditQuery = useCallback(() => {
+    const params = new URLSearchParams(location.search);
+    params.delete('edit');
+    const query = params.toString();
+    navigate(`${location.pathname}${query ? `?${query}` : ''}${location.hash}`, { replace: true });
+  }, [navigate, location.pathname, location.search, location.hash]);
+
+  // Every accepted edit re-derives the resolved content from the draft
+  // documents (same join, same fallback rules as the bundled loader) and
+  // copies the draft to sessionStorage — an accidental reload restores it
+  // (§5.2).
+  const refresh = useCallback((active: DraftStore) => {
+    const texts = active.draftTexts();
+    setResolved(resolveContent(active.draftStructures(), texts.vi, texts.en));
+    setRevision((r) => r + 1);
+    const isDirty = active.isDirty();
+    setDirty(isDirty);
+    if (isDirty) sessionStorage.setItem(DRAFT_STORAGE, JSON.stringify(active.snapshot()));
+    else clearDraftStorage();
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const init = async () => {
+      // `?edit=<branch>` targets that branch; a bare `?edit` resumes the
+      // session's branch or the default. An illegal name exits edit mode the
+      // same way a failed auth does.
+      const requested = requestedBranch(location.search);
+      if (requested === null) {
+        setEditFlag(false);
+        clearDraftStorage();
+        stripEditQuery();
+        return;
+      }
+      const branch = requested ?? getEditBranch();
+      setBranch(branch);
+      const authed = await ensureEditorAuth(branch);
+      if (cancelled) return;
+      if (!authed) {
+        // 401 or a cancelled prompt → normal visitor site, zero affordances.
+        setEditFlag(false);
+        clearDraftStorage();
+        stripEditQuery();
+        return;
+      }
+      setEditFlag(true);
+      setEditBranch(branch);
+      setPhase('loading');
+
+      // Draft initialization is the live repository files, never the bundle
+      // (§5.1); the bundle is only the offline fallback, flagged stale.
+      let offline = false;
+      let bases: Record<DraftDocId, DocBase> | null = null;
+      try {
+        bases = {} as Record<DraftDocId, DocBase>;
+        for (const meta of DRAFT_DOCS) bases[meta.id] = await fetchDoc(meta.file, branch);
+      } catch {
+        offline = true;
+      }
+      if (!bases) bases = bundledBase();
+
+      const created = new DraftStore(bases);
+
+      const stored = sessionStorage.getItem(DRAFT_STORAGE);
+      if (stored) {
+        try {
+          const drifted = created.applySaved(JSON.parse(stored));
+          if (drifted.length > 0) setConflicts(drifted);
+          setDraftRestored(true);
+        } catch {
+          clearDraftStorage();
+        }
+      }
+
+      try {
+        const file = await fetchTextFile(TYPES_FILE, branch);
+        typesRef.current = { source: file.text, sha: file.sha };
+      } catch {
+        typesRef.current = null;
+      }
+
+      if (cancelled) return;
+      setStore(created);
+      setPhase(offline ? 'offline' : 'ready');
+      refresh(created);
+    };
+    void init();
+    return () => {
+      cancelled = true;
+    };
+  }, [refresh, stripEditQuery, location.search]);
+
+  // Mid-edit navigation guard (§5.2).
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warn);
+    return () => window.removeEventListener('beforeunload', warn);
+  }, [dirty]);
+
+  const editApi = useMemo<EditApi | null>(
+    () =>
+      store && (phase === 'ready' || phase === 'offline')
+        ? {
+            commit: (path, value) => {
+              const rejected = store.setValue(lang, path, value);
+              setIssues(rejected ?? []);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            revert: (path) => {
+              const rejected = store.revertPath(path);
+              setIssues(rejected ?? []);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            isPathDirty: (path) => store.isPathDirty(path),
+          }
+        : null,
+    [store, phase, lang, refresh],
+  );
+
+  const runSave = useCallback(async () => {
+    if (!store || phase === 'offline') return;
+    // The full-draft validator runs before any PUT (§5.6); an invalid draft
+    // never reaches the repository.
+    const invalid = store.validate();
+    if (invalid.length > 0) {
+      setIssues(invalid);
+      return;
+    }
+    setSaving(true);
+    setSaveStopped(false);
+    setUnionNote(null);
+    setSaveResults([]);
+    const { results, stoppedEarly } = await saveDraft(store, (result) => {
+      setSaveResults((prev) => [...prev, result]);
+    }, branch);
+    setSaveStopped(stoppedEarly);
+    const written = new Set(results.filter((r) => r.status === 'written').map((r) => r.id));
+    const conflicted = results.filter((r) => r.status === 'conflict').map((r) => r.id);
+    setConflicts((prev) => [...new Set([...prev.filter((id) => !written.has(id)), ...conflicted])]);
+
+    // The third leg of §3.1: append ids whose documents landed to their unions.
+    const types = typesRef.current;
+    if (types) {
+      const union = await saveIdUnions(store, types, branch);
+      if (union) {
+        if (union.failed !== undefined) setUnionNote('failed');
+        else {
+          typesRef.current = { source: union.source!, sha: union.sha! };
+          setUnionNote('ok');
+        }
+      }
+    }
+    setSaving(false);
+    refresh(store);
+  }, [store, phase, refresh, branch]);
+
+  const resolveRebase = useCallback(
+    async (id: DraftDocId) => {
+      if (!store) return;
+      const meta = DRAFT_DOCS.find((d) => d.id === id)!;
+      try {
+        store.resetBase(id, await fetchDoc(meta.file, branch));
+      } catch {
+        // unreachable proxy — the conflict UI stays, take-theirs still works
+      }
+      const rejected = store.rebase(id);
+      setIssues(rejected ?? []);
+      if (!rejected) setConflicts((prev) => prev.filter((x) => x !== id));
+      refresh(store);
+    },
+    [store, refresh, branch],
+  );
+
+  const resolveTakeTheirs = useCallback(
+    (id: DraftDocId) => {
+      store?.discardDocument(id);
+      setConflicts((prev) => prev.filter((x) => x !== id));
+      if (store) refresh(store);
+    },
+    [store, refresh],
+  );
+
+  const openHandMerge = useCallback((id: DraftDocId) => {
+    setPanelTab(id);
+    setPanelOpen(true);
+  }, []);
+
+  const discardDoc = useCallback(
+    (id: DraftDocId) => {
+      store?.discardDocument(id);
+      setConflicts((prev) => prev.filter((x) => x !== id));
+      if (store) refresh(store);
+    },
+    [store, refresh],
+  );
+
+  const revertPath = useCallback(
+    (path: string) => {
+      if (!store) return;
+      const rejected = store.revertPath(path);
+      setIssues(rejected ?? []);
+      if (!rejected) refresh(store);
+    },
+    [store, refresh],
+  );
+
+  const exit = useCallback(() => {
+    setEditFlag(false);
+    clearDraftStorage();
+    stripEditQuery();
+  }, [stripEditQuery]);
+
+  const openPanel = useCallback(() => {
+    setPanelOpen(true);
+  }, []);
+
+  // `revision` is the draft's invalidation counter — the store mutates in
+  // place, so it is the only signal that a recomputation is due.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const changedDocs = useMemo(() => store?.changedDocs() ?? [], [store, revision]);
+
+  const override = resolved ? { ui: UI[lang], content: resolved[lang] } : undefined;
+
+  return (
+    <I18nProvider override={override}>
+      <EditContext.Provider value={editApi}>
+        {children}
+        {store && (
+          <>
+            <EditBar
+              offline={phase === 'offline'}
+              dirty={dirty}
+              changedDocs={changedDocs}
+              conflicts={conflicts}
+              issues={issues}
+              saving={saving}
+              saveStopped={saveStopped}
+              saveResults={saveResults}
+              unionNote={unionNote}
+              draftRestored={draftRestored}
+              branch={branch}
+              onOpenPanel={openPanel}
+              onSave={() => void runSave()}
+              onExit={exit}
+              onRebase={(id) => void resolveRebase(id)}
+              onTakeTheirs={resolveTakeTheirs}
+              onHandMerge={openHandMerge}
+              onDiscardDoc={discardDoc}
+              onRevertPath={revertPath}
+            />
+            {panelOpen && (
+              <JsonPanel
+                store={store}
+                tab={panelTab}
+                revision={revision}
+                conflicts={conflicts}
+                onClose={() => setPanelOpen(false)}
+                onTab={setPanelTab}
+                onChanged={() => {
+                  setIssues(store.validate());
+                  refresh(store);
+                }}
+                onConflictResolved={(id) => setConflicts((prev) => prev.filter((x) => x !== id))}
+              />
+            )}
+          </>
+        )}
+      </EditContext.Provider>
+    </I18nProvider>
+  );
+}

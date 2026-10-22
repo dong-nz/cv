@@ -2,6 +2,7 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Badge } from '@/components/ui/Badge'
 import { motion } from 'motion/react'
 import { InView } from '@/components/ui/InView'
+import { EditableText } from '@/components/ui/EditableText'
 import { useI18n } from '@/i18n/provider'
 
 import { Link } from 'react-router'
@@ -39,12 +40,16 @@ export function ProjectsListPage() {
               whileTap={{ scale: 0.98 }}
             >
               <div className="project-card-header">
-                <h3>{project.title}</h3>
+                <EditableText as="h3" path={`projects.${project.id}.title`} label={s.edit.fields.title}>
+                  {project.title}
+                </EditableText>
                 <Badge variant="outline">
                   {s.projects.categories[project.category]}
                 </Badge>
               </div>
-              <p className="project-card-summary">{project.summary}</p>
+              <EditableText as="p" className="project-card-summary" path={`projects.${project.id}.summary`} label={`${project.title} — ${s.edit.fields.summary}`}>
+                {project.summary}
+              </EditableText>
               <div className="project-card-techs">
                 {project.technologies.slice(0, 4).map((tech) => (
                   <span key={tech} className="tag">

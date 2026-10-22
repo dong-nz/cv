@@ -1,6 +1,7 @@
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { motion } from "motion/react"
 import { InView } from "@/components/ui/InView"
+import { EditableText } from '@/components/ui/EditableText'
 import { useI18n } from '@/i18n/provider'
 
 export function Experience() {
@@ -32,9 +33,9 @@ export function Experience() {
             >
               <div className="timeline-marker" />
               <div className="timeline-header">
-                <div className="timeline-title">
+                <EditableText as="div" className="timeline-title" path={`experience.${exp.id}.title`} label={s.edit.fields.expTitle}>
                   {exp.title}
-                </div>
+                </EditableText>
                 <div className="timeline-company">{exp.company}</div>
                 <div className="timeline-meta">
                   <span className="timeline-duration">{exp.duration}</span>
@@ -44,8 +45,15 @@ export function Experience() {
                 </div>
               </div>
               <ul className="timeline-responsibilities">
-                {exp.responsibilities.map((r) => (
-                  <li key={r}>{r}</li>
+                {exp.responsibilities.map((r, ri) => (
+                  <EditableText
+                    as="li"
+                    key={ri}
+                    path={`experience.${exp.id}.responsibilities[${ri}]`}
+                    label={`${exp.title} — ${s.edit.fields.responsibility} ${ri + 1}`}
+                  >
+                    {r}
+                  </EditableText>
                 ))}
               </ul>
             </motion.div>

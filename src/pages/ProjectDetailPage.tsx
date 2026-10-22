@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router'
 import { motion, type Transition } from 'motion/react'
 import { Badge } from '@/components/ui/Badge'
 import { Tag } from '@/components/ui/Tag'
+import { EditableText } from '@/components/ui/EditableText'
 import { InView } from '@/components/ui/InView'
 import { useI18n } from '@/i18n/provider'
 
@@ -61,19 +62,25 @@ export function ProjectDetailPage() {
           viewport={{ once: true, amount: 0.2 }}
           transition={itemTransition(0)}
         >
-          <h1 id="project-title" style={{ flex: 1 }}>{project.title}</h1>
+          <EditableText as="h1" id="project-title" style={{ flex: 1 }} path={`projects.${project.id}.title`} label={s.edit.fields.title}>
+            {project.title}
+          </EditableText>
           <Badge variant="outline">{s.projects.categories[project.category]}</Badge>
         </motion.div>
 
-        <motion.p
+        <EditableText
+          as={motion.p}
           className="prose-lede"
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={itemTransition(0.08)}
+          path={`projects.${project.id}.summary`}
+          label={`${project.title} — ${s.edit.fields.summary}`}
+          multiline
         >
           {project.summary}
-        </motion.p>
+        </EditableText>
 
         <div className="prose">
           {project.metrics && project.metrics.length > 0 && (
@@ -137,8 +144,12 @@ export function ProjectDetailPage() {
                   viewport={{ once: true, amount: 0.2 }}
                   transition={itemTransition(0.48 + idx * 0.08)}
                 >
-                  <h4>{section.title}</h4>
-                  <p>{section.content}</p>
+                  <EditableText as="h4" path={`projects.${project.id}.sections.${section.id}.title`} label={`${section.title} — ${s.edit.fields.sectionTitle}`}>
+                    {section.title}
+                  </EditableText>
+                  <EditableText as="p" path={`projects.${project.id}.sections.${section.id}.content`} label={`${section.title} — ${s.edit.fields.sectionContent}`} multiline>
+                    {section.content}
+                  </EditableText>
                   <Tag accent>{section.type}</Tag>
                 </motion.div>
               ))}

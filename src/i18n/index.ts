@@ -25,6 +25,7 @@ import type {
 } from './dict-types';
 import type { Language, PhilosophyId } from '../types/index';
 import { validateContent } from './validate';
+import type { ContentStructures } from './validate';
 
 const uiVi: UIDict = uiViJson;
 // tsc enforces en completeness against the derived Vietnamese tree (§3.3).
@@ -65,8 +66,6 @@ function deepMerge<T>(base: T, patch: unknown): T {
   return out as T;
 }
 
-const mergedEn: ContentVi = deepMerge(contentVi, contentEn);
-
 export const UI: Record<Language, UIDict> = { vi: uiVi, en: uiEn };
 
 // Resolved records: structure joined with text. These are the shapes every
@@ -97,7 +96,7 @@ export type ResolvedContent = {
   projects: ResolvedProject[];
 };
 
-function joinContent(text: ContentVi): ResolvedContent {
+function joinContent(structures: ContentStructures, text: ContentVi): ResolvedContent {
   return {
     profile: {
       ...structures.profile,
@@ -130,7 +129,21 @@ function joinContent(text: ContentVi): ResolvedContent {
   };
 }
 
-export const CONTENT: Record<Language, ResolvedContent> = {
-  vi: joinContent(contentVi),
-  en: joinContent(mergedEn),
-};
+// Resolve one pair of text documents against one set of structure documents.
+// The Phase 1 constant below is the bundled answer; the edit-mode draft store
+// (src/i18n/draft.ts) calls this on every accepted edit to rebuild the
+// provider override — same join, same fallback rules, draft documents in.
+export function resolveContent(
+  structures: ContentStructures,
+  vi: ContentVi,
+  en: ContentEn,
+): Record<Language, ResolvedContent> {
+  const mergedEn: ContentVi = deepMerge(vi, en);
+  return { vi: joinContent(structures, vi), en: joinContent(structures, mergedEn) };
+}
+
+export const CONTENT: Record<Language, ResolvedContent> = resolveContent(
+  structures,
+  contentVi,
+  contentEn,
+);

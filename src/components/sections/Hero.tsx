@@ -7,6 +7,7 @@ import {DownloadResume} from '@/components/sections/DownloadResume'
 import {Button} from "@/components/ui/Button"
 import {Typewriter} from '@/components/ui/Typewriter'
 import {HeroParticles} from '@/components/sections/HeroParticles'
+import {EditableText} from '@/components/ui/EditableText'
 import {SocialLinks} from "@/components/ui/SocialLinks"
 
 
@@ -74,9 +75,24 @@ export function Hero() {
                             never content — the emphasis span keeps its classes. */}
                         {c.profile.tagline.map((segment, i) => (
                             segment.emphasis ? (
-                                <span key={i} className="ok-possible name-highlight">{segment.text}</span>
+                                <EditableText
+                                    as="span"
+                                    key={i}
+                                    className="ok-possible name-highlight"
+                                    path={`profile.tagline[${i}].text`}
+                                    label={`${s.edit.fields.tagline} ${i + 1}`}
+                                >
+                                    {segment.text}
+                                </EditableText>
                             ) : (
-                                <span key={i}>{segment.text}</span>
+                                <EditableText
+                                    as="span"
+                                    key={i}
+                                    path={`profile.tagline[${i}].text`}
+                                    label={`${s.edit.fields.tagline} ${i + 1}`}
+                                >
+                                    {segment.text}
+                                </EditableText>
                             )
                         ))}
                     </motion.p>

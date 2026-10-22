@@ -1,6 +1,7 @@
 import { motion } from "motion/react"
 import { SectionHeading } from "@/components/ui/SectionHeading"
 import { InView } from '@/components/ui/InView'
+import { EditableText } from '@/components/ui/EditableText'
 import { useI18n } from '@/i18n/provider'
 
 export function Expertise() {
@@ -31,7 +32,9 @@ export function Expertise() {
               whileHover={{ scale: 1.02, y: -4 }}
               whileTap={{ scale: 0.98 }}
             >
-              <h3>{group.title}</h3>
+              <EditableText as="h3" path={`skills.${group.id}.title`} label={s.edit.fields.groupTitle}>
+                {group.title}
+              </EditableText>
               <ul className="expertise-skills">
                 {group.skills.map((skill) => (
                   <li key={skill} className="expertise-skill">
