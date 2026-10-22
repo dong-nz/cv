@@ -1,0 +1,188 @@
+{
+  "profile": {
+    "name": "Nguyễn Đông",
+    "title": "Senior Software Engineer",
+    "bio": "Senior Software Engineer với kinh nghiệm xây dựng hệ thống phân tán, logistics technology, và ứng dụng AI/ML vào bài toán thực tế. Tập trung vào system architecture, integration, và production-grade solutions.",
+    "tagline": [
+      {
+        "text": "Phần lớn thời gian tôi là Backend Software Engineer. Muốn tôi là Full Stack Developer, "
+      },
+      {
+        "text": "yes",
+        "emphasis": true
+      },
+      {
+        "text": ", có thể."
+      }
+    ],
+    "philosophy": {
+      "build-for-the-real-problem": {
+        "title": "Giải pháp được xây dựng dựa trên vấn đề thực tế",
+        "description": "Không bắt đầu bằng technology. Bắt đầu bằng problem."
+      },
+      "think-in-systems": {
+        "title": "Think in systems",
+        "description": "Quan tâm đến kiến trúc tổng thể, không chỉ từng component."
+      },
+      "measure-impact": {
+        "title": "Measure impact",
+        "description": "Technical implementation phải gắn với measurable outcome."
+      },
+      "keep-learning": {
+        "title": "Keep learning",
+        "description": "Continuous exploration of new technologies and approaches."
+      },
+      "business-domain-knowledge-is-a-key-of-success": {
+        "title": "Kiến thức nghiệp vụ là chìa khóa thành công",
+        "description": "Hiểu sâu về business domain giúp hiểu rõ vấn đề và đưa ra giải pháp phù hợp."
+      }
+    }
+  },
+  "skills": {
+    "software-engineering": {
+      "title": "Software Engineering"
+    },
+    "system-architecture": {
+      "title": "System Architecture"
+    },
+    "logistics-technology": {
+      "title": "Logistics Technology"
+    },
+    "ai-ml": {
+      "title": "AI / ML"
+    },
+    "infrastructure": {
+      "title": "Infrastructure"
+    },
+    "engineering-practices": {
+      "title": "Engineering Practices"
+    }
+  },
+  "experience": {
+    "open-to-work": {
+      "title": "Đang tìm nơi làm việc mới",
+      "responsibilities": [
+        "Sẵn sàng cho vai trò Senior Engineer: system architecture, integration platform, full-stack delivery"
+      ]
+    },
+    "relax-gap": {
+      "title": "Nghỉ ngơi",
+      "responsibilities": [
+        "Nghỉ có chủ đích giữa hai vai trò — lấy lại nhịp trước khi nhận hệ thống tiếp theo",
+        "Tự thử nghiệm theo nhịp riêng: local LLM với llama.cpp, đọc về Computer Vision"
+      ]
+    },
+    "lazada-senior-swe": {
+      "title": "Senior Software Engineer",
+      "responsibilities": [
+        "System ownership và architecture design cho logistics integration systems",
+        "Developed IoT-DWS integration solution deployed across 16 sortations",
+        "Led system maintenance and modernization for production environments",
+        "Applied Computer Vision and ML to solve real-world operational problems",
+        "Scrum Master responsibilities — team achieved Scrum Level L3"
+      ]
+    },
+    "nexts-founder": {
+      "title": "Người sáng lập",
+      "responsibilities": [
+        "Phát triển giải pháp cho xe tự hành, thu thập dữ liệu thời gian thực từ cảm biến và hệ thống onboard: LiDAR, camera, GPS, CAN bus."
+      ]
+    },
+    "sap-senior-swe": {
+      "title": "Senior Software Engineer",
+      "responsibilities": [
+        "Team leader quản lý sản phẩm B1 Integration"
+      ]
+    }
+  },
+  "projects": {
+    "iot-dws-integration": {
+      "title": "Tích hợp hệ thống IoT-DWS",
+      "summary": "Thiết kế và triển khai hệ thống integration giữa IoT devices và DWS (Dimensioning Weighing Scanning) machines cho 16 sortations.",
+      "sections": {
+        "context": {
+          "title": "Context",
+          "content": "Tiếp nhận và nhanh chóng làm chủ một hệ thống IoT-DWS sau khi thành viên phụ trách trước đó rời project. Cần hiểu nhanh architecture hiện tại và tiếp tục phát triển integration solution."
+        },
+        "problem": {
+          "title": "Problem",
+          "content": "Cần integration giữa các IoT devices (sensors, cameras) và DWS machines — hệ thống vật lý phức tạp với nhiều protocol khác nhau (HMI, FTP, HTTP)."
+        },
+        "solution": {
+          "title": "Solution",
+          "content": "Thiết kế HTTP-based integration engine với HMAC security, RocketMQ messaging, và protocol adapters cho HMI/FTP/HTTP."
+        },
+        "architecture": {
+          "title": "Architecture",
+          "content": "```text\nIoT Devices\n    ↓\nProtocol Adapters (HMI/FTP/HTTP)\n    ↓\nHTTP Engine + HMAC Security\n    ↓\nRocketMQ\n    ↓\nDWS Machines\n```"
+        },
+        "challenges": {
+          "title": "Challenges",
+          "content": "Nhiều protocol khác nhau, security requirements (HMAC signature), real-time data processing, production reliability."
+        },
+        "result": {
+          "title": "Result",
+          "content": "Giải pháp được triển khai cho 16 sortations, ổn định trong production, hỗ trợ 3 protocols (HMI, FTP, HTTP)."
+        }
+      }
+    },
+    "awb-detection": {
+      "title": "AWB Detection / Computer Vision",
+      "summary": "Ứng dụng Computer Vision và Machine Learning để tự động phát hiện và OCR shipping label từ hình ảnh camera trên sortation.",
+      "sections": {
+        "context": {
+          "title": "Context",
+          "content": "Sortation machines chụp ảnh packages khi di chuyển trên băng chuyền. Cần tự động đọc AWB (Air Waybill) từ ảnh để tracking và sorting."
+        },
+        "problem": {
+          "title": "Problem",
+          "content": "White label trên white package — traditional CV methods không đủ robust. Cần ML-based detection."
+        },
+        "pipeline": {
+          "title": "Pipeline",
+          "content": "```text\nImage\n  ↓\nAWB/Label Detection (YOLO)\n  ↓\nBounding Box / OBB\n  ↓\nRotation Correction\n  ↓\nCrop\n  ↓\nOCR\n  ↓\nText Extraction\n```"
+        },
+        "challenges": {
+          "title": "Challenges",
+          "content": "White label on white package, rotated labels, varying lighting conditions, real-time inference requirements."
+        },
+        "result": {
+          "title": "Result",
+          "content": "Model fine-tuned cho AWB detection, xử lý 70,000 images/month. Presentation tại Tech Talk workshop."
+        }
+      }
+    },
+    "facility-management": {
+      "title": "Facility Management Platform",
+      "summary": "Xây dựng nền tảng digital twin cho logistics facilities — mô hình hóa facility, theo dõi real-time, và recommendation system.",
+      "sections": {
+        "vision": {
+          "title": "Vision",
+          "content": "Chuyển đổi từ manual operations sang Operation Intelligence Platform — thu thập data, monitor, analyze, recommend, decide."
+        },
+        "architecture": {
+          "title": "Architecture",
+          "content": "```text\nPhysical Facility\n    ↓\nData Collection\n    ↓\nFacility Model\n    ↓\nDigital Twin\n    ↓\nSimulation\n    ↓\nAnalytics\n    ↓\nRecommendation\n    ↓\nOperation Decision\n```"
+        },
+        "result": {
+          "title": "Result",
+          "content": "Platform hỗ trợ facility modeling, real-time visibility, và recommendation cho capacity planning."
+        }
+      }
+    },
+    "local-llm-experiments": {
+      "title": "Local LLM Experiments",
+      "summary": "Technical exploration về running local MoE LLMs với llama.cpp — GPU offloading, VRAM optimization, performance tracing.",
+      "sections": {
+        "exploration": {
+          "title": "Exploration",
+          "content": "Technical exploration về MoE (Mixture of Experts), expert routing, GPU offloading, VRAM optimization, prefill/decode pipeline."
+        },
+        "learnings": {
+          "title": "Lessons Learned",
+          "content": "Understand the system → Measure → Analyze → Optimize. Không phải khoe hardware — mà thể hiện engineering approach."
+        }
+      }
+    }
+  }
+}

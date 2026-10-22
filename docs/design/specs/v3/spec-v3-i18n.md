@@ -14,8 +14,10 @@ Add full English/Vietnamese bilingual support to the portfolio. Users can toggle
 **Content lives in data, not in layout.** Every user-facing string must be defined in a centralized module — never hardcoded in JSX. This ensures:
 
 1. **Phase 1 (frontend):** All strings in `src/i18n/strings.ts`, consumed via `useLanguage()` hook
-2. **Phase 2 (backend):** Replace `src/i18n/strings.ts` with API calls — zero component changes
-3. **Future-proof:** Adding a new language requires only updating the strings module and data layer, not touching components
+2. **Phase 2 (backend):** Replace `src/i18n/strings.ts` with API calls — zero component changes — **superseded 2026-10-22** by `spec-v4-live-edit.md`: strings and content moved to per-language JSON dictionaries (`src/i18n/locales/`), consumed through `useI18n()`; `strings.ts` and `field.ts` are deleted. The "zero component changes" property carried over — every consumer switched to the provider in the same migration.
+3. **Future-proof:** Adding a new language requires only updating the strings module and data layer, not touching components — now literally true: a new language is a new locale directory plus one `Language` union member (§3.1 of the v4 spec).
+
+> **Status 2026-10-22:** the Phase-2 rows below describe the v3 plan and are kept for history; the shipped implementation is the v4 one. Rows 25–27 are done by the v4 migration.
 
 
 ## Implementation Progress

@@ -12,78 +12,35 @@ export type ProjectCategory =
   | "architecture"
   | "experiment";
 
-export interface Project {
-  id: string;
-  title: string;
-  titleEn?: string;
-  summary: string;
-  summaryEn?: string;
-  category: ProjectCategory;
-  role: string;
-  technologies: string[];
-  metrics?: string[];
-  featured: boolean;
-}
+// Stable id unions (spec-v4 §3.1). Text dictionaries are type-safe only against
+// closed unions: adding a content item means adding a union member, a structure
+// record, and its Vietnamese text — tsc catches a missing text entry, the
+// validator (src/i18n/validate.ts) catches id mismatches across documents.
+// SkillGroupId and PhilosophyId are internal keys and never appear in URLs.
+export type ProjectId =
+  | 'iot-dws-integration'
+  | 'awb-detection'
+  | 'facility-management'
+  | 'local-llm-experiments';
 
-export interface ProjectSection {
-  id: string;
-  title: string;
-  titleEn?: string;
-  content: string;
-  contentEn?: string;
-  type: "text" | "diagram" | "metrics" | "code";
-}
+export type ExperienceId =
+  | 'open-to-work'
+  | 'relax-gap'
+  | 'lazada-senior-swe'
+  | 'nexts-founder'
+  | 'sap-senior-swe';
 
-export interface ProjectDetail extends Project {
-  sections: ProjectSection[];
-}
+export type SkillGroupId =
+  | 'software-engineering'
+  | 'system-architecture'
+  | 'logistics-technology'
+  | 'ai-ml'
+  | 'infrastructure'
+  | 'engineering-practices';
 
-export interface ExperienceEntry {
-  id: string;
-  title: string;
-  titleEn?: string;
-  company: string;
-  duration: string;
-  location?: string;
-  responsibilities: string[];
-  responsibilitiesEn?: string[];
-  variant?: 'current' | 'gap';
-  logo?: string;
-}
-
-export interface SkillGroup {
-  title: string;
-  titleEn?: string;
-  skills: string[];
-}
-
-export interface PhilosophyPoint {
-  title: string;
-  titleEn?: string;
-  description: string;
-  descriptionEn?: string;
-  keywords: string[];
-}
-
-export interface Profile {
-  name: string;
-  nameEn: string;
-  firstName: string;
-  lastName: string;
-  title: string;
-  titleEn?: string;
-  tagline: string;
-  taglineEn?: string;
-  bio: string;
-  bioEn?: string;
-  email: string;
-  githubUrl: string;
-  linkedinUrl: string;
-  githubHandle: string;
-  linkedinHandle: string;
-  telegramUrl: string;
-  telegramHandle: string;
-  currentInterests: string[];
-  roles: string[];
-  philosophy: PhilosophyPoint[];
-}
+export type PhilosophyId =
+  | 'build-for-the-real-problem'
+  | 'think-in-systems'
+  | 'measure-impact'
+  | 'keep-learning'
+  | 'business-domain-knowledge-is-a-key-of-success';

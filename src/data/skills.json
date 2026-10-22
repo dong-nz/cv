@@ -1,0 +1,64 @@
+[
+  {
+    "id": "software-engineering",
+    "skills": [
+      "Java",
+      "Go",
+      "TypeScript",
+      "Distributed Systems",
+      "REST APIs",
+      "Microservices"
+    ]
+  },
+  {
+    "id": "system-architecture",
+    "skills": [
+      "System Design",
+      "Integration Architecture",
+      "Event-driven Architecture",
+      "Message Queues",
+      "API Design"
+    ]
+  },
+  {
+    "id": "logistics-technology",
+    "skills": [
+      "Sortation",
+      "Warehouse / Facility Operations",
+      "Package Flow",
+      "Operational Intelligence",
+      "Facility Modeling"
+    ]
+  },
+  {
+    "id": "ai-ml",
+    "skills": [
+      "Computer Vision",
+      "Object Detection",
+      "OCR",
+      "Model Deployment",
+      "LLM",
+      "AI-assisted Engineering"
+    ]
+  },
+  {
+    "id": "infrastructure",
+    "skills": [
+      "Docker",
+      "Linux",
+      "CI/CD",
+      "Networking",
+      "Middleware"
+    ]
+  },
+  {
+    "id": "engineering-practices",
+    "skills": [
+      "Agile / Scrum",
+      "Technical Documentation",
+      "System Maintenance",
+      "Performance Optimization",
+      "Technical Research"
+    ]
+  }
+]

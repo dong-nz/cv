@@ -1,66 +1,7 @@
-import type { SkillGroup } from "@/types";
+// Typed loader for the skills structure document (spec-v4 D2) — see the note
+// in profile.ts. Group titles are localized text and live in the content
+// dictionaries; only language-neutral ids and skill terms stay here.
+import skillsJson from './skills.json';
+import type { SkillGroupStructure } from '../i18n/dict-types';
 
-export const skillGroups: SkillGroup[] = [
-  {
-    title: "Software Engineering",
-    titleEn: "Software Engineering",
-    skills: [
-      "Java",
-      "Go",
-      "TypeScript",
-      "Distributed Systems",
-      "REST APIs",
-      "Microservices",
-    ],
-  },
-  {
-    title: "System Architecture",
-    titleEn: "System Architecture",
-    skills: [
-      "System Design",
-      "Integration Architecture",
-      "Event-driven Architecture",
-      "Message Queues",
-      "API Design",
-    ],
-  },
-  {
-    title: "Logistics Technology",
-    titleEn: "Logistics Technology",
-    skills: [
-      "Sortation",
-      "Warehouse / Facility Operations",
-      "Package Flow",
-      "Operational Intelligence",
-      "Facility Modeling",
-    ],
-  },
-  {
-    title: "AI / ML",
-    titleEn: "AI / ML",
-    skills: [
-      "Computer Vision",
-      "Object Detection",
-      "OCR",
-      "Model Deployment",
-      "LLM",
-      "AI-assisted Engineering",
-    ],
-  },
-  {
-    title: "Infrastructure",
-    titleEn: "Infrastructure",
-    skills: ["Docker", "Linux", "CI/CD", "Networking", "Middleware"],
-  },
-  {
-    title: "Engineering Practices",
-    titleEn: "Engineering Practices",
-    skills: [
-      "Agile / Scrum",
-      "Technical Documentation",
-      "System Maintenance",
-      "Performance Optimization",
-      "Technical Research",
-    ],
-  },
-];
+export const skillGroups = skillsJson as SkillGroupStructure[];

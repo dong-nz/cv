@@ -2,17 +2,14 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Link } from "react-router"
 import { motion } from "motion/react"
 import { Badge } from "@/components/ui/Badge"
-import { projects } from "@/data/projects"
 import { InView } from "@/components/ui/InView"
-import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
-import { field } from '@/i18n/field'
+import { useI18n } from '@/i18n/provider'
 
 const MotionLink = motion.create(Link)
 
 export function Projects() {
-  const { lang } = useLanguage()
-  const featured = projects.filter((p) => p.featured).slice(0, 4)
+  const { ui: s, content: c } = useI18n()
+  const featured = c.projects.filter((p) => p.featured).slice(0, 4)
 
   return (
     <InView>
@@ -27,12 +24,12 @@ export function Projects() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title={strings.projects.featured[lang]} tag={strings.projects.featured[lang]} />
+        <SectionHeading title={s.projects.featured} tag={s.projects.featured} />
         <Link
           to="/projects"
           className="section-cta"
         >
-          {strings.projects.viewAll[lang]} →
+          {s.projects.viewAll} →
         </Link>
         <div className="projects-grid">
           {featured.map((project, i) => (
@@ -49,12 +46,12 @@ export function Projects() {
             >
               <div className="project-card-content">
                 <div className="project-card-header">
-                  <h3>{field(lang, project.title, project.titleEn)}</h3>
+                  <h3>{project.title}</h3>
                   <Badge variant="outline">
-                    {strings.projects.categories[project.category][lang]}
+                    {s.projects.categories[project.category]}
                   </Badge>
                 </div>
-                <p className="project-card-summary">{field(lang, project.summary, project.summaryEn)}</p>
+                <p className="project-card-summary">{project.summary}</p>
                 <div className="project-card-techs">
                   {project.technologies.slice(0, 4).map((tech) => (
                     <span key={tech} className="tag">
@@ -71,7 +68,7 @@ export function Projects() {
                     ))}
                   </div>
                 )}
-                <span className="project-card-cta">{strings.projects.viewDetails[lang]} →</span>
+                <span className="project-card-cta">{s.projects.viewDetails} →</span>
               </div>
             </MotionLink>
           ))}

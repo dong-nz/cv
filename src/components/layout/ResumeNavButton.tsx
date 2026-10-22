@@ -1,9 +1,8 @@
 import { resumeAvailable } from '@/data/resume'
-import { useLanguage } from '@/hooks/useLanguage'
+import { useI18n } from '@/i18n/provider'
 import { useResumeDialog } from '@/hooks/useResumeDialog'
 import { ResumeDialog } from '@/components/ui/ResumeDialog'
 import { ResumeIcon } from '@/components/ui/icons'
-import { strings } from '@/i18n/strings'
 
 /**
  * Bar entry for the resume: an icon-only `.nav-control` in the brand group, right after the home
@@ -11,7 +10,7 @@ import { strings } from '@/i18n/strings'
  * accessible name is the translated action in `aria-label`, the hint is the `title`.
  */
 export function ResumeNavButton() {
-  const { lang } = useLanguage()
+  const { ui: s } = useI18n()
   const { open, openDialog, close, containerRef, triggerRef, panelRef } = useResumeDialog()
 
   if (!resumeAvailable) return null
@@ -24,8 +23,8 @@ export function ResumeNavButton() {
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls="resume-modal-nav"
-        aria-label={strings.nav.resume[lang]}
-        title={strings.common.resumeModalHint[lang]}
+        aria-label={s.nav.resume}
+        title={s.common.resumeModalHint}
         onClick={openDialog}
       >
         <ResumeIcon size={24} />

@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router'
 import { ThemeProvider } from '@/hooks/useTheme'
 import { Layout } from '@/components/layout/Layout'
 import { LanguageProvider } from '@/hooks/useLanguage'
+import { I18nProvider } from '@/i18n/provider'
 import { HomePage } from '@/pages/HomePage'
 
 // HomePage stays eager: it is the landing route and owns the LCP, so its code must
@@ -20,7 +21,10 @@ function App() {
     <BrowserRouter>
       <ThemeProvider>
         <LanguageProvider>
-          <Layout>
+          {/* I18nProvider sits below LanguageProvider: it resolves the language
+              through useLanguage and hands every consumer the UI/CONTENT of it. */}
+          <I18nProvider>
+            <Layout>
             {/* A null fallback keeps the shell (nav, footer) painted without reserving a
                 box that would shift the page when the route chunk lands. */}
             <Suspense fallback={null}>
@@ -34,7 +38,8 @@ function App() {
                 <Route path="/contact" element={<ContactPage />} />
               </Routes>
             </Suspense>
-          </Layout>
+            </Layout>
+          </I18nProvider>
         </LanguageProvider>
       </ThemeProvider>
     </BrowserRouter>

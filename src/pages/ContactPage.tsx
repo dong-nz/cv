@@ -2,10 +2,9 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { ContactLinks } from '@/components/ui/ContactLinks'
 import { motion } from 'motion/react'
 import { InView } from '@/components/ui/InView'
-import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
+import { useI18n } from '@/i18n/provider'
 export function ContactPage() {
-  const { lang } = useLanguage()
+  const { ui: s } = useI18n()
   return (
     <InView>
       <motion.section
@@ -19,7 +18,7 @@ export function ContactPage() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-      <SectionHeading title={strings.contact.heading[lang]} tag={strings.common.contactTag[lang]} />
+      <SectionHeading title={s.contact.heading} tag={s.common.contactTag} />
       <ContactLinks />
       </motion.section>
     </InView>

@@ -1,0 +1,128 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "resume": "Tải CV",
+    "about": "Giới thiệu",
+    "experience": "Kinh nghiệm",
+    "projects": "Dự án",
+    "philosophy": "Triết lý",
+    "contact": "Liên hệ",
+    "palette": "Giao diện",
+    "paletteAria": "Đổi màu giao diện",
+    "menuAria": "Menu trang",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu",
+    "groupMenu": "Menu",
+    "groupAppearance": "Giao diện",
+    "themeGroup": "Chế độ",
+    "themeDark": "Tối",
+    "themeLight": "Sáng",
+    "langGroup": "Ngôn ngữ",
+    "langEn": "English",
+    "langVi": "Tiếng Việt",
+    "langSwitch": "Đổi ngôn ngữ",
+    "switchTo": "Chuyển sang",
+    "mainNav": "Điều hướng chính",
+    "themeSwitch": "Đổi chế độ hiển thị",
+    "themeMode": "Chế độ hiển thị"
+  },
+  "social": {
+    "heading": "Kết nối",
+    "aria": {
+      "github": "Xem hồ sơ GitHub",
+      "linkedin": "Xem hồ sơ LinkedIn",
+      "email": "Gửi email",
+      "telegram": "Mở chat Telegram"
+    }
+  },
+  "footer": {
+    "copyright": "Bảo lưu mọi quyền",
+    "links": {
+      "home": "Trang chủ",
+      "about": "Giới thiệu",
+      "projects": "Dự án",
+      "contact": "Liên hệ"
+    }
+  },
+  "hero": {
+    "greeting": "Xin chào, tôi là",
+    "ctaProjects": "Xem dự án",
+    "ctaContact": "Liên hệ",
+    "scroll": "Cuộn"
+  },
+  "about": {
+    "heading": "Giới thiệu",
+    "subtitle": "Kỹ sư phần mềm cao cấp với chuyên môn sâu về hệ thống phân tán, công nghệ logistics và ứng dụng AI thực tiễn.",
+    "engineeringTitle": "Cách tôi tư duy về kỹ thuật",
+    "exploringTitle": "Những điều tôi đang tìm hiểu",
+    "exploringTitlePage": "Những điều tôi đang tìm hiểu",
+    "expertise": "Chuyên môn"
+  },
+  "expertise": {
+    "heading": "Chuyên môn"
+  },
+  "experience": {
+    "heading": "Kinh nghiệm",
+    "tldr": "TL;DR",
+    "tldrText": "15 năm kinh nghiệm, hơn 8 công ty đã đi qua. Quá dài để kể hết."
+  },
+  "projects": {
+    "featured": "Dự án nổi bật",
+    "all": "Dự án",
+    "viewAll": "Xem tất cả",
+    "viewDetails": "Xem chi tiết",
+    "categories": {
+      "software-engineering": "Kỹ thuật phần mềm",
+      "logistics": "Logistics",
+      "ai-ml": "AI / ML",
+      "computer-vision": "Computer Vision",
+      "architecture": "Kiến trúc",
+      "experiment": "Thử nghiệm"
+    }
+  },
+  "contact": {
+    "heading": "Liên hệ",
+    "email": "Email",
+    "github": "GitHub",
+    "linkedin": "LinkedIn",
+    "telegram": "Telegram"
+  },
+  "projectDetail": {
+    "notFound": "Không tìm thấy dự án",
+    "backToProjects": "Quay lại dự án",
+    "impact": "Tác động",
+    "role": "Vai trò",
+    "technologies": "Công nghệ",
+    "experiments": "Thí nghiệm kỹ thuật"
+  },
+  "philosophy": {
+    "heading": "Triết lý",
+    "quotes": [
+      {
+        "title": "Thời gian là vô giá",
+        "details": [
+          "Thời gian là vô giá. Bạn không thể mua nó bằng tiền, không thể khiến nó dừng lại, cũng chẳng thể quay ngược về quá khứ. Một khi thời gian đã trôi qua, nó sẽ mãi mãi không trở lại.",
+          "Chúng ta dành quá nhiều thời gian trong cuộc đời để theo đuổi những thứ như tiền bạc, địa vị và sự công nhận từ người khác. Nhưng thời gian là thứ duy nhất mà chúng ta không bao giờ có thể lấy lại.",
+          "Vì vậy, hãy luôn ý thức về cách bạn sử dụng thời gian của mình. Hãy dành thời gian cho những điều thực sự quan trọng: những người bạn yêu thương, những mục tiêu truyền cảm hứng cho bạn và những khoảnh khắc nuôi dưỡng tâm hồn bạn."
+        ]
+      }
+    ]
+  },
+  "common": {
+    "resumeDownload": "Tải CV",
+    "resumeModalTitle": "Tải CV",
+    "resumeModalAria": "Chọn ngôn ngữ CV",
+    "resumeModalHint": "Chọn ngôn ngữ — PDF sẽ tải về máy của bạn.",
+    "resumeModalClose": "Đóng tùy chọn tải CV",
+    "backToTop": "Cuộn lên đầu trang",
+    "contactTag": "Liên hệ",
+    "experienceTag": "Kinh nghiệm"
+  },
+  "resume": {
+    "EXPERIENCE": "Kinh nghiệm",
+    "SKILLS": "Kỹ năng",
+    "PROJECTS": "Dự án",
+    "UPDATED": "Cập nhật lần cuối",
+    "QR_ALT": "mã QR"
+  }
+}

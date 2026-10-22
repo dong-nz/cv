@@ -2,17 +2,15 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Badge } from '@/components/ui/Badge'
 import { motion } from 'motion/react'
 import { InView } from '@/components/ui/InView'
-import { projects } from '@/data/projects'
-import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
-import { field } from '@/i18n/field'
+import { useI18n } from '@/i18n/provider'
 
 import { Link } from 'react-router'
+
 
 const MotionLink = motion.create(Link)
 
 export function ProjectsListPage() {
-  const { lang } = useLanguage()
+  const { ui: s, content: c } = useI18n()
   return (
     <InView>
       <motion.section
@@ -26,9 +24,9 @@ export function ProjectsListPage() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title={strings.projects.all[lang]} tag={strings.projects.all[lang]} />
+        <SectionHeading title={s.projects.all} tag={s.projects.all} />
         <div className="projects-grid">
-          {projects.map((project, i) => (
+          {c.projects.map((project, i) => (
             <MotionLink
               key={project.id}
               to={`/projects/${project.id}`}
@@ -41,12 +39,12 @@ export function ProjectsListPage() {
               whileTap={{ scale: 0.98 }}
             >
               <div className="project-card-header">
-                <h3>{field(lang, project.title, project.titleEn)}</h3>
+                <h3>{project.title}</h3>
                 <Badge variant="outline">
-                  {strings.projects.categories[project.category][lang]}
+                  {s.projects.categories[project.category]}
                 </Badge>
               </div>
-              <p className="project-card-summary">{field(lang, project.summary, project.summaryEn)}</p>
+              <p className="project-card-summary">{project.summary}</p>
               <div className="project-card-techs">
                 {project.technologies.slice(0, 4).map((tech) => (
                   <span key={tech} className="tag">
@@ -54,7 +52,7 @@ export function ProjectsListPage() {
                   </span>
                 ))}
               </div>
-              <span className="project-card-cta">{strings.projects.viewDetails[lang]} →</span>
+              <span className="project-card-cta">{s.projects.viewDetails} →</span>
             </MotionLink>
           ))}
         </div>

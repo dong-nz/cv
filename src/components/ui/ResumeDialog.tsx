@@ -2,8 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { resumeUrlFor, resumeLanguages, resumeLanguageLabels } from '@/data/resume'
-import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
+import { useI18n } from '@/i18n/provider'
 
 type ResumeDialogProps = {
   open: boolean
@@ -19,7 +18,7 @@ type ResumeDialogProps = {
  * descendants, which would size the viewport overlay to the bar and clip the panel.
  */
 export function ResumeDialog({ open, close, panelRef, dialogId }: ResumeDialogProps) {
-  const { lang } = useLanguage()
+  const { ui: s } = useI18n()
 
   // Enter only, one frame late so the panel is on screen before it takes focus. AnimatePresence
   // keeps the open=true props on its exiting copy, so an onAnimationComplete handler fires again
@@ -47,7 +46,7 @@ export function ResumeDialog({ open, close, panelRef, dialogId }: ResumeDialogPr
             className="resume-modal"
             role="dialog"
             aria-modal="true"
-            aria-label={strings.common.resumeModalAria[lang]}
+            aria-label={s.common.resumeModalAria}
             tabIndex={-1}
             initial={{ opacity: 0, y: 12, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -56,11 +55,11 @@ export function ResumeDialog({ open, close, panelRef, dialogId }: ResumeDialogPr
             onClick={event => event.stopPropagation()}
           >
             <div className="resume-modal-head">
-              <h3>{strings.common.resumeModalTitle[lang]}</h3>
+              <h3>{s.common.resumeModalTitle}</h3>
               <button
                 type="button"
                 className="resume-modal-close"
-                aria-label={strings.common.resumeModalClose[lang]}
+                aria-label={s.common.resumeModalClose}
                 onClick={close}
               >
                 <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -68,7 +67,7 @@ export function ResumeDialog({ open, close, panelRef, dialogId }: ResumeDialogPr
                 </svg>
               </button>
             </div>
-            <p className="resume-modal-hint">{strings.common.resumeModalHint[lang]}</p>
+            <p className="resume-modal-hint">{s.common.resumeModalHint}</p>
             <div className="resume-modal-options">
               {resumeLanguages.map(optionLang => (
                 <a

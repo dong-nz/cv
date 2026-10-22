@@ -1,28 +1,26 @@
 import { motion } from "motion/react"
-import { profile } from "@/data/profile"
-import { useLanguage } from "@/hooks/useLanguage"
-import { strings } from "@/i18n/strings"
+import { useI18n } from "@/i18n/provider"
 import { GithubIcon, LinkedinIcon, MailIcon, TelegramIcon } from "@/components/ui/icons"
-import type { Language, SocialId } from "@/types"
+import type { SocialId } from "@/types"
 
 type ContactEntry = {
   id: SocialId
   href: string
   external: boolean
   labelKey: 'email' | 'github' | 'linkedin' | 'telegram'
-  sub: Record<Language, string>
+  sub: string
   icon: React.ReactNode
 }
 
-const entries: ContactEntry[] = [
-  { id: 'email', href: `mailto:${profile.email}`, external: false, labelKey: 'email', sub: { en: profile.email, vi: profile.email }, icon: <MailIcon size={24} /> },
-  { id: 'github', href: profile.githubUrl, external: true, labelKey: 'github', sub: { en: `@${profile.githubHandle}`, vi: `@${profile.githubHandle}` }, icon: <GithubIcon size={24} /> },
-  { id: 'linkedin', href: profile.linkedinUrl, external: true, labelKey: 'linkedin', sub: { en: `@${profile.linkedinHandle}`, vi: `@${profile.linkedinHandle}` }, icon: <LinkedinIcon size={24} /> },
-  { id: 'telegram', href: profile.telegramUrl, external: true, labelKey: 'telegram', sub: { en: `@${profile.telegramHandle}`, vi: `@${profile.telegramHandle}` }, icon: <TelegramIcon size={24} /> },
-]
-
 export function ContactLinks() {
-  const { lang } = useLanguage()
+  const { ui: s, content: c } = useI18n()
+
+  const entries: ContactEntry[] = [
+    { id: 'email', href: `mailto:${c.profile.email}`, external: false, labelKey: 'email', sub: c.profile.email, icon: <MailIcon size={24} /> },
+    { id: 'github', href: c.profile.githubUrl, external: true, labelKey: 'github', sub: `@${c.profile.githubHandle}`, icon: <GithubIcon size={24} /> },
+    { id: 'linkedin', href: c.profile.linkedinUrl, external: true, labelKey: 'linkedin', sub: `@${c.profile.linkedinHandle}`, icon: <LinkedinIcon size={24} /> },
+    { id: 'telegram', href: c.profile.telegramUrl, external: true, labelKey: 'telegram', sub: `@${c.profile.telegramHandle}`, icon: <TelegramIcon size={24} /> },
+  ]
 
   return (
     <div className="contact-links">
@@ -42,8 +40,8 @@ export function ContactLinks() {
         >
           {entry.icon}
           <div>
-            <div className="link-label">{strings.contact[entry.labelKey][lang]}</div>
-            <div className="contact-link-sub">{entry.sub[lang]}</div>
+            <div className="link-label">{s.contact[entry.labelKey]}</div>
+            <div className="contact-link-sub">{entry.sub}</div>
           </div>
         </motion.a>
       ))}

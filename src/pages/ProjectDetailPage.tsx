@@ -3,10 +3,7 @@ import { motion, type Transition } from 'motion/react'
 import { Badge } from '@/components/ui/Badge'
 import { Tag } from '@/components/ui/Tag'
 import { InView } from '@/components/ui/InView'
-import { projects } from '@/data/projects'
-import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
-import { field } from '@/i18n/field'
+import { useI18n } from '@/i18n/provider'
 
 const sectionVariants = {
   hidden: { opacity: 0 },
@@ -21,8 +18,8 @@ const itemTransition = (delay: number): Transition => ({
 
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
-  const { lang } = useLanguage()
-  const project = projects.find((p) => p.id === id)
+  const { ui: s, content: c } = useI18n()
+  const project = c.projects.find((p) => p.id === id)
 
   if (!project) {
     return (
@@ -34,9 +31,9 @@ export function ProjectDetailPage() {
           viewport={{ once: true, amount: 0.1 }}
           variants={sectionVariants}
         >
-          <h2>{strings.projectDetail.notFound[lang]}</h2>
+          <h2>{s.projectDetail.notFound}</h2>
           <p>
-            <Link to="/projects">{strings.projectDetail.backToProjects[lang]} ←</Link>
+            <Link to="/projects">{s.projectDetail.backToProjects} ←</Link>
           </p>
         </motion.section>
       </InView>
@@ -54,7 +51,7 @@ export function ProjectDetailPage() {
         variants={sectionVariants}
       >
         <Link to="/projects" className="back-link">
-          {strings.projectDetail.backToProjects[lang]} ←
+          {s.projectDetail.backToProjects} ←
         </Link>
 
         <motion.div
@@ -64,8 +61,8 @@ export function ProjectDetailPage() {
           viewport={{ once: true, amount: 0.2 }}
           transition={itemTransition(0)}
         >
-          <h1 id="project-title" style={{ flex: 1 }}>{field(lang, project.title, project.titleEn)}</h1>
-          <Badge variant="outline">{strings.projects.categories[project.category][lang]}</Badge>
+          <h1 id="project-title" style={{ flex: 1 }}>{project.title}</h1>
+          <Badge variant="outline">{s.projects.categories[project.category]}</Badge>
         </motion.div>
 
         <motion.p
@@ -75,7 +72,7 @@ export function ProjectDetailPage() {
           viewport={{ once: true, amount: 0.2 }}
           transition={itemTransition(0.08)}
         >
-          {field(lang, project.summary, project.summaryEn)}
+          {project.summary}
         </motion.p>
 
         <div className="prose">
@@ -86,7 +83,7 @@ export function ProjectDetailPage() {
               viewport={{ once: true, amount: 0.2 }}
               transition={itemTransition(0.16)}
             >
-              <h3>{strings.projectDetail.impact[lang]}</h3>
+              <h3>{s.projectDetail.impact}</h3>
               <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                 {project.metrics.map((m) => (
                   <span key={m} className="achievement-metric">
@@ -103,7 +100,7 @@ export function ProjectDetailPage() {
             viewport={{ once: true, amount: 0.2 }}
             transition={itemTransition(0.24)}
           >
-            <h3>{strings.projectDetail.role[lang]}</h3>
+            <h3>{s.projectDetail.role}</h3>
             <p>{project.role}</p>
           </motion.div>
 
@@ -113,7 +110,7 @@ export function ProjectDetailPage() {
             viewport={{ once: true, amount: 0.2 }}
             transition={itemTransition(0.32)}
           >
-            <h3>{strings.projectDetail.technologies[lang]}</h3>
+            <h3>{s.projectDetail.technologies}</h3>
             <div className="philosophy-keywords">
               {project.technologies.map((tech) => (
                 <Tag key={tech}>{tech}</Tag>
@@ -129,7 +126,7 @@ export function ProjectDetailPage() {
                 viewport={{ once: true, amount: 0.2 }}
                 transition={itemTransition(0.4)}
               >
-                {strings.projectDetail.experiments[lang]}
+                {s.projectDetail.experiments}
               </motion.h3>
               {project.sections.map((section, idx) => (
                 <motion.div
@@ -140,8 +137,8 @@ export function ProjectDetailPage() {
                   viewport={{ once: true, amount: 0.2 }}
                   transition={itemTransition(0.48 + idx * 0.08)}
                 >
-                  <h4>{field(lang, section.title, section.titleEn)}</h4>
-                  <p>{field(lang, section.content, section.contentEn)}</p>
+                  <h4>{section.title}</h4>
+                  <p>{section.content}</p>
                   <Tag accent>{section.type}</Tag>
                 </motion.div>
               ))}

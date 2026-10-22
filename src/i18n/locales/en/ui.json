@@ -1,0 +1,128 @@
+{
+  "nav": {
+    "home": "Home",
+    "resume": "Get resume",
+    "about": "About",
+    "experience": "Experience",
+    "projects": "Projects",
+    "philosophy": "Philosophy",
+    "contact": "Contact",
+    "palette": "Theme",
+    "paletteAria": "Switch theme color",
+    "menuAria": "Site menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "groupMenu": "Menu",
+    "groupAppearance": "Appearance",
+    "themeGroup": "Mode",
+    "themeDark": "Dark",
+    "themeLight": "Light",
+    "langGroup": "Language",
+    "langEn": "English",
+    "langVi": "Tiếng Việt",
+    "langSwitch": "Switch language",
+    "switchTo": "Switch to",
+    "mainNav": "Main navigation",
+    "themeSwitch": "Switch display mode",
+    "themeMode": "Display mode"
+  },
+  "social": {
+    "heading": "Connect",
+    "aria": {
+      "github": "View GitHub profile",
+      "linkedin": "View LinkedIn profile",
+      "email": "Send email",
+      "telegram": "Open Telegram chat"
+    }
+  },
+  "footer": {
+    "copyright": "All rights reserved",
+    "links": {
+      "home": "Home",
+      "about": "About",
+      "projects": "Projects",
+      "contact": "Contact"
+    }
+  },
+  "hero": {
+    "greeting": "Hi, I'm",
+    "ctaProjects": "View Projects",
+    "ctaContact": "Contact Me",
+    "scroll": "Scroll"
+  },
+  "about": {
+    "heading": "About Me",
+    "subtitle": "Senior Software Engineer with deep expertise in distributed systems, logistics technology, and practical AI applications.",
+    "engineeringTitle": "How I Think About Engineering",
+    "exploringTitle": "What I'm Exploring",
+    "exploringTitlePage": "What I'm Currently Exploring",
+    "expertise": "Core Expertise"
+  },
+  "expertise": {
+    "heading": "Core Expertise"
+  },
+  "experience": {
+    "heading": "Experience",
+    "tldr": "TL;DR",
+    "tldrText": "15 years of experience, more than 8 companies along the way. Too long to tell."
+  },
+  "projects": {
+    "featured": "Featured Projects",
+    "all": "Projects",
+    "viewAll": "View All",
+    "viewDetails": "View Details",
+    "categories": {
+      "software-engineering": "Software Engineering",
+      "logistics": "Logistics",
+      "ai-ml": "AI / ML",
+      "computer-vision": "Computer Vision",
+      "architecture": "Architecture",
+      "experiment": "Experiment"
+    }
+  },
+  "contact": {
+    "heading": "Contact",
+    "email": "Email",
+    "github": "GitHub",
+    "linkedin": "LinkedIn",
+    "telegram": "Telegram"
+  },
+  "projectDetail": {
+    "notFound": "Project Not Found",
+    "backToProjects": "Back to Projects",
+    "impact": "Impact",
+    "role": "Role",
+    "technologies": "Technologies",
+    "experiments": "Engineering Experiments"
+  },
+  "philosophy": {
+    "heading": "Philosophy",
+    "quotes": [
+      {
+        "title": "Time is priceless",
+        "details": [
+          "Time is priceless. You can’t buy it, pause it, or rewind it. Once it’s gone, it’s gone for good.",
+          "We spend so much of our lives chasing things—money, status, validation—but time is the one thing we can never earn back.",
+          "So be mindful of how you use it. Invest it in what truly matters: the people you love, the goals that inspire you, the moments that feed your soul."
+        ]
+      }
+    ]
+  },
+  "common": {
+    "resumeDownload": "Get Resume",
+    "resumeModalTitle": "Get Resume",
+    "resumeModalAria": "Choose resume language",
+    "resumeModalHint": "Choose a language — the PDF downloads to your device.",
+    "resumeModalClose": "Close resume options",
+    "backToTop": "Scroll to top",
+    "contactTag": "Contact",
+    "experienceTag": "Experience"
+  },
+  "resume": {
+    "EXPERIENCE": "Experience",
+    "SKILLS": "Skills",
+    "PROJECTS": "Projects",
+    "UPDATED": "Last updated",
+    "QR_ALT": "QR code"
+  }
+}

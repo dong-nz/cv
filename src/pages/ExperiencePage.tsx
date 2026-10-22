@@ -1,13 +1,10 @@
 import { motion } from 'motion/react'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { InView } from '@/components/ui/InView'
-import { experiences } from '@/data/experience'
-import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
-import { field } from '@/i18n/field'
+import { useI18n } from '@/i18n/provider'
 
 export function ExperiencePage() {
-  const { lang } = useLanguage()
+  const { ui: s, content: c } = useI18n()
   return (
     <InView>
       <motion.section
@@ -21,9 +18,9 @@ export function ExperiencePage() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title={strings.experience.heading[lang]} tag={strings.common.experienceTag[lang]} />
+        <SectionHeading title={s.experience.heading} tag={s.common.experienceTag} />
         <div className="timeline">
-          {experiences.map((exp, i) => (
+          {c.experiences.map((exp, i) => (
             <motion.div
               key={exp.id}
               className={exp.variant ? `timeline-entry timeline-entry-${exp.variant}` : 'timeline-entry'}
@@ -34,7 +31,7 @@ export function ExperiencePage() {
             >
               <div className="timeline-marker" />
               <div className="timeline-header">
-                <div className="timeline-title">{field(lang, exp.title, exp.titleEn)}</div>
+                <div className="timeline-title">{exp.title}</div>
                 <div className="timeline-company">{exp.company}</div>
                 <div className="timeline-meta">
                   <span className="timeline-duration">{exp.duration}</span>
@@ -42,7 +39,7 @@ export function ExperiencePage() {
                 </div>
               </div>
               <ul className="timeline-responsibilities">
-                {field(lang, exp.responsibilities, exp.responsibilitiesEn).map((r) => (
+                {exp.responsibilities.map((r) => (
                   <li key={r}>{r}</li>
                 ))}
               </ul>
@@ -50,8 +47,8 @@ export function ExperiencePage() {
           ))}
           <div className="timeline-tldr">
             <span className="timeline-tldr-marker" aria-hidden="true" />
-            <span className="timeline-tldr-chip">{strings.experience.tldr[lang]}</span>
-            <p className="timeline-tldr-text">{strings.experience.tldrText[lang]}</p>
+            <span className="timeline-tldr-chip">{s.experience.tldr}</span>
+            <p className="timeline-tldr-text">{s.experience.tldrText}</p>
           </div>
         </div>
       </motion.section>

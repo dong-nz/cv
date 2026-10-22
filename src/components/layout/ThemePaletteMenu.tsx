@@ -4,11 +4,12 @@ import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
 import { useClickOutside } from '@/hooks/useClickOutside'
 import { paletteIds, paletteMeta } from '@/data/palettes'
-import { strings } from '@/i18n/strings'
+import { useI18n } from '@/i18n/provider'
 
 export function ThemePaletteMenu() {
   const { palette, setPalette } = useTheme()
   const { lang } = useLanguage()
+  const { ui: s } = useI18n()
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -33,8 +34,8 @@ export function ThemePaletteMenu() {
         className={`nav-control nav-palette-trigger ${open ? 'open' : ''}`}
         aria-expanded={open}
         aria-controls="palette-menu"
-        aria-label={`${strings.nav.palette[lang]}: ${paletteMeta[palette].label[lang]}`}
-        title={strings.nav.paletteAria[lang]}
+        aria-label={`${s.nav.palette}: ${paletteMeta[palette].label[lang]}`}
+        title={s.nav.paletteAria}
         onClick={() => setOpen((prev) => !prev)}
       >
         {/* Rotation tracks the submenu: 90° while it is open, back to 0° on selection, Escape or

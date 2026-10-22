@@ -1,8 +1,6 @@
 import {motion, useScroll, useTransform} from "motion/react"
 import {InView} from "@/components/ui/InView"
-import {useLanguage} from '@/hooks/useLanguage'
-import {strings} from '@/i18n/strings'
-import { field } from '@/i18n/field'
+import {useI18n} from '@/i18n/provider'
 import {DownloadResume} from '@/components/sections/DownloadResume'
 
 
@@ -10,11 +8,11 @@ import {Button} from "@/components/ui/Button"
 import {Typewriter} from '@/components/ui/Typewriter'
 import {HeroParticles} from '@/components/sections/HeroParticles'
 import {SocialLinks} from "@/components/ui/SocialLinks"
-import {profile} from "@/data/profile"
+
 
 export function Hero() {
     const {scrollY} = useScroll()
-    const {lang} = useLanguage()
+    const {ui: s, content: c} = useI18n()
     const y = useTransform(scrollY, [0, 300], [0, -80])
     return (
         <InView>
@@ -43,7 +41,7 @@ export function Hero() {
                     >
           <span className="hero-greeting">
             <span className="greeting-dot"/>
-              {strings.hero.greeting[lang]}
+              {s.hero.greeting}
           </span>
                     </motion.div>
                     <motion.h1
@@ -54,7 +52,7 @@ export function Hero() {
                         viewport={{once: true, amount: 0.2}}
                         transition={{duration: 0.45, ease: "easeOut", delay: 0.08}}
                     >
-                        <span className="name-highlight">{field(lang, profile.name, profile.nameEn)}</span>
+                        <span className="name-highlight">{c.profile.name}</span>
                     </motion.h1>
                     <motion.p
                         className="hero-title"
@@ -63,7 +61,7 @@ export function Hero() {
                         viewport={{once: true, amount: 0.2}}
                         transition={{duration: 0.45, ease: "easeOut", delay: 0.16}}
                     >
-                        <Typewriter texts={profile.roles}/>
+                        <Typewriter texts={c.profile.roles}/>
                     </motion.p>
                     <motion.p
                         className="hero-tagline"
@@ -71,8 +69,17 @@ export function Hero() {
                         whileInView={{opacity: 1, y: 0}}
                         viewport={{once: true, amount: 0.2}}
                         transition={{duration: 0.45, ease: "easeOut", delay: 0.24}}
-                        dangerouslySetInnerHTML={{__html: field(lang, profile.tagline, profile.taglineEn)}}
-                    />
+                    >
+                        {/* Tagline segments (D9): markup is this component's rendering,
+                            never content — the emphasis span keeps its classes. */}
+                        {c.profile.tagline.map((segment, i) => (
+                            segment.emphasis ? (
+                                <span key={i} className="ok-possible name-highlight">{segment.text}</span>
+                            ) : (
+                                <span key={i}>{segment.text}</span>
+                            )
+                        ))}
+                    </motion.p>
                     <motion.div
                         className="hero-cta"
                         initial={{opacity: 0, y: 24}}
@@ -81,10 +88,10 @@ export function Hero() {
                         transition={{duration: 0.45, ease: "easeOut", delay: 0.32}}
                     >
                         <Button href="/projects" variant="primary">
-                            {strings.hero.ctaProjects[lang]}
+                            {s.hero.ctaProjects}
                         </Button>
                         <Button href="/contact" variant="primary">
-                            {strings.hero.ctaContact[lang]}
+                            {s.hero.ctaContact}
                         </Button>
                         <DownloadResume />
 
@@ -95,7 +102,7 @@ export function Hero() {
                     <div className="scroll-mouse">
                         <div className="scroll-wheel"/>
                     </div>
-                    <span>{strings.hero.scroll[lang]}</span>
+                    <span>{s.hero.scroll}</span>
                 </div>
                 <motion.div
                     className="hero-visual"
@@ -106,7 +113,7 @@ export function Hero() {
                 >
                     <motion.img
                         src="/profile-photo.webp"
-                        alt={field(lang, profile.name, profile.nameEn)}
+                        alt={c.profile.name}
                         className="hero-photo"
                         style={{y}}
                         width="1200"

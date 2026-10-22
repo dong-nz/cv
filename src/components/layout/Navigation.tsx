@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import { useTheme } from '@/hooks/useTheme'
 import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
+import { useI18n } from '@/i18n/provider'
 import { navPaths } from '@/data/navigation'
 import { RollingTextLink } from '@/components/ui/RollingTextLink'
 import { ThemePaletteMenu } from '@/components/layout/ThemePaletteMenu'
@@ -15,8 +15,9 @@ import { ResumeNavButton } from '@/components/layout/ResumeNavButton'
 export function Navigation() {
   const { cycleTheme, resolvedTheme } = useTheme()
   const { lang, toggleLang } = useLanguage()
+  const { ui: s } = useI18n()
   const targetLang = lang === 'en' ? 'vi' : 'en'
-  const targetLabel = targetLang === 'en' ? strings.nav.langEn[lang] : strings.nav.langVi[lang]
+  const targetLabel = targetLang === 'en' ? s.nav.langEn : s.nav.langVi
   const [mobileOpen, setMobileOpen] = useState(false)
   const location = useLocation()
   const triggerRef = useRef<HTMLButtonElement>(null)
@@ -59,7 +60,7 @@ export function Navigation() {
 
   return (
     <>
-      <nav className="nav" role="navigation" aria-label={strings.nav.mainNav[lang]}>
+      <nav className="nav" role="navigation" aria-label={s.nav.mainNav}>
         <div className="nav-container">
           <div className="nav-brand">
             {/* Trigger first, brand next: the hamburger is the sheet's own control and sits at
@@ -69,7 +70,7 @@ export function Navigation() {
               ref={triggerRef}
               className="mobile-menu-btn"
               onClick={() => setMobileOpen((prev) => !prev)}
-              aria-label={mobileOpen ? strings.nav.closeMenu[lang] : strings.nav.openMenu[lang]}
+              aria-label={mobileOpen ? s.nav.closeMenu : s.nav.openMenu}
               aria-expanded={mobileOpen}
               aria-controls="mobile-menu"
             >
@@ -103,7 +104,7 @@ export function Navigation() {
                 <Link to="/"> target the {CV} wordmark always had. The accessible name is the
                 translated Home label; the icon itself is decorative. The current-page marker stays
                 on the nav link and the sheet's Home row. */}
-            <Link to="/" className="nav-logo" aria-label={strings.nav.home[lang]}>
+            <Link to="/" className="nav-logo" aria-label={s.nav.home}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
                 <polyline points="9 22 9 12 15 12 15 22" />
@@ -116,8 +117,8 @@ export function Navigation() {
 
           <ul className="nav-menu">
             {navPaths.map((path) => {
-              const navKey = path === '/' ? 'home' : path.replace('/', '') as keyof typeof strings.nav
-              const label = strings.nav[navKey][lang]
+              const navKey = path === '/' ? 'home' : path.replace('/', '') as keyof typeof s.nav
+              const label = s.nav[navKey]
               return (
                 <li key={path}>
                   <RollingTextLink
@@ -139,8 +140,8 @@ export function Navigation() {
             <button
               className="nav-control lang-toggle"
               onClick={toggleLang}
-              aria-label={strings.nav.langSwitch[lang]}
-              title={`${strings.nav.switchTo[lang]} ${targetLabel}`}
+              aria-label={s.nav.langSwitch}
+              title={`${s.nav.switchTo} ${targetLabel}`}
             >
               <LanguageIcon lang={targetLang} />
             </button>
@@ -148,8 +149,8 @@ export function Navigation() {
             <button
               className="nav-control theme-toggle"
               onClick={cycleTheme}
-              aria-label={`${strings.nav.themeSwitch[lang]} (${resolvedTheme === 'dark' ? strings.nav.themeDark[lang] : strings.nav.themeLight[lang]})`}
-              title={`${strings.nav.themeMode[lang]}: ${resolvedTheme === 'dark' ? strings.nav.themeDark[lang] : strings.nav.themeLight[lang]}`}
+              aria-label={`${s.nav.themeSwitch} (${resolvedTheme === 'dark' ? s.nav.themeDark : s.nav.themeLight})`}
+              title={`${s.nav.themeMode}: ${resolvedTheme === 'dark' ? s.nav.themeDark : s.nav.themeLight}`}
             >
               {resolvedTheme === 'dark' ? <SunIcon /> : <MoonIcon />}
             </button>

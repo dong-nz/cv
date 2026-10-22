@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react"
 import { motion, AnimatePresence, useReducedMotion } from "motion/react"
-import { strings } from '@/i18n/strings'
-import { useLanguage } from '@/hooks/useLanguage'
+import { useI18n } from '@/i18n/provider'
 
 const SCROLL_THRESHOLD = 300
 
 export function BackToTop() {
   const [visible, setVisible] = useState(false)
   const reduceMotion = useReducedMotion()
-  const { lang } = useLanguage()
+  const { ui: s } = useI18n()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -28,7 +27,7 @@ export function BackToTop() {
       {visible && (
         <motion.button
           className="back-to-top"
-          aria-label={strings.common.backToTop[lang]}
+          aria-label={s.common.backToTop}
           onClick={scrollToTop}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

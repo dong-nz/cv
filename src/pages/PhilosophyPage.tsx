@@ -2,11 +2,10 @@ import {SectionHeading} from '@/components/ui/SectionHeading'
 import {motion} from 'motion/react'
 import {InView} from '@/components/ui/InView'
 
-import {useLanguage} from '@/hooks/useLanguage'
-import {strings} from '@/i18n/strings'
+import {useI18n} from '@/i18n/provider'
 
 export function PhilosophyPage() {
-    const {lang} = useLanguage()
+    const {ui: s} = useI18n()
     return (
         <InView>
             <motion.section
@@ -20,11 +19,11 @@ export function PhilosophyPage() {
                     visible: {opacity: 1, transition: {duration: 0.5}},
                 }}
             >
-                <SectionHeading id="philosophy-heading" title={strings.philosophy.heading[lang]} tag={strings.philosophy.heading[lang]}/>
+                <SectionHeading id="philosophy-heading" title={s.philosophy.heading} tag={s.philosophy.heading}/>
                 <div className="prose prose-wide">
-                    {strings.philosophy.quotes.map((quote, i) => (
+                    {s.philosophy.quotes.map((quote, i) => (
                         <motion.div
-                            key={quote.title[lang]}
+                            key={i}
                             className="philosophy-quote"
                             initial={{opacity: 0, y: 24}}
                             whileInView={{opacity: 1, y: 0}}
@@ -32,9 +31,13 @@ export function PhilosophyPage() {
                             transition={{duration: 0.45, ease: 'easeOut', delay: i * 0.08}}
                         >
                             <h3>
-                                {quote.title[lang]}
+                                {quote.title}
                             </h3>
-                            <div dangerouslySetInnerHTML={{__html: quote.details[lang]}}/>
+                            <div>
+                                {quote.details.map((detail, j) => (
+                                    <p key={j}>{detail}</p>
+                                ))}
+                            </div>
                         </motion.div>
                     ))}
                 </div>

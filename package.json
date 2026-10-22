@@ -11,6 +11,7 @@
     "build:resume-preview": "pnpm tsx scripts/generate-resume.ts --preview",
     "lint": "oxlint",
     "sitemap": "pnpm tsx scripts/generate-sitemap.ts",
+    "validate:content": "pnpm tsx scripts/validate-content.ts",
     "preview": "vite preview"
   },
   "dependencies": {

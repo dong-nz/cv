@@ -1,13 +1,10 @@
 import { motion } from "motion/react"
 import { SectionHeading } from "@/components/ui/SectionHeading"
-import { skillGroups } from "@/data/skills"
-import { InView } from "@/components/ui/InView"
-import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
-import { field } from '@/i18n/field'
+import { InView } from '@/components/ui/InView'
+import { useI18n } from '@/i18n/provider'
 
 export function Expertise() {
-  const { lang } = useLanguage()
+  const { ui: s, content: c } = useI18n()
   return (
     <InView>
       <motion.section
@@ -21,11 +18,11 @@ export function Expertise() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title={strings.expertise.heading[lang]} tag={strings.expertise.heading[lang]} />
+        <SectionHeading title={s.expertise.heading} tag={s.expertise.heading} />
         <div className="expertise-grid">
-          {skillGroups.map((group, i) => (
+          {c.skillGroups.map((group, i) => (
             <motion.div
-              key={group.title}
+              key={group.id}
               className="expertise-card"
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -34,7 +31,7 @@ export function Expertise() {
               whileHover={{ scale: 1.02, y: -4 }}
               whileTap={{ scale: 0.98 }}
             >
-              <h3>{field(lang, group.title, group.titleEn)}</h3>
+              <h3>{group.title}</h3>
               <ul className="expertise-skills">
                 {group.skills.map((skill) => (
                   <li key={skill} className="expertise-skill">

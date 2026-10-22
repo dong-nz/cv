@@ -2,14 +2,10 @@ import { motion } from 'motion/react'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { InView } from '@/components/ui/InView'
-import { profile } from '@/data/profile'
-import { skillGroups } from '@/data/skills'
-import { useLanguage } from '@/hooks/useLanguage'
-import { strings } from '@/i18n/strings'
-import { field } from '@/i18n/field'
+import { useI18n } from '@/i18n/provider'
 
 export function AboutPage() {
-  const { lang } = useLanguage()
+  const { ui: s, content: c } = useI18n()
   return (
     <>
       <InView>
@@ -25,21 +21,21 @@ export function AboutPage() {
           }}
         >
           <SectionHeading
-            title={strings.about.heading[lang]}
-            subtitle={strings.about.subtitle[lang]}
-            tag={strings.about.heading[lang]}
+            title={s.about.heading}
+            subtitle={s.about.subtitle}
+            tag={s.about.heading}
           />
           <p className="prose-lede lede-wide">
-            {field(lang, profile.bio, profile.bioEn)}
+            {c.profile.bio}
           </p>
 
           <h3 className="subheading">
-            {strings.about.engineeringTitle[lang]}
+            {s.about.engineeringTitle}
           </h3>
           <div className="philosophy-grid">
-            {profile.philosophy.map((point, i) => (
+            {c.profile.philosophy.map((point, i) => (
               <motion.div
-                key={point.title}
+                key={point.id}
                 className="philosophy-card"
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -48,8 +44,8 @@ export function AboutPage() {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <h3>{field(lang, point.title, point.titleEn)}</h3>
-                <p>{field(lang, point.description, point.descriptionEn)}</p>
+                <h3>{point.title}</h3>
+                <p>{point.description}</p>
                 <div className="philosophy-keywords">
                   {point.keywords.map((kw) => (
                     <Tag key={kw}>{kw}</Tag>
@@ -60,10 +56,10 @@ export function AboutPage() {
           </div>
 
           <h3 className="subheading">
-            {strings.about.exploringTitlePage[lang]}
+            {s.about.exploringTitlePage}
           </h3>
           <div className="interests-list">
-            {profile.currentInterests.map((interest) => (
+            {c.profile.currentInterests.map((interest) => (
               <Tag key={interest} accent>
                 {interest}
               </Tag>
@@ -83,11 +79,11 @@ export function AboutPage() {
             visible: { opacity: 1, transition: { duration: 0.5 } },
           }}
         >
-          <SectionHeading title={strings.about.expertise[lang]} />
+          <SectionHeading title={s.about.expertise} />
           <div className="expertise-grid">
-            {skillGroups.map((group, i) => (
+            {c.skillGroups.map((group, i) => (
               <motion.div
-                key={group.title}
+                key={group.id}
                 className="expertise-card"
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -96,7 +92,7 @@ export function AboutPage() {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <h3>{field(lang, group.title, group.titleEn)}</h3>
+                <h3>{group.title}</h3>
                 <ul className="expertise-skills">
                   {group.skills.map((skill: string) => (
                     <li key={skill} className="expertise-skill">

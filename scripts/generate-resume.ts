@@ -1,13 +1,10 @@
 import { chromium } from 'playwright';
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { profile } from '../src/data/profile.js';
-import { experiences } from '../src/data/experience.js';
-import { skillGroups } from '../src/data/skills.js';
-import { projects } from '../src/data/projects.js';
+import { CONTENT, UI } from '../src/i18n/index.js';
+import type { ResolvedExperienceEntry, ResolvedProject, ResolvedSkillGroup } from '../src/i18n/index.js';
 import { resumeQr } from '../src/data/resume.js';
 import { siteUrl } from '../src/data/site.js';
-import { strings } from '../src/i18n/strings.js';
 import type { Language } from '../src/types/index.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -74,7 +71,7 @@ const fontFaces = Object.entries(fonts).map(([key, b64]) => {
 }).join('\n');
 
 // --- Company logos: load every logo referenced by experience entries ---
-const logoIds = [...new Set(experiences.map(exp => exp.logo).filter((id): id is string => id !== undefined))];
+const logoIds = [...new Set(CONTENT.en.experiences.map(exp => exp.logo).filter((id): id is string => id !== undefined))];
 const logos: Record<string, string> = {};
 for (const id of logoIds) {
   const logoFile = join(ROOT, 'public/resume-logos', `${id}.svg`);
@@ -104,28 +101,9 @@ for (const q of resumeQr) {
 // --- Version stamp date ---
 const updatedDate = new Date().toISOString().slice(0, 10);
 
-// --- Language-specific label map ---
-const labels: Record<Language, Record<string, string>> = {
-  en: {
-    EXPERIENCE: 'Experience',
-    SKILLS: 'Skills',
-    PROJECTS: 'Projects',
-    UPDATED: 'Last updated',
-    QR_ALT: 'QR code',
-  },
-  vi: {
-    EXPERIENCE: 'Kinh nghiệm',
-    SKILLS: 'Kỹ năng',
-    PROJECTS: 'Dự án',
-    UPDATED: 'Cập nhật lần cuối',
-    QR_ALT: 'mã QR',
-  },
-};
+// (Removed: the inline `labels` map and `resolveField` — labels now live in
+// the UI dictionaries and text arrives pre-resolved through CONTENT.)
 
-// --- Resolve bilingual field ---
-function resolveField<T>(en: T | undefined, vi: T | undefined, lang: Language): T {
-  return lang === 'en' && en !== undefined ? en : (vi !== undefined ? vi : (en as T));
-}
 
 // --- Escape data strings before injection ---
 function escapeHtml(value: string): string {
@@ -141,25 +119,25 @@ function renderQr(lang: Language): string {
   return qrAssets
     .map(q => `
       <div class="qr-item">
-        <img class="qr-img" src="${q.dataUri}" alt="${escapeHtml(`${q.label} ${labels[lang].QR_ALT}`)}" />
+        <img class="qr-img" src="${q.dataUri}" alt="${escapeHtml(`${q.label} ${UI[lang].resume.QR_ALT}`)}" />
         <span class="qr-label">${escapeHtml(q.label)}</span>
       </div>`)
     .join('');
 }
 
 // --- Render HTML helpers ---
-function renderExperience(exps: typeof experiences, lang: Language): string {
+function renderExperience(exps: ResolvedExperienceEntry[]): string {
   return exps
     // open-to-work (variant 'current') is excluded from the resume PDF entirely
     .filter(exp => exp.variant !== 'current')
     .map(exp => {
       const variantClass = exp.variant ? ` ${exp.variant}` : '';
       const companyLine = [exp.company, exp.location].filter(Boolean).join(' · ');
-      const responsibilities = resolveField(exp.responsibilitiesEn, exp.responsibilities, lang);
+      const responsibilities = exp.responsibilities;
       return `
     <div class="exp-entry avoid-break${variantClass}">
       <div class="exp-header">
-        <span class="exp-title">${escapeHtml(resolveField(exp.titleEn, exp.title, lang))}</span>
+        <span class="exp-title">${escapeHtml(exp.title)}</span>
         <span class="exp-duration">${escapeHtml(exp.duration)}</span>
       </div>
       <div class="exp-company">${exp.logo ? `<img class="exp-logo" src="data:image/svg+xml;base64,${logos[exp.logo]}" alt="" />` : ''}${escapeHtml(companyLine)}</div>
@@ -175,27 +153,27 @@ function renderExperience(exps: typeof experiences, lang: Language): string {
 function renderTldr(lang: Language): string {
   return `
     <div class="timeline-tldr avoid-break">
-      <div class="timeline-tldr-chip">${escapeHtml(strings.experience.tldr[lang])}</div>
-      <div class="timeline-tldr-text">${escapeHtml(strings.experience.tldrText[lang])}</div>
+      <div class="timeline-tldr-chip">${escapeHtml(UI[lang].experience.tldr)}</div>
+      <div class="timeline-tldr-text">${escapeHtml(UI[lang].experience.tldrText)}</div>
     </div>
   `;
 }
 
-function renderSkills(groups: typeof skillGroups, lang: Language): string {
+function renderSkills(groups: ResolvedSkillGroup[]): string {
   return groups.map(group => `
     <div class="skill-group avoid-break">
-      <div class="skill-group-title">${escapeHtml(resolveField(group.titleEn, group.title, lang))}</div>
+      <div class="skill-group-title">${escapeHtml(group.title)}</div>
       <div class="skill-list">${group.skills.map(skill => escapeHtml(skill)).join(' · ')}</div>
     </div>
   `).join('');
 }
 
-function renderProjects(projs: typeof projects, lang: Language): string {
+function renderProjects(projs: ResolvedProject[]): string {
   return projs.map(project => `
     <div class="project avoid-break">
-      <div class="project-title">${escapeHtml(resolveField(project.titleEn, project.title, lang))}</div>
+      <div class="project-title">${escapeHtml(project.title)}</div>
       <div class="project-role">${escapeHtml(project.role)}</div>
-      <div class="project-summary">${escapeHtml(resolveField(project.summaryEn, project.summary, lang))}</div>
+      <div class="project-summary">${escapeHtml(project.summary)}</div>
       <div class="project-tech">
         ${project.technologies.map(t => `<span>${escapeHtml(t)}</span>`).join('')}
       </div>
@@ -205,26 +183,28 @@ function renderProjects(projs: typeof projects, lang: Language): string {
 
 // --- Assemble HTML ---
 function buildHtml(lang: Language): string {
+  const c = CONTENT[lang];
+  const r = UI[lang].resume;
   const fills: Array<[string, string]> = [
-    ['{{NAME}}', escapeHtml(resolveField(profile.nameEn, profile.name, lang))],
-    ['{{TITLE}}', escapeHtml(resolveField(profile.titleEn, profile.title, lang))],
-    ['{{BIO}}', escapeHtml(resolveField(profile.bioEn, profile.bio, lang))],
-    ['{{EMAIL}}', escapeHtml(profile.email)],
-    ['{{GITHUB_URL}}', escapeHtml(profile.githubUrl)],
-    ['{{LINKEDIN_URL}}', escapeHtml(profile.linkedinUrl)],
+    ['{{NAME}}', escapeHtml(c.profile.name)],
+    ['{{TITLE}}', escapeHtml(c.profile.title)],
+    ['{{BIO}}', escapeHtml(c.profile.bio)],
+    ['{{EMAIL}}', escapeHtml(c.profile.email)],
+    ['{{GITHUB_URL}}', escapeHtml(c.profile.githubUrl)],
+    ['{{LINKEDIN_URL}}', escapeHtml(c.profile.linkedinUrl)],
     ['{{PHOTO_BASE64}}', photoBase64],
     ['{{FONT_FACES}}', fontFaces],
     ['{{UPDATED_DATE}}', updatedDate],
-    ['{{UPDATED_LABEL}}', labels[lang].UPDATED],
+    ['{{UPDATED_LABEL}}', r.UPDATED],
     ['{{SITE_URL}}', escapeHtml(siteUrl)],
     ['{{LANG}}', lang],
-    ['{{EXPERIENCE_LABEL}}', labels[lang].EXPERIENCE],
-    ['{{SKILLS_LABEL}}', labels[lang].SKILLS],
-    ['{{PROJECTS_LABEL}}', labels[lang].PROJECTS],
-    ['{{EXPERIENCE}}', renderExperience(experiences, lang)],
+    ['{{EXPERIENCE_LABEL}}', r.EXPERIENCE],
+    ['{{SKILLS_LABEL}}', r.SKILLS],
+    ['{{PROJECTS_LABEL}}', r.PROJECTS],
+    ['{{EXPERIENCE}}', renderExperience(c.experiences)],
     ['{{TLDR}}', renderTldr(lang)],
-    ['{{SKILLS}}', renderSkills(skillGroups, lang)],
-    ['{{PROJECTS}}', renderProjects(projects, lang)],
+    ['{{SKILLS}}', renderSkills(c.skillGroups)],
+    ['{{PROJECTS}}', renderProjects(c.projects)],
     ['{{QR_CODES}}', renderQr(lang)],
   ];
   return fills.reduce((html, [key, value]) => html.split(key).join(value), template);

@@ -1,0 +1,131 @@
+[
+  {
+    "id": "iot-dws-integration",
+    "category": "logistics",
+    "role": "Senior Software Engineer — System Owner",
+    "technologies": [
+      "Java",
+      "HTTP",
+      "HMAC",
+      "RocketMQ",
+      "DWS"
+    ],
+    "metrics": [
+      "16 sortations deployed"
+    ],
+    "featured": true,
+    "sections": [
+      {
+        "id": "context",
+        "type": "text"
+      },
+      {
+        "id": "problem",
+        "type": "text"
+      },
+      {
+        "id": "solution",
+        "type": "text"
+      },
+      {
+        "id": "architecture",
+        "type": "diagram"
+      },
+      {
+        "id": "challenges",
+        "type": "text"
+      },
+      {
+        "id": "result",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "id": "awb-detection",
+    "category": "computer-vision",
+    "role": "Senior Software Engineer — ML Engineering",
+    "technologies": [
+      "Python",
+      "OpenCV",
+      "YOLO",
+      "ONNX",
+      "OCR"
+    ],
+    "metrics": [
+      "70,000 images/month processed"
+    ],
+    "featured": true,
+    "sections": [
+      {
+        "id": "context",
+        "type": "text"
+      },
+      {
+        "id": "problem",
+        "type": "text"
+      },
+      {
+        "id": "pipeline",
+        "type": "diagram"
+      },
+      {
+        "id": "challenges",
+        "type": "text"
+      },
+      {
+        "id": "result",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "id": "facility-management",
+    "category": "software-engineering",
+    "role": "Senior Software Engineer — Platform Design",
+    "technologies": [
+      "Go",
+      "TypeScript",
+      "Docker",
+      "Event-driven"
+    ],
+    "featured": true,
+    "sections": [
+      {
+        "id": "vision",
+        "type": "text"
+      },
+      {
+        "id": "architecture",
+        "type": "diagram"
+      },
+      {
+        "id": "result",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "id": "local-llm-experiments",
+    "category": "experiment",
+    "role": "Engineering Experiment",
+    "technologies": [
+      "llama.cpp",
+      "Qwen",
+      "MoE",
+      "Python",
+      "CUDA"
+    ],
+    "featured": true,
+    "sections": [
+      {
+        "id": "exploration",
+        "type": "text"
+      },
+      {
+        "id": "learnings",
+        "type": "text"
+      }
+    ]
+  }
+]
