@@ -82,17 +82,29 @@ Content is split once, at authoring time, into language-neutral **structure docu
 - `src/data/social.ts` — social tiles as `{id, href, external}` (github, linkedin, email, telegram); `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
 - `src/data/palettes.ts`, `src/data/site.ts` — code config, not content: `siteUrl` (the canonical origin) and `siteName`; every absolute URL the site publishes — canonical, Open Graph, JSON-LD, `robots.txt`, `sitemap.xml` — derives from it
 
+## Live Edit Mode (`?edit`, v4)
+
+- Entry: any route with `?edit` — `MaybeEditMode` in `App.tsx` lazy-mounts `EditModeShell` (its own chunk; visitors never load edit code). The shell authenticates, fetches the live master documents through the proxy, and re-wraps the tree in an `I18nProvider` override — the seven routes ARE the preview
+- Target branch (spec D10): `?edit=<branch>` reads (`?ref=`) and writes (`branch` in the PUT body) that branch; a bare `?edit` resumes the session's last branch, default `master`. Names are validated against git ref rules in `src/i18n/edit-mode.ts` before any request (illegal → exit like a failed auth); the branch is stored beside the session flag. The target branch must already exist — Contents API updates never create branches. Only `master` deploys, so the EditBar shows a merge hint on other branches
+- Auth: HTTP Basic at the nginx `/api/content/` proxy is the security boundary; `src/i18n/edit-mode.ts` probes it through a hidden iframe, keeps the session flag `portfolio-edit` in sessionStorage, and strips `?edit` when the probe fails (401 or cancelled prompt → normal visitor site)
+- `src/i18n/draft.ts` — `DraftStore`: baselines (`data` + `last_commit_sha`) of the six content documents, copy-on-write draft, leaf-path diff, cross-document validation on every accepted edit, three-way rebase on 412 conflicts (origin / base / working kept separate), draft persisted to sessionStorage `portfolio-draft`, sequential-PUT save (one commit per touched document, resume from the first unwritten one on failure), and appending new id union members to `src/types/index.ts` after their documents land
+- `src/components/ui/EditableText.tsx` — the site's own element (`as` = the tag or motion component it renders today) becomes the inline editor only in edit mode; commit on blur only (Vietnamese IME-safe), Esc cancels, Enter commits single-line fields, paste is plain-text, empty required values are rejected at commit; without an `EditContext` provider it renders byte-identical markup to the plain element
+- `src/components/layout/EditBar.tsx` — fixed save bar: per-path diff with revert, conflict resolution (rebase / take-theirs / hand-merge), per-document save status, partial-save resume, exit confirm; `src/components/layout/JsonPanel.tsx` — per-document JSON editor with shape hints, record templates (structure + text stubs created together), orphan-free record delete, read-only `ui.json` tabs
+- Editable surface is content text only (bio, tagline segments, project titles/summaries/section prose, experience titles/responsibilities, skill-group titles, philosophy titles/descriptions); structure fields (`featured`, `variant`, technologies, links, ids) are edited in the JSON panel; `ui.json` is read-only in v4
+- Dev parity: `vite.config.ts` proxies `/api/content/` to the Gitea Contents API exactly like production nginx — run `pnpm dev` with `GITEA_TOKEN` set; without it edit mode falls to the offline state (bundled content, save disabled)
+- Spec: `docs/design/specs/v4/spec-v4-live-edit.md` §5–§6
+
 ## Component Structure
 
 ```
 src/
   components/
-    layout/     — Layout.tsx, Navigation.tsx, MobileMenu.tsx, Footer.tsx, ThemePaletteMenu.tsx, ResumeNavButton.tsx
+    layout/     — Layout.tsx, Navigation.tsx, MobileMenu.tsx, Footer.tsx, ThemePaletteMenu.tsx, ResumeNavButton.tsx, EditModeShell.tsx, EditBar.tsx, JsonPanel.tsx
     sections/   — Hero, About, Expertise, Experience, Projects, Contact, HeroParticles, DownloadResume (the hero lazer CTA; it gates itself on `resumeAvailable`)
-    ui/         — Badge, Button, ContactLinks, LanguageIcon, ResumeDialog, SectionHeading, SocialLinks, Tag, Typewriter, InView, RollingTextLink, BackToTop, icons
+    ui/         — Badge, Button, ContactLinks, LanguageIcon, ResumeDialog, SectionHeading, SocialLinks, Tag, Typewriter, InView, RollingTextLink, BackToTop, EditableText, icons
   data/         — profile, skills, experience, projects (JSON documents + typed loaders), resume, palettes, navigation, social, site (TS modules)
-  i18n/         — index.ts (loader), dict-types.ts, validate.ts, provider.tsx, locales/{vi,en}/{content,ui}.json
-  hooks/        — useTheme.tsx, useLanguage.tsx, useClickOutside.ts, useResumeDialog.ts
+  i18n/         — index.ts (loader), dict-types.ts, validate.ts, provider.tsx, draft.ts (DraftStore + save pipeline), edit-mode.ts (session/auth), locales/{vi,en}/{content,ui}.json
+  hooks/        — useTheme.tsx, useLanguage.tsx, useClickOutside.ts, useResumeDialog.ts, useEdit.ts (edit context)
   pages/        — HomePage, AboutPage, ExperiencePage, ProjectsListPage, ProjectDetailPage, PhilosophyPage, ContactPage
   types/        — shared TypeScript interfaces
 ```
@@ -121,14 +133,14 @@ src/
 ## Scripts
 
 - `scripts/generate-resume.ts` — Playwright-based PDF resume generator (bilingual en/vi)
-- `scripts/generate-sitemap.ts` — writes `dist/sitemap.xml` from `src/data/site.ts`, `navPaths` and the project list; fails if `dist/` is missing or if `dist/index.html` no longer contains `siteUrl`
+- `scripts/smoke-draft.ts` — regression check of the draft-store semantics (`pnpm tsx scripts/smoke-draft.ts`): accept/reject paths, empty-required rejection, orphan-free record delete, template creation, snapshot round-trip, conflict detection, clean rebase
 
 ## Deployment
 
 - Deployment is triggered automatically by gitea workflow `.gitea/workflows/deploy.yml`
 - Three jobs: `build` (`pnpm build` → `dist/` artifact) → `generate-resume` (`pnpm tsx scripts/generate-resume.ts --lang=en`, then `--lang=vi`) → `deploy` rsyncs `dist/`, both PDFs included, to `/opt/stacks/dong-site/dist/`
-- `nginx.conf` — production Nginx SPA routing + caching config
-- `docker-compose.yaml` — Docker service for local nginx deployment
+- `nginx.conf` — production Nginx SPA routing + caching config + the `/api/content/` location: auth_basic (`deploy/htpasswd`) in front of a proxied Gitea Contents API whose write token comes from the `GITEA_TOKEN` environment (envsubst at container start; the token never enters the SPA bundle)
+- `docker-compose.yaml` — Docker service for local nginx deployment; mounts the nginx template + `deploy/htpasswd`, passes `GITEA_TOKEN` through
 
 ```
 .gitea/

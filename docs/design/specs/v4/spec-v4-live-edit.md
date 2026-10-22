@@ -1,7 +1,7 @@
 # Specification — v4 Live Edit (i18n Overlay + Git-backed Content Editing)
 
 > **Parent:** `spec.md` (product vision), `specs/v3/spec-v3-i18n.md` (supersedes its Phase 2)
-> **Status:** Proposed rev.4 — execution concerns from the 2026-10-22 review folded in (C1–C7). Awaiting final owner approval. No code changed yet.
+> **Status:** rev.4 — Phases 1–3 implemented 2026-10-22 (see §12 rows 3–15). Remaining: the production nginx step (§6.3), pushing the content documents to the repository, `GITEA_TOKEN`, and the owner's browser walkthrough.
 
 ---
 
@@ -84,6 +84,11 @@ Chosen over a dedicated `/edit` route (which would need its own page selector an
 ### D9 — `profile.tagline` is segmented; markup moves to `Hero.tsx` (owner decision, 2026-10-22)
 
 The only HTML string in the entire data layer is `profile.tagline` (`src/data/profile.ts:11`, `<span class='ok-possible name-highlight'>yes</span>`). The value becomes `Array<{ text: string; emphasis?: boolean }>`; `Hero.tsx` renders the span with its existing classes from data instead of `dangerouslySetInnerHTML`. After migration no content document contains HTML — the validator can enforce plain text (§3.6 rule 5), and the tagline becomes inline-editable segment by segment (§5.1). The current value maps to three segments (`…Full Stack Developer, ` / `{text: 'yes', emphasis: true}` / `, có thể.`); `taglineEn` becomes a single plain segment. The resume generator does not consume the tagline — no resume impact.
+
+
+### D10 — Target-branch editing via `?edit=<branch>` (owner decision, 2026-10-22)
+
+The Gitea Contents API already supports branch targeting natively — `?ref=<branch>` on GET, `branch` in the PUT body — so the editor exposes it in the entry URL instead of hardcoding `master`: `?edit=<branch>` reads and writes that branch; a bare `?edit` (or `?edit=1`) resumes the session's last branch, defaulting to `master`. Branch names are validated against git's ref rules (`edit-mode.ts`) before any request; an illegal name exits edit mode exactly like a failed auth. The target branch must already exist in the repository — Contents API updates never create branches. Deploy semantics are unchanged (owner decision): only pushes to `master` trigger the pipeline, so a save to a working branch shows a merge hint in the EditBar instead of the deploy-queued note. Chosen over a fixed env-configured branch (no per-session flexibility) and over a branch-selector UI (branch-list API call + a new control surface for a single user).
 
 ---
 
@@ -323,7 +328,7 @@ Rejected alternative — `/admin` route with preview pane + bespoke forms: same 
 stateDiagram-v2
   visitor --> authenticating: ?edit on any route
   authenticating --> visitor: 401 / cancel
-  authenticating --> editing: auth ok — draft = live master docs + shas
+  authenticating --> editing: auth ok — draft = live branch docs + shas
   editing --> editing: accepted edit → draft + sessionStorage copy
   editing --> saving: save (validator passes, §3.6)
   saving --> saved: commits written — deploy queued
@@ -333,7 +338,7 @@ stateDiagram-v2
   editing --> visitor: exit (save-or-discard prompt)
 ```
 
-- **Entry:** `?edit` on any route → the app probes the protected endpoint once (hidden-iframe GET to trigger the native Basic prompt, §6.2). 401 or cancel → normal visitor site, zero affordances. Auth OK → session flag in `sessionStorage` + draft initialization (§5.1). Within a session the browser re-attaches Basic credentials to later requests on its own — no repeated prompt.
+- **Entry:** `?edit` on any route → the app probes the protected endpoint once (hidden-iframe GET to trigger the native Basic prompt, §6.2). 401 or cancel → normal visitor site, zero affordances. Auth OK → session flag in `sessionStorage` + draft initialization (§5.1). Within a session the browser re-attaches Basic credentials to later requests on its own — no repeated prompt. The probe targets the session's branch: `?edit=<branch>` selects it, a bare `?edit` resumes the last one or `master` (D10); the branch name is validated before the probe and stored beside the session flag.
 - **Durability:** every accepted edit is also copied to `sessionStorage` (the documents are tens of KB). An accidental reload restores the draft: the app re-fetches live files, re-applies the saved draft, and flags any document whose `last_commit_sha` moved → conflict flow (§5.6). SPA navigation never loses the draft; `beforeunload` warns while dirty.
 - **Exit:** explicit action in the EditBar — save-or-discard prompt if dirty, clear flag + draft, `history.replaceState` strips `?edit`.
 
@@ -551,9 +556,10 @@ Deferred (not v4):
 | 8 | 22 consumer files migrated; `field.ts`/`strings.ts` deleted | 1 | ✅ Done 2026-10-22 |
 | 9 | Resume generator migrated to shared documents | 1 | ✅ Done 2026-10-22 |
 | 10 | Phase 1 verified (build, validate, lint, resume-PDF text diff, browser walkthrough) | 1 | ✅ Automated checks Done 2026-10-22 — `tsc -b`, `pnpm validate:content`, `pnpm lint` (no new warnings), `pnpm build`, `pnpm build:resume-all` all pass; the resume verification was **stronger than planned**: the generated resume HTML (`--dump-html`, both languages) is byte-identical before and after the migration, so no pdftotext diff was needed. A throwaway SSR smoke (`react-dom/server` over the real provider tree) rendered all 7 routes × both languages and matched EN/VI markers from the joined dictionaries (display names, section headings, philosophy quotes, project detail, contact links); it was deleted after the run. ⬜ Browser walkthrough of all 7 routes, both languages — owner |
-| 11 | Production nginx step (§6.3) | 2 | ⬜ TODO |
-| 12 | Local proxy config + compose + auth | 2 | ⬜ TODO |
-| 13 | Edit mode 3a: draft store, inline editing, save happy path | 3 | ⬜ TODO |
-| 14 | Edit mode 3b: JSON panel + record templates | 3 | ⬜ TODO |
-| 15 | Edit mode 3c: save bar, conflicts, failure recovery | 3 | ⬜ TODO |
+| 11 | Production nginx step (§6.3) | 2 | ⬜ TODO — server step + `GITEA_TOKEN` are owner-side; the Phase-1 JSON documents must also be pushed to the repository before the proxy answers 200 |
+| 12 | Local proxy config + compose + auth | 2 | ✅ Done 2026-10-22 — `nginx.conf` template location, compose env/htpasswd mounts, `deploy/htpasswd`. Compose smoke: unauthenticated GET → 401 + `WWW-Authenticate: Basic realm="Editor"`; authenticated request passes htpasswd and reaches Gitea (answers 404 `rel_path` — the JSON documents are not yet pushed and `GITEA_TOKEN` is unset locally, so the 200/412 legs land with row 11). `vite.config.ts` dev proxy mirrors nginx exactly |
+| 13 | Edit mode 3a: draft store, inline editing, save happy path | 3 | ✅ Done 2026-10-22 (automated) — `draft.ts` (copy-on-write, path diff, origin/base separation + three-way rebase, sessionStorage snapshot, sequential-PUT save, id-union append), `edit-mode.ts` (`?edit`, session flag, Basic probe, dirty guard), `EditableText.tsx` (§5.3 contract), `useEdit.ts` context split, `App.tsx` lazy `MaybeEditMode` gate; editable surface wrapped in Hero/About/AboutPage/Expertise/Experience/ExperiencePage/Projects/ProjectsListPage/ProjectDetailPage. Verified: `pnpm build` (EditModeShell is a separate 24 kB lazy chunk, entry unchanged), `pnpm lint` (no new warnings), `scripts/smoke-draft.ts` 7/7 (accept/reject, empty-required, orphan-free delete, template, snapshot round-trip, conflict detection, clean rebase). ⬜ Browser: IME dấu commit on blur, cross-page live preview, reload restores the draft |
+| 14 | Edit mode 3b: JSON panel + record templates | 3 | ✅ Done 2026-10-22 (automated) — `JsonPanel.tsx`: per-document tabs + read-only `ui` tabs, shape hints, templates (project / experience / skill-group / philosophy / section-with-project-picker), record list + confirm-gated delete (structure + both text documents in one validated step), side-by-side hand-merge for conflicted documents, parse + validator status line. Verified via an SSR wiring smoke (`react-dom/server`, vi markup: tabs, templates, delete controls, status) — deleted after the run. ⬜ Browser: add/delete → live preview + validator behavior |
+| 15 | Edit mode 3c: save bar, conflicts, failure recovery | 3 | ✅ Done 2026-10-22 (automated) — `EditBar.tsx`: changed-path diff with per-path revert and per-document discard, validate-before-save, sequential-PUT progress lines (written / conflict / failed), resume after partial failure, conflict actions (rebase / take-theirs / hand-merge), exit confirm when dirty. Verified via the same (now deleted) SSR smoke — vi markup carried the conflict controls, save statuses, and the resume button. ⬜ Browser + Gitea: save → commit → queued CI deploy → live change; full 412 flow against a real stale sha |
 | 16 | Layout designer research (WYSIWYG / layout config) | deferred | ⬜ Out of v4 scope |
+| 17 | Target-branch editing (D10): `?edit=<branch>`, `?ref=` on GET, `branch` on PUT, branch chip + merge hint | 3 | ✅ Done 2026-10-22 (automated) — tri-state URL parsing with git-ref validation (`edit-mode.ts`), `?ref=` on every document GET and `branch` in every PUT body (`draft.ts`, incl. the 412-refresh and id-union legs), branch persisted beside the session flag, EditBar branch chip + merge hint on non-default branches (`ui.json` `branchLabel`/`mergeHint`). Verified: `pnpm build`, `pnpm lint` (no new warnings), `scripts/smoke-draft.ts` 7/7, throwaway wiring smoke (URL tri-state, ref/branch transport, EditBar render for branch vs master) — deleted after the run. ⬜ Browser + Gitea: edit on a non-master branch → commits land there; merge → deploy |
