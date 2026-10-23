@@ -81,4 +81,18 @@ const merged = (store3.dataOf('content.vi') as Record<string, Record<string, str
 if (merged[firstProject].summary !== 'MINE') fail('rebase lost the draft edit');
 if (merged[otherId].summary !== 'THEIRS') fail('rebase lost the base edit');
 
-console.log('draft store smoke: all 7 checks passed');
+// 8. A text document that does not hold an array field yet (an older target
+// branch — the field still lives in the structure document) must gain a real
+// array when a [0] path is committed; an object-keyed pseudo-array crashed
+// TagListEditor's items.map on the re-render after the first tag edit.
+const store4 = new DraftStore(structuredClone(bases));
+const baseVi = store4.dataOf('content.vi') as Record<string, Record<string, unknown>>;
+delete baseVi.profile.currentInterests;
+const tagEdit = store4.setValue('vi', 'profile.currentInterests[0]', 'NEW TAG');
+if (tagEdit !== null) fail(`tag edit rejected: ${JSON.stringify(tagEdit)}`);
+const arr = (store4.dataOf('content.vi') as Record<string, Record<string, unknown>>).profile
+  .currentInterests;
+if (!Array.isArray(arr)) fail(`setPath made ${JSON.stringify(arr)}, not an array`);
+if (arr[0] !== 'NEW TAG') fail('array element not set');
+
+console.log('draft store smoke: all 8 checks passed');

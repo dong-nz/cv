@@ -74,8 +74,17 @@ export function getPath(root: unknown, segs: PathSeg[]): unknown {
 export function setPath(root: unknown, segs: PathSeg[], value: unknown): unknown {
   if (segs.length === 0) return value;
   const [head, ...rest] = segs;
+  // A missing container under a numeric segment is an array. A text document
+  // that does not hold the field yet (an older target branch, e.g.
+  // `profile.currentInterests` still living in the old structure document)
+  // must not gain an object-keyed pseudo-array — that shape crashed every
+  // consumer doing items.map on the re-render after the first commit.
   const copy = (
-    Array.isArray(root) ? [...(root as unknown[])] : { ...(root as Record<PathSeg, unknown>) }
+    Array.isArray(root)
+      ? [...(root as unknown[])]
+      : root === undefined && typeof head === 'number'
+        ? []
+        : { ...(root as Record<PathSeg, unknown>) }
   ) as Record<PathSeg, unknown>;
   copy[head] = rest.length === 0 ? value : setPath(copy[head], rest, value);
   return copy;
@@ -263,13 +272,62 @@ export function patchUnionSource(source: string, union: string, id: string): str
 export type SavedDraft = {
   docs: Record<string, unknown>;
   baseShas: Record<string, string>;
+  // Record ids created inside this draft session — their ids follow the title
+  // until the record is saved (spec-v4-inline-editing E3). Optional so a
+  // persisted draft from before this existed still restores.
+  created?: string[];
 };
+
+export type RecordKind = 'project' | 'experience' | 'skill-group' | 'philosophy' | 'section';
+export type RecordIds = { id: string; projectId?: string };
+
+// Where a field physically lives (spec-v4-inline-editing E7): `doc` is the
+// short form a developer searches, `pointer` the path inside it, `repoPath`
+// the full project path — what the provenance chip copies to the clipboard.
+export type FieldInfo = { doc: string; pointer: string; repoPath: string };
+
+// One field where my draft and the moved branch both changed, to different
+// values (E8) — the store never resolves it by itself.
+export type ConflictField = { path: string; mine: unknown; theirs: unknown };
 
 function uniqueId(base: string, taken: readonly string[]): string {
   let id = base;
   let n = 2;
   while (taken.includes(id)) id = `${base}-${n++}`;
   return id;
+}
+
+// Ids are born from titles (spec-v4-inline-editing E3): lowercase, hyphen-
+// joined ASCII. Vietnamese diacritics fold through NFD; đ folds separately.
+export function slugify(title: string): string {
+  return title
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+const recordKey = (kind: RecordKind, ids: RecordIds): string =>
+  ids.projectId ? `${kind}:${ids.projectId}:${ids.id}` : `${kind}:${ids.id}`;
+
+// A committed text path naming a record title — the trigger for id re-sluging
+// while the record is still draft-only (E3).
+export function recordForTitlePath(
+  path: string,
+): { kind: RecordKind; ids: RecordIds } | null {
+  const section = /^projects\.([^.[\]]+)\.sections\.([^.[\]]+)\.title$/.exec(path);
+  if (section) return { kind: 'section', ids: { id: section[2], projectId: section[1] } };
+  const project = /^projects\.([^.[\]]+)\.title$/.exec(path);
+  if (project) return { kind: 'project', ids: { id: project[1] } };
+  const experience = /^experience\.([^.[\]]+)\.title$/.exec(path);
+  if (experience) return { kind: 'experience', ids: { id: experience[1] } };
+  const group = /^skills\.([^.[\]]+)\.title$/.exec(path);
+  if (group) return { kind: 'skill-group', ids: { id: group[1] } };
+  const point = /^profile\.philosophy\.([^.[\]]+)\.title$/.exec(path);
+  if (point) return { kind: 'philosophy', ids: { id: point[1] } };
+  return null;
 }
 
 export class DraftStore {
@@ -280,6 +338,10 @@ export class DraftStore {
   private origin = new Map<DraftDocId, unknown>();
   private working = new Map<DraftDocId, unknown>();
   private changes = new Map<DraftDocId, string[]>;
+  // Ids of records created in this draft session (recordKey form). A created
+  // id follows its title while the record is draft-only; after a save the id
+  // is published and fixed (E3).
+  private created = new Set<string>();
 
   constructor(bases: Record<DraftDocId, DocBase>) {
     for (const meta of DRAFT_DOCS) {
@@ -399,17 +461,16 @@ export class DraftStore {
 
   // Templates and record deletes (§5.4): structure record and text entries
   // are created or removed in one action — orphan text is never produced.
-  addRecord(
-    kind: 'project' | 'experience' | 'skill-group' | 'philosophy' | 'section',
-    options: { projectId?: string } = {},
-  ): ContentIssue[] | null {
+  addRecord(kind: RecordKind, options: { projectId?: string } = {}): ContentIssue[] | null {
     const candidates = new Map<DraftDocId, unknown>();
     const vi = structuredClone(this.dataOf('content.vi')) as Record<string, any>;
     const en = structuredClone(this.dataOf('content.en')) as Record<string, any>;
+    let createdIds: RecordIds | null = null;
 
     if (kind === 'project') {
       const projects = structuredClone(this.dataOf('projects')) as Record<string, any>[];
       const id = uniqueId('new-project', projects.map((p) => p.id));
+      createdIds = { id };
       projects.push({ id, category: 'experiment', technologies: [], featured: false, sections: [] });
       candidates.set('projects', projects);
       const stub = { title: 'New project', summary: 'Write the summary here.', role: 'Owner', sections: {} };
@@ -418,6 +479,7 @@ export class DraftStore {
     } else if (kind === 'experience') {
       const experiences = structuredClone(this.dataOf('experience')) as Record<string, any>[];
       const id = uniqueId('new-experience', experiences.map((e) => e.id));
+      createdIds = { id };
       experiences.push({ id });
       candidates.set('experience', experiences);
       const stub = { title: 'New role', company: 'New company', duration: 'present', responsibilities: ['Write a responsibility here.'] };
@@ -426,6 +488,7 @@ export class DraftStore {
     } else if (kind === 'skill-group') {
       const groups = structuredClone(this.dataOf('skills')) as Record<string, any>[];
       const id = uniqueId('new-skill-group', groups.map((g) => g.id));
+      createdIds = { id };
       groups.push({ id, skills: ['New skill'] });
       candidates.set('skills', groups);
       vi.skills = { ...vi.skills, [id]: { title: 'New skill group' } };
@@ -434,6 +497,7 @@ export class DraftStore {
       const profile = structuredClone(this.dataOf('profile')) as Record<string, any>;
       const points = profile.philosophy as Record<string, any>[];
       const id = uniqueId('new-philosophy-point', points.map((p) => p.id));
+      createdIds = { id };
       points.push({ id });
       candidates.set('profile', profile);
       const stub = { title: 'New principle', description: 'Write the principle here.', keywords: ['new-keyword'] };
@@ -446,6 +510,7 @@ export class DraftStore {
       const project = projects.find((p) => p.id === projectId);
       if (!project) return [{ path: 'projects.json', message: `no project ${projectId}` }];
       const sectionId = uniqueId('new-section', (project.sections as Record<string, any>[]).map((s) => s.id));
+      createdIds = { id: sectionId, projectId };
       project.sections = [...project.sections, { id: sectionId, type: 'text' }];
       candidates.set('projects', projects);
       const stub = { title: 'New section', content: 'Write the section here.' };
@@ -459,15 +524,14 @@ export class DraftStore {
     }
     candidates.set('content.vi', vi);
     candidates.set('content.en', en);
-    return this.tryApply(candidates);
+    const issues = this.tryApply(candidates);
+    if (issues === null && createdIds) this.created.add(recordKey(kind, createdIds));
+    return issues;
   }
 
   // Delete removes the record's text entries from both language documents in
   // the same action — the validator can never see orphan text (§5.4).
-  deleteRecord(
-    kind: 'project' | 'experience' | 'skill-group' | 'philosophy' | 'section',
-    ids: { id: string; projectId?: string },
-  ): ContentIssue[] | null {
+  deleteRecord(kind: RecordKind, ids: RecordIds): ContentIssue[] | null {
     const candidates = new Map<DraftDocId, unknown>();
 
     const dropFromTexts = (mutate: (doc: Record<string, any>) => void) => {
@@ -515,7 +579,204 @@ export class DraftStore {
         delete text?.sections[ids.id];
       });
     }
-    return this.tryApply(candidates);
+    const issues = this.tryApply(candidates);
+    if (issues === null) this.created.delete(recordKey(kind, ids));
+    return issues;
+  }
+
+  // --- provenance (spec-v4-inline-editing E7) ---------------------------------
+
+  describeField(id: DraftDocId, path: string): FieldInfo {
+    const file = DRAFT_DOCS.find((d) => d.id === id)?.file ?? id;
+    return { doc: file.replace(/^src\//, ''), pointer: path, repoPath: file };
+  }
+
+  // --- generic document writes (E4/E5): structure fields and text arrays ----
+
+  apply(id: DraftDocId, next: unknown): ContentIssue[] | null {
+    return this.tryApply(new Map([[id, next]]));
+  }
+
+  setStructured(id: DraftDocId, path: string, value: unknown): ContentIssue[] | null {
+    return this.apply(id, setPath(this.dataOf(id), parsePath(path), value));
+  }
+
+  deleteStructured(id: DraftDocId, path: string): ContentIssue[] | null {
+    return this.apply(id, deletePath(this.dataOf(id), parsePath(path)));
+  }
+
+  // Move one element inside an array the path names (a document root array
+  // included) — record order and tag order share this single primitive.
+  moveItem(id: DraftDocId, path: string, from: number, to: number): ContentIssue[] | null {
+    const segs = parsePath(path);
+    const arr = getPath(this.dataOf(id), segs);
+    if (!Array.isArray(arr) || from < 0 || to < 0 || from >= arr.length || to >= arr.length) {
+      return null;
+    }
+    const next = [...arr];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    return this.apply(id, setPath(this.dataOf(id), segs, next));
+  }
+
+  isCreated(kind: RecordKind, ids: RecordIds): boolean {
+    return this.created.has(recordKey(kind, ids));
+  }
+
+  // E3: a draft-only id follows its title. Once the record has been saved the
+  // id is published — it is the URL — and never changes again.
+  renameRecord(kind: RecordKind, ids: RecordIds, rawId: string): ContentIssue[] | null {
+    if (!this.isCreated(kind, ids)) return null;
+    const slug = slugify(rawId);
+    if (!slug) return null;
+
+    const candidates = new Map<DraftDocId, unknown>();
+    let newId = slug;
+
+    const renameInTexts = (mutate: (doc: Record<string, any>) => void) => {
+      for (const id of ['content.vi', 'content.en'] as const) {
+        const doc = structuredClone(this.dataOf(id)) as Record<string, any>;
+        mutate(doc);
+        candidates.set(id, doc);
+      }
+    };
+
+    if (kind === 'project') {
+      const projects = structuredClone(this.dataOf('projects')) as Record<string, any>[];
+      newId = uniqueId(slug, projects.map((p) => p.id));
+      if (newId === ids.id) return null;
+      projects.forEach((p, i) => {
+        if (p.id === ids.id) projects[i] = { ...p, id: newId };
+      });
+      candidates.set('projects', projects);
+      renameInTexts((doc) => {
+        const rec = doc.projects[ids.id];
+        if (rec === undefined) return;
+        const rest = { ...doc.projects };
+        delete rest[ids.id];
+        doc.projects = { ...rest, [newId]: rec };
+      });
+    } else if (kind === 'experience') {
+      const experiences = structuredClone(this.dataOf('experience')) as Record<string, any>[];
+      newId = uniqueId(slug, experiences.map((e) => e.id));
+      if (newId === ids.id) return null;
+      experiences.forEach((e, i) => {
+        if (e.id === ids.id) experiences[i] = { ...e, id: newId };
+      });
+      candidates.set('experience', experiences);
+      renameInTexts((doc) => {
+        const rec = doc.experience[ids.id];
+        if (rec === undefined) return;
+        const rest = { ...doc.experience };
+        delete rest[ids.id];
+        doc.experience = { ...rest, [newId]: rec };
+      });
+    } else if (kind === 'skill-group') {
+      const groups = structuredClone(this.dataOf('skills')) as Record<string, any>[];
+      newId = uniqueId(slug, groups.map((g) => g.id));
+      if (newId === ids.id) return null;
+      groups.forEach((g, i) => {
+        if (g.id === ids.id) groups[i] = { ...g, id: newId };
+      });
+      candidates.set('skills', groups);
+      renameInTexts((doc) => {
+        const rec = doc.skills[ids.id];
+        if (rec === undefined) return;
+        const rest = { ...doc.skills };
+        delete rest[ids.id];
+        doc.skills = { ...rest, [newId]: rec };
+      });
+    } else if (kind === 'philosophy') {
+      const profile = structuredClone(this.dataOf('profile')) as Record<string, any>;
+      const points = profile.philosophy as Record<string, any>[];
+      newId = uniqueId(slug, points.map((p) => p.id));
+      if (newId === ids.id) return null;
+      points.forEach((p, i) => {
+        if (p.id === ids.id) points[i] = { ...p, id: newId };
+      });
+      candidates.set('profile', profile);
+      renameInTexts((doc) => {
+        const rec = doc.profile.philosophy[ids.id];
+        if (rec === undefined) return;
+        const rest = { ...doc.profile.philosophy };
+        delete rest[ids.id];
+        doc.profile.philosophy = { ...rest, [newId]: rec };
+      });
+    } else {
+      const projectId = ids.projectId;
+      if (!projectId) return null;
+      const projects = structuredClone(this.dataOf('projects')) as Record<string, any>[];
+      const project = projects.find((p) => p.id === projectId);
+      if (!project) return null;
+      const sections = project.sections as Record<string, any>[];
+      newId = uniqueId(slug, sections.map((s) => s.id));
+      if (newId === ids.id) return null;
+      sections.forEach((s, i) => {
+        if (s.id === ids.id) sections[i] = { ...s, id: newId };
+      });
+      candidates.set('projects', projects);
+      renameInTexts((doc) => {
+        const text = doc.projects[projectId];
+        const rec = text?.sections?.[ids.id];
+        if (rec === undefined) return;
+        const rest = { ...text.sections };
+        delete rest[ids.id];
+        doc.projects = {
+          ...doc.projects,
+          [projectId]: { ...text, sections: { ...rest, [newId]: rec } },
+        };
+      });
+    }
+
+    const issues = this.tryApply(candidates);
+    if (issues === null) {
+      this.created.delete(recordKey(kind, ids));
+      this.created.add(recordKey(kind, { ...ids, id: newId }));
+    }
+    return issues;
+  }
+
+  // --- conflicts, field by field (E8) -------------------------------------------
+
+  conflictFields(id: DraftDocId): ConflictField[] {
+    const origin = this.origin.get(id);
+    const theirs = this.base.get(id)?.data;
+    if (origin === undefined || theirs === undefined) return [];
+    const mine = this.dataOf(id);
+    const theirPaths = new Set(diffPaths(origin, theirs));
+    const out: ConflictField[] = [];
+    for (const path of diffPaths(origin, mine)) {
+      if (!theirPaths.has(path)) continue;
+      const segs = parsePath(path);
+      const myValue = getPath(mine, segs);
+      const theirValue = getPath(theirs, segs);
+      if (JSON.stringify(myValue) === JSON.stringify(theirValue)) continue;
+      out.push({ path, mine: myValue, theirs: theirValue });
+    }
+    return out;
+  }
+
+  // Keep one side for one field, then retry the rebase. 'theirs': the working
+  // copy adopts the branch value, so my edit at that path is dropped. 'mine':
+  // the origin snapshot adopts the branch value, so the rebase replays my
+  // value over theirs — my edit wins at that path, every other replay is
+  // untouched.
+  resolveConflictField(
+    id: DraftDocId,
+    path: string,
+    side: 'mine' | 'theirs',
+  ): ContentIssue[] | null {
+    const origin = this.origin.get(id);
+    const theirs = this.base.get(id)?.data;
+    if (origin === undefined || theirs === undefined) return null;
+    const segs = parsePath(path);
+    if (side === 'mine') {
+      this.origin.set(id, setPath(origin, segs, getPath(theirs, segs)));
+    } else {
+      const issues = this.apply(id, setPath(this.dataOf(id), segs, getPath(theirs, segs)));
+      if (issues) return issues;
+    }
+    return this.rebase(id);
   }
 
   // Apply candidate documents atomically: replace, recompute changed paths,
@@ -565,13 +826,14 @@ export class DraftStore {
     for (const [id, data] of this.working) docs[id] = data;
     const baseShas: Record<string, string> = {};
     for (const [id, meta] of this.base) baseShas[id] = meta.sha;
-    return { docs, baseShas };
+    return { docs, baseShas, created: [...this.created] };
   }
 
   // Re-apply a persisted draft onto freshly fetched baselines. A document
   // whose last_commit_sha moved since the draft was taken is returned as
   // drifted → the conflict flow (§5.6) owns it from here.
   applySaved(saved: SavedDraft): DraftDocId[] {
+    this.created = new Set(saved.created ?? []);
     const drifted: DraftDocId[] = [];
     for (const [idStr, data] of Object.entries(saved.docs)) {
       const id = idStr as DraftDocId;
@@ -602,7 +864,8 @@ export class DraftStore {
   // Rebase (§5.6): a real three-way merge of origin → mine against origin →
   // theirs. Paths only I touched replay onto the refreshed base; a path both
   // sides changed differently is a conflict the store refuses to resolve —
-  // the caller falls back to take-theirs or hand-merge.
+  // resolveConflictField (spec-v4-inline-editing E8) settles it field by
+  // field, take-theirs still owns the whole document.
   rebase(id: DraftDocId): ContentIssue[] | null {
     const origin = this.origin.get(id)!;
     const theirs = this.base.get(id)!.data;
@@ -617,7 +880,7 @@ export class DraftStore {
     if (clashes.length > 0) {
       return clashes.map((p) => ({
         path: p,
-        message: 'changed both locally and in master — hand-merge or take theirs',
+        message: 'changed both locally and in the branch — resolve the field or take theirs',
       }));
     }
     let data = theirs;
