@@ -112,5 +112,7 @@ Page manifests (`spec-v4-data-organization.md` §5) are **read-only in the app**
 | # | Task | Status |
 |---|---|---|
 | 0 | Design agreed (E1–E7) | ✅ Done 2026-10-23 |
-| 1–9 | Implementation §5 | ⬜ TODO |
-| — | Acceptance §6 | ⬜ TODO |
+| 1–7 | Implementation §5 | ✅ Done 2026-10-23 — EditableText zone/pencil/provenance, TagListEditor over all tag arrays, tagline emphasis, `RecordControls` + `AddGhost` on every record surface (About, AboutPage, Expertise, Experience, ExperiencePage, Projects, ProjectsListPage, ProjectDetailPage incl. sections, PhilosophyPage), `RecordSettings` (featured, section list + type picker, variant, location, logo), id-slug rename on title commit, per-field conflict UI in EditBar; chrome CSS in `App.css`, labels in both `ui.json` |
+| 8 | Remove `JsonPanel` + panel labels | ⬜ TODO — kept until the inline surface is verified in a real browser |
+| 9 | Docs superseded notes | ⬜ TODO |
+| — | Acceptance §6 | 🟡 Partial — `pnpm build`, `pnpm validate:content`, `pnpm lint` (no new warnings), `pnpm tsx scripts/smoke-draft.ts` pass 2026-10-23; browser verification of the edit surfaces pending (user verifies in a real browser) |

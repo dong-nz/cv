@@ -19,6 +19,7 @@ import {
   fetchTextFile,
   saveDraft,
   saveIdUnions,
+  recordForTitlePath,
 } from '@/i18n/draft';
 import type { DocBase, DocSaveResult, DraftDocId } from '@/i18n/draft';
 import {
@@ -35,7 +36,6 @@ import { EditContext } from '@/hooks/useEdit';
 import type { EditApi } from '@/hooks/useEdit';
 import type { ContentIssue } from '@/i18n/validate';
 import { EditBar } from './EditBar';
-import { JsonPanel, type PanelTab } from './JsonPanel';
 
 type Phase = 'authenticating' | 'loading' | 'ready' | 'offline';
 
@@ -61,8 +61,6 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
   const [saving, setSaving] = useState(false);
   const [saveStopped, setSaveStopped] = useState(false);
   const [unionNote, setUnionNote] = useState<'ok' | 'failed' | null>(null);
-  const [panelOpen, setPanelOpen] = useState(false);
-  const [panelTab, setPanelTab] = useState<PanelTab>('profile');
 
   const stripEditQuery = useCallback(() => {
     const params = new URLSearchParams(location.search);
@@ -167,15 +165,23 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('beforeunload', warn);
   }, [dirty]);
 
+  // The EditApi v2 surface (spec-v4-inline-editing E4): text writes keep the
+  // v1 helpers; everything else — structure fields, tags, records, order,
+  // provenance — goes through the generic draft methods. A committed record
+  // title re-sluges its draft-only id (E3); a saved record's id never moves.
   const editApi = useMemo<EditApi | null>(
     () =>
       store && (phase === 'ready' || phase === 'offline')
         ? {
+            textDoc: lang === 'en' ? 'content.en' : 'content.vi',
             commit: (path, value) => {
               const rejected = store.setValue(lang, path, value);
               setIssues(rejected ?? []);
-              if (!rejected) refresh(store);
-              return rejected;
+              if (rejected) return rejected;
+              const record = recordForTitlePath(path);
+              if (record) store.renameRecord(record.kind, record.ids, value);
+              refresh(store);
+              return null;
             },
             revert: (path) => {
               const rejected = store.revertPath(path);
@@ -184,6 +190,59 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
               return rejected;
             },
             isPathDirty: (path) => store.isPathDirty(path),
+            describe: (doc, path) => store.describeField(doc, path),
+            apply: (doc, next) => {
+              const rejected = store.apply(doc, next);
+              setIssues(rejected ?? []);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            dataOf: (doc) => store.dataOf(doc),
+            setStructured: (doc, path, value) => {
+              const rejected = store.setStructured(doc, path, value);
+              setIssues(rejected ?? []);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            deleteStructured: (doc, path) => {
+              const rejected = store.deleteStructured(doc, path);
+              setIssues(rejected ?? []);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            isPathDirtyIn: (doc, path) => store.changedPaths(doc).includes(path),
+            moveItem: (doc, path, from, to) => {
+              const rejected = store.moveItem(doc, path, from, to);
+              if (rejected) setIssues(rejected);
+              else refresh(store);
+              return rejected;
+            },
+            addRecord: (kind, options) => {
+              const rejected = store.addRecord(kind, options);
+              setIssues(rejected ?? []);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            deleteRecord: (kind, ids) => {
+              const rejected = store.deleteRecord(kind, ids);
+              setIssues(rejected ?? []);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            isCreated: (kind, ids) => store.isCreated(kind, ids),
+            renameRecord: (kind, ids, rawId) => {
+              const rejected = store.renameRecord(kind, ids, rawId);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            conflictFields: (doc) => store.conflictFields(doc),
+            resolveConflictField: (doc, path, side) => {
+              const rejected = store.resolveConflictField(doc, path, side);
+              setIssues(rejected ?? []);
+              if (!rejected) setConflicts((prev) => prev.filter((x) => x !== doc));
+              refresh(store);
+              return rejected;
+            },
           }
         : null,
     [store, phase, lang, refresh],
@@ -252,10 +311,27 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     [store, refresh],
   );
 
-  const openHandMerge = useCallback((id: DraftDocId) => {
-    setPanelTab(id);
-    setPanelOpen(true);
-  }, []);
+  // One field, one side (E8): refresh that document's base first so the
+  // branch values shown are current, then keep 'mine' or 'theirs' at that
+  // path and retry the rebase. The document leaves the conflict list only
+  // when the rebase completes with no remaining clash.
+  const resolveConflictField = useCallback(
+    async (id: DraftDocId, path: string, side: 'mine' | 'theirs') => {
+      if (!store) return;
+      const meta = DRAFT_DOCS.find((d) => d.id === id)!;
+      try {
+        store.resetBase(id, await fetchDoc(meta.file, branch));
+      } catch {
+        // unreachable proxy — the field UI stays, take-theirs still works
+      }
+      const rejected = store.resolveConflictField(id, path, side);
+      setIssues(rejected ?? []);
+      if (!rejected) setConflicts((prev) => prev.filter((x) => x !== id));
+      refresh(store);
+    },
+    [store, refresh, branch],
+  );
+
 
   const discardDoc = useCallback(
     (id: DraftDocId) => {
@@ -282,9 +358,6 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     stripEditQuery();
   }, [stripEditQuery]);
 
-  const openPanel = useCallback(() => {
-    setPanelOpen(true);
-  }, []);
 
   // `revision` is the draft's invalidation counter — the store mutates in
   // place, so it is the only signal that a recomputation is due.
@@ -311,30 +384,15 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
               unionNote={unionNote}
               draftRestored={draftRestored}
               branch={branch}
-              onOpenPanel={openPanel}
+              getConflictFields={(id) => store.conflictFields(id)}
               onSave={() => void runSave()}
               onExit={exit}
               onRebase={(id) => void resolveRebase(id)}
               onTakeTheirs={resolveTakeTheirs}
-              onHandMerge={openHandMerge}
+              onResolveField={(id, path, side) => void resolveConflictField(id, path, side)}
               onDiscardDoc={discardDoc}
               onRevertPath={revertPath}
             />
-            {panelOpen && (
-              <JsonPanel
-                store={store}
-                tab={panelTab}
-                revision={revision}
-                conflicts={conflicts}
-                onClose={() => setPanelOpen(false)}
-                onTab={setPanelTab}
-                onChanged={() => {
-                  setIssues(store.validate());
-                  refresh(store);
-                }}
-                onConflictResolved={(id) => setConflicts((prev) => prev.filter((x) => x !== id))}
-              />
-            )}
           </>
         )}
       </EditContext.Provider>

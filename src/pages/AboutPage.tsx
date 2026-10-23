@@ -3,10 +3,15 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { Tag } from '@/components/ui/Tag'
 import { InView } from '@/components/ui/InView'
 import { EditableText } from '@/components/ui/EditableText'
+import { TagListEditor } from '@/components/ui/TagListEditor'
+import { RecordControls, AddGhost } from '@/components/ui/RecordControls'
+import { useEdit } from '@/hooks/useEdit'
 import { useI18n } from '@/i18n/provider'
 
 export function AboutPage() {
   const { ui: s, content: c } = useI18n()
+  const edit = useEdit()
+
   return (
     <>
       <InView>
@@ -51,7 +56,7 @@ export function AboutPage() {
             {c.profile.philosophy.map((point, i) => (
               <motion.div
                 key={point.id}
-                className="philosophy-card"
+                className={edit ? 'philosophy-card edit-record-host' : 'philosophy-card'}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
@@ -59,31 +64,49 @@ export function AboutPage() {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
+                {edit && (
+                  <RecordControls
+                    label={point.title}
+                    canUp={i > 0}
+                    canDown={i < c.profile.philosophy.length - 1}
+                    onUp={() => edit.moveItem('profile', 'philosophy', i, i - 1)}
+                    onDown={() => edit.moveItem('profile', 'philosophy', i, i + 1)}
+                    onDelete={() => edit.deleteRecord('philosophy', { id: point.id })}
+                  />
+                )}
                 <EditableText as="h3" path={`profile.philosophy.${point.id}.title`} label={s.edit.fields.pointTitle}>
                   {point.title}
                 </EditableText>
                 <EditableText as="p" path={`profile.philosophy.${point.id}.description`} label={s.edit.fields.pointDescription} multiline>
                   {point.description}
                 </EditableText>
-                <div className="philosophy-keywords">
-                  {point.keywords.map((kw) => (
-                    <Tag key={kw}>{kw}</Tag>
-                  ))}
-                </div>
+                <TagListEditor
+                  arrayPath={`profile.philosophy.${point.id}.keywords`}
+                  items={point.keywords}
+                  containerAs="div"
+                  containerClassName="philosophy-keywords"
+                  as={Tag}
+                  labelPrefix={`${point.title} — ${s.edit.fields.pointKeywords}`}
+                  addLabel={s.edit.addKeyword}
+                />
               </motion.div>
             ))}
+            {edit && <AddGhost variant="card" label={s.edit.addPhilosophy} onClick={() => edit.addRecord('philosophy')} />}
           </div>
 
           <h3 className="subheading">
             {s.about.exploringTitlePage}
           </h3>
-          <div className="interests-list">
-            {c.profile.currentInterests.map((interest) => (
-              <Tag key={interest} accent>
-                {interest}
-              </Tag>
-            ))}
-          </div>
+          <TagListEditor
+            arrayPath="profile.currentInterests"
+            items={c.profile.currentInterests}
+            containerAs="div"
+            containerClassName="interests-list"
+            as={Tag}
+            accent
+            labelPrefix={s.edit.fields.interests}
+            addLabel={s.edit.addInterest}
+          />
         </motion.section>
       </InView>
       <InView>
@@ -103,7 +126,7 @@ export function AboutPage() {
             {c.skillGroups.map((group, i) => (
               <motion.div
                 key={group.id}
-                className="expertise-card"
+                className={edit ? 'expertise-card edit-record-host' : 'expertise-card'}
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
@@ -111,18 +134,33 @@ export function AboutPage() {
                 whileHover={{ scale: 1.02, y: -4 }}
                 whileTap={{ scale: 0.98 }}
               >
+                {edit && (
+                  <RecordControls
+                    label={group.title}
+                    canUp={i > 0}
+                    canDown={i < c.skillGroups.length - 1}
+                    onUp={() => edit.moveItem('skills', '', i, i - 1)}
+                    onDown={() => edit.moveItem('skills', '', i, i + 1)}
+                    onDelete={() => edit.deleteRecord('skill-group', { id: group.id })}
+                  />
+                )}
                 <EditableText as="h3" path={`skills.${group.id}.title`} label={s.edit.fields.groupTitle}>
                   {group.title}
                 </EditableText>
-                <ul className="expertise-skills">
-                  {group.skills.map((skill: string) => (
-                    <li key={skill} className="expertise-skill">
-                      {skill}
-                    </li>
-                  ))}
-                </ul>
+                <TagListEditor
+                  doc="skills"
+                  arrayPath={`[${i}].skills`}
+                  items={group.skills}
+                  containerAs="ul"
+                  containerClassName="expertise-skills"
+                  as="li"
+                  itemClassName="expertise-skill"
+                  labelPrefix={`${group.title} — ${s.edit.fields.skill}`}
+                  addLabel={s.edit.addSkill}
+                />
               </motion.div>
             ))}
+            {edit && <AddGhost variant="card" label={s.edit.addSkillGroup} onClick={() => edit.addRecord('skill-group')} />}
           </div>
         </motion.section>
       </InView>

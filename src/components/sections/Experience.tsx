@@ -2,10 +2,17 @@ import { SectionHeading } from '@/components/ui/SectionHeading'
 import { motion } from "motion/react"
 import { InView } from "@/components/ui/InView"
 import { EditableText } from '@/components/ui/EditableText'
+import { TagListEditor } from '@/components/ui/TagListEditor'
+import { RecordControls, AddGhost } from '@/components/ui/RecordControls'
+import { RecordSettings, ExperienceSettingsPanel } from '@/components/ui/RecordSettings'
+import { useEdit } from '@/hooks/useEdit'
 import { useI18n } from '@/i18n/provider'
+import { useState } from 'react'
 
 export function Experience() {
   const { ui: s, content: c } = useI18n()
+  const edit = useEdit()
+  const [settingsFor, setSettingsFor] = useState<string | null>(null)
   return (
     <InView>
       <motion.section
@@ -25,13 +32,30 @@ export function Experience() {
           {c.experiences.map((exp, i) => (
             <motion.div
               key={exp.id}
-              className={exp.variant ? `timeline-entry timeline-entry-${exp.variant}` : 'timeline-entry'}
+              className={[
+                'timeline-entry',
+                exp.variant ? `timeline-entry-${exp.variant}` : '',
+                edit ? 'edit-record-host' : '',
+              ]
+                .filter(Boolean)
+                .join(' ')}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.2 }}
               transition={{ duration: 0.45, ease: "easeOut", delay: i * 0.08 }}
             >
               <div className="timeline-marker" />
+              {edit && (
+                <RecordControls
+                  label={exp.title}
+                  canUp={i > 0}
+                  canDown={i < c.experiences.length - 1}
+                  onUp={() => edit.moveItem('experience', '', i, i - 1)}
+                  onDown={() => edit.moveItem('experience', '', i, i + 1)}
+                  onDelete={() => edit.deleteRecord('experience', { id: exp.id })}
+                  onSettings={() => setSettingsFor(exp.id)}
+                />
+              )}
               <div className="timeline-header">
                 <EditableText as="div" className="timeline-title" path={`experience.${exp.id}.title`} label={s.edit.fields.expTitle}>
                   {exp.title}
@@ -48,20 +72,18 @@ export function Experience() {
                   )}
                 </div>
               </div>
-              <ul className="timeline-responsibilities">
-                {exp.responsibilities.map((r, ri) => (
-                  <EditableText
-                    as="li"
-                    key={ri}
-                    path={`experience.${exp.id}.responsibilities[${ri}]`}
-                    label={`${exp.title} — ${s.edit.fields.responsibility} ${ri + 1}`}
-                  >
-                    {r}
-                  </EditableText>
-                ))}
-              </ul>
+              <TagListEditor
+                arrayPath={`experience.${exp.id}.responsibilities`}
+                items={exp.responsibilities}
+                containerAs="ul"
+                containerClassName="timeline-responsibilities"
+                as="li"
+                labelPrefix={`${exp.title} — ${s.edit.fields.responsibility}`}
+                addLabel={s.edit.addResponsibility}
+              />
             </motion.div>
           ))}
+          {edit && <AddGhost label={s.edit.addExperience} onClick={() => edit.addRecord('experience')} />}
         <div className="timeline-tldr">
           <span className="timeline-tldr-marker" aria-hidden="true" />
           <span className="timeline-tldr-chip">{s.experience.tldr}</span>
@@ -70,6 +92,14 @@ export function Experience() {
           </EditableText>
         </div>
         </div>
+        {edit && settingsFor && (
+          <RecordSettings title={s.edit.settings} onClose={() => setSettingsFor(null)}>
+            {(() => {
+              const entry = c.experiences.find((e) => e.id === settingsFor)
+              return entry ? <ExperienceSettingsPanel entry={entry} /> : null
+            })()}
+          </RecordSettings>
+        )}
         </div>
       </motion.section>
     </InView>

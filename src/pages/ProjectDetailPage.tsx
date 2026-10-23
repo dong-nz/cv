@@ -5,7 +5,11 @@ import { Tag } from '@/components/ui/Tag'
 import { EditableText } from '@/components/ui/EditableText'
 import { InView } from '@/components/ui/InView'
 import { useI18n } from '@/i18n/provider'
-
+import { TagListEditor } from '@/components/ui/TagListEditor'
+import { RecordControls, AddGhost } from '@/components/ui/RecordControls'
+import { RecordSettings, ProjectSettingsPanel } from '@/components/ui/RecordSettings'
+import { useEdit } from '@/hooks/useEdit'
+import { useState } from 'react'
 const sectionVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { duration: 0.5 } },
@@ -20,8 +24,9 @@ const itemTransition = (delay: number): Transition => ({
 export function ProjectDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { ui: s, content: c } = useI18n()
+  const edit = useEdit()
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const project = c.projects.find((p) => p.id === id)
-
   if (!project) {
     return (
       <InView>
@@ -66,6 +71,13 @@ export function ProjectDetailPage() {
             {project.title}
           </EditableText>
           <Badge variant="outline">{s.projects.categories[project.category]}</Badge>
+          {edit && (
+            <RecordControls
+              label={project.title}
+              onDelete={() => edit.deleteRecord('project', { id: project.id })}
+              onSettings={() => setSettingsOpen(true)}
+            />
+          )}
         </motion.div>
 
         <EditableText
@@ -83,7 +95,7 @@ export function ProjectDetailPage() {
         </EditableText>
 
         <div className="prose">
-          {project.metrics && project.metrics.length > 0 && (
+          {(edit || (project.metrics?.length ?? 0) > 0) && (
             <motion.div
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -91,13 +103,16 @@ export function ProjectDetailPage() {
               transition={itemTransition(0.16)}
             >
               <h3>{s.projectDetail.impact}</h3>
-              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                {project.metrics.map((m) => (
-                  <span key={m} className="achievement-metric">
-                    {m}
-                  </span>
-                ))}
-              </div>
+              <TagListEditor
+                arrayPath={`projects.${project.id}.metrics`}
+                items={project.metrics ?? []}
+                containerAs="div"
+                containerClassName="project-metrics"
+                as="span"
+                itemClassName="achievement-metric"
+                labelPrefix={`${project.title} — ${s.edit.fields.metric}`}
+                addLabel={s.edit.addMetric}
+              />
             </motion.div>
           )}
 
@@ -120,14 +135,19 @@ export function ProjectDetailPage() {
             transition={itemTransition(0.32)}
           >
             <h3>{s.projectDetail.technologies}</h3>
-            <div className="philosophy-keywords">
-              {project.technologies.map((tech) => (
-                <Tag key={tech}>{tech}</Tag>
-              ))}
-            </div>
+            <TagListEditor
+              doc="projects"
+              arrayPath={`[${c.projects.findIndex((p) => p.id === project.id)}].technologies`}
+              items={project.technologies}
+              containerAs="div"
+              containerClassName="philosophy-keywords"
+              as={Tag}
+              labelPrefix={`${project.title} — ${s.edit.fields.technology}`}
+              addLabel={s.edit.addTechnology}
+            />
           </motion.div>
 
-          {project.sections && project.sections.length > 0 && (
+          {(edit || (project.sections?.length ?? 0) > 0) && (
             <div>
               <motion.h3
                 initial={{ opacity: 0, y: 24 }}
@@ -139,13 +159,23 @@ export function ProjectDetailPage() {
               </motion.h3>
               {project.sections.map((section, idx) => (
                 <motion.div
-                  key={idx}
-                  className="project-section"
+                  key={section.id}
+                  className={edit ? 'project-section edit-record-host' : 'project-section'}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.2 }}
                   transition={itemTransition(0.48 + idx * 0.08)}
                 >
+                  {edit && (
+                    <RecordControls
+                      label={section.title}
+                      canUp={idx > 0}
+                      canDown={idx < (project.sections?.length ?? 0) - 1}
+                      onUp={() => edit.moveItem('projects', `[${c.projects.findIndex((p) => p.id === project.id)}].sections`, idx, idx - 1)}
+                      onDown={() => edit.moveItem('projects', `[${c.projects.findIndex((p) => p.id === project.id)}].sections`, idx, idx + 1)}
+                      onDelete={() => edit.deleteRecord('section', { id: section.id, projectId: project.id })}
+                    />
+                  )}
                   <EditableText as="h4" path={`projects.${project.id}.sections.${section.id}.title`} label={`${section.title} — ${s.edit.fields.sectionTitle}`}>
                     {section.title}
                   </EditableText>
@@ -155,9 +185,20 @@ export function ProjectDetailPage() {
                   <Tag accent>{section.type}</Tag>
                 </motion.div>
               ))}
+              {edit && (
+                <AddGhost
+                  label={s.edit.addSection}
+                  onClick={() => edit.addRecord('section', { projectId: project.id })}
+                />
+              )}
             </div>
           )}
         </div>
+        {edit && settingsOpen && (
+          <RecordSettings title={s.edit.settings} onClose={() => setSettingsOpen(false)}>
+            <ProjectSettingsPanel project={project} />
+          </RecordSettings>
+        )}
       </motion.section>
     </InView>
   )

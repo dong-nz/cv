@@ -9,11 +9,14 @@ import {Typewriter} from '@/components/ui/Typewriter'
 import {HeroParticles} from '@/components/sections/HeroParticles'
 import {EditableText} from '@/components/ui/EditableText'
 import {SocialLinks} from "@/components/ui/SocialLinks"
-
+import {useEdit} from '@/hooks/useEdit'
+import {deletePath, parsePath, setPath} from '@/i18n/draft'
+import {ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon} from '@/components/ui/icons'
 
 export function Hero() {
     const {scrollY} = useScroll()
     const {ui: s, content: c} = useI18n()
+    const edit = useEdit()
     const y = useTransform(scrollY, [0, 300], [0, -80])
     return (
         <InView>
@@ -72,15 +75,72 @@ export function Hero() {
                         transition={{duration: 0.45, ease: "easeOut", delay: 0.24}}
                     >
                         {/* Tagline segments (D9): markup is this component's rendering,
-                            never content — the emphasis span keeps its classes. */}
-                        {c.profile.tagline.map((segment, i) => (
-                            segment.emphasis ? (
+                            never content — the emphasis span keeps its classes. In edit
+                            mode each segment carries emphasis / move / delete controls
+                            (spec-v4-inline-editing §2.1) and a ghost add follows. */}
+                        {c.profile.tagline.map((segment, i) => {
+                            const controls = edit ? (
+                                <>
+                                    <button
+                                        type="button"
+                                        className={`edit-item-control edit-emphasis-toggle${segment.emphasis ? ' is-on' : ''}`}
+                                        aria-pressed={segment.emphasis === true}
+                                        aria-label={`${s.edit.emphasis} — ${s.edit.fields.tagline} ${i + 1}`}
+                                        onMouseDown={(event) => event.stopPropagation()}
+                                        onClick={() => {
+                                            const segs = parsePath(`profile.tagline[${i}].emphasis`)
+                                            if (segment.emphasis) {
+                                                edit.apply(edit.textDoc, deletePath(edit.dataOf(edit.textDoc), segs))
+                                            } else {
+                                                edit.apply(edit.textDoc, setPath(edit.dataOf(edit.textDoc), segs, true))
+                                            }
+                                        }}
+                                    >
+                                        B
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="edit-item-control"
+                                        aria-label={`${s.edit.moveUp} — ${s.edit.fields.tagline} ${i + 1}`}
+                                        disabled={i === 0}
+                                        onMouseDown={(event) => event.stopPropagation()}
+                                        onClick={() => edit.moveItem(edit.textDoc, 'profile.tagline', i, i - 1)}
+                                    >
+                                        <ChevronUpIcon size={12}/>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="edit-item-control"
+                                        aria-label={`${s.edit.moveDown} — ${s.edit.fields.tagline} ${i + 1}`}
+                                        disabled={i === c.profile.tagline.length - 1}
+                                        onMouseDown={(event) => event.stopPropagation()}
+                                        onClick={() => edit.moveItem(edit.textDoc, 'profile.tagline', i, i + 1)}
+                                    >
+                                        <ChevronDownIcon size={12}/>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="edit-item-control edit-item-remove"
+                                        aria-label={`${s.edit.remove} — ${s.edit.fields.tagline} ${i + 1}`}
+                                        onMouseDown={(event) => event.stopPropagation()}
+                                        onClick={() => {
+                                            if (window.confirm(s.edit.removeConfirm)) {
+                                                edit.apply(edit.textDoc, deletePath(edit.dataOf(edit.textDoc), parsePath(`profile.tagline[${i}]`)))
+                                            }
+                                        }}
+                                    >
+                                        <TrashIcon size={12}/>
+                                    </button>
+                                </>
+                            ) : undefined
+                            return segment.emphasis ? (
                                 <EditableText
                                     as="span"
                                     key={i}
                                     className="ok-possible name-highlight"
                                     path={`profile.tagline[${i}].text`}
                                     label={`${s.edit.fields.tagline} ${i + 1}`}
+                                    fieldControls={controls}
                                 >
                                     {segment.text}
                                 </EditableText>
@@ -90,11 +150,22 @@ export function Hero() {
                                     key={i}
                                     path={`profile.tagline[${i}].text`}
                                     label={`${s.edit.fields.tagline} ${i + 1}`}
+                                    fieldControls={controls}
                                 >
                                     {segment.text}
                                 </EditableText>
                             )
-                        ))}
+                        })}
+                        {edit && (
+                            <button
+                                type="button"
+                                className="edit-add-inline"
+                                onClick={() => edit.apply(edit.textDoc, setPath(edit.dataOf(edit.textDoc), parsePath('profile.tagline'), [...c.profile.tagline, {text: s.edit.newTag}]))}
+                            >
+                                <PlusIcon size={12}/>
+                                {s.edit.addTaglineSegment}
+                            </button>
+                        )}
                     </motion.p>
                     <motion.div
                         className="hero-cta"

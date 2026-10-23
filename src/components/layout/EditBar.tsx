@@ -1,13 +1,15 @@
-// EditBar (spec-v4 §5.5): the fixed status bar of edit mode. It lists every
-// changed path grouped by document with before → after and a per-path revert,
-// reports save progress (written / conflict / failed), partial-save resume,
-// conflict resolution (rebase / take-theirs / hand-merge), validation issues,
-// and guards Exit with a confirm when changes are unsaved.
+// EditBar (spec-v4 §5.5, spec-v4-inline-editing E8): the fixed status bar of
+// edit mode. It lists every changed path grouped by document with before →
+// after and a per-path revert, reports save progress (written / conflict /
+// failed), partial-save resume, validation issues, and guards Exit with a
+// confirm when changes are unsaved. Conflicts are resolved field by field:
+// keep mine / keep theirs per clashing path, with rebase and take-theirs as
+// the whole-document operations.
 import { useState } from 'react';
 import { useI18n } from '@/i18n/provider';
 import { DRAFT_DOCS } from '@/i18n/draft';
 import { DEFAULT_BRANCH } from '@/i18n/edit-mode';
-import type { DocSaveResult, DraftDocId } from '@/i18n/draft';
+import type { ConflictField, DocSaveResult, DraftDocId } from '@/i18n/draft';
 import type { ContentIssue } from '@/i18n/validate';
 
 type ChangedDoc = { id: DraftDocId; paths: { path: string; before: unknown; after: unknown }[] };
@@ -24,12 +26,12 @@ type EditBarProps = {
   unionNote: 'ok' | 'failed' | null;
   draftRestored: boolean;
   branch: string;
-  onOpenPanel: () => void;
+  getConflictFields: (id: DraftDocId) => ConflictField[];
   onSave: () => void;
   onExit: () => void;
   onRebase: (id: DraftDocId) => void;
   onTakeTheirs: (id: DraftDocId) => void;
-  onHandMerge: (id: DraftDocId) => void;
+  onResolveField: (id: DraftDocId, path: string, side: 'mine' | 'theirs') => void;
   onDiscardDoc: (id: DraftDocId) => void;
   onRevertPath: (path: string) => void;
 };
@@ -38,7 +40,7 @@ function fileOf(id: DraftDocId): string {
   return DRAFT_DOCS.find((d) => d.id === id)!.file;
 }
 
-// Diff values are shown truncated; the full value lives in the JSON panel.
+// Diff values are shown truncated; the full value stays in the document.
 function truncate(value: unknown): string {
   const text = typeof value === 'string' ? value : JSON.stringify(value) ?? '';
   return text.length > 80 ? `${text.slice(0, 80)}…` : text;
@@ -56,18 +58,19 @@ export function EditBar({
   unionNote,
   draftRestored,
   branch,
-  onOpenPanel,
+  getConflictFields,
   onSave,
   onExit,
   onRebase,
   onTakeTheirs,
-  onHandMerge,
+  onResolveField,
   onDiscardDoc,
   onRevertPath,
 }: EditBarProps) {
   const { ui } = useI18n();
   const s = ui.edit;
   const [showDiff, setShowDiff] = useState(false);
+  const [openFields, setOpenFields] = useState<Set<DraftDocId>>(new Set());
 
   const allWritten =
     saveResults.length > 0 && !saveStopped && saveResults.every((r) => r.status === 'written');
@@ -98,9 +101,6 @@ export function EditBar({
             onClick={() => setShowDiff((v) => !v)}
           >
             {s.changesTitle}
-          </button>
-          <button type="button" className="edit-btn" onClick={onOpenPanel}>
-            {s.openPanel}
           </button>
           <button
             type="button"
@@ -159,7 +159,7 @@ export function EditBar({
         <div className="edit-bar-conflicts">
           <strong>{s.conflicts}</strong>
           {conflicts.map((id) => (
-            <span key={id} className="edit-bar-conflict">
+            <div key={id} className="edit-bar-conflict">
               <code>{fileOf(id)}</code> {s.conflictDetail}{' '}
               <button type="button" className="edit-btn" onClick={() => onRebase(id)}>
                 {s.rebase}
@@ -167,10 +167,41 @@ export function EditBar({
               <button type="button" className="edit-btn" onClick={() => onTakeTheirs(id)}>
                 {s.takeTheirs}
               </button>
-              <button type="button" className="edit-btn" onClick={() => onHandMerge(id)}>
-                {s.handMerge}
+              <button
+                type="button"
+                className="edit-btn"
+                aria-expanded={openFields.has(id)}
+                onClick={() =>
+                  setOpenFields((prev) => {
+                    const next = new Set(prev);
+                    if (next.has(id)) next.delete(id);
+                    else next.add(id);
+                    return next;
+                  })
+                }
+              >
+                {s.conflictFields}
               </button>
-            </span>
+              {openFields.has(id) && (
+                <ul className="edit-bar-conflict-fields">
+                  {getConflictFields(id).map((f) => (
+                    <li key={f.path}>
+                      <code className="edit-bar-path">{f.path}</code>
+                      <span className="edit-bar-conflict-side">{s.yours}</span>
+                      <span className="edit-bar-value">{truncate(f.mine)}</span>
+                      <span className="edit-bar-conflict-side">{s.theirs}</span>
+                      <span className="edit-bar-value">{truncate(f.theirs)}</span>
+                      <button type="button" className="edit-btn" onClick={() => onResolveField(id, f.path, 'mine')}>
+                        {s.keepMine}
+                      </button>
+                      <button type="button" className="edit-btn" onClick={() => onResolveField(id, f.path, 'theirs')}>
+                        {s.keepTheirs}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           ))}
         </div>
       )}
