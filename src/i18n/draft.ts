@@ -1,7 +1,7 @@
 // Draft store (spec-v4 §5.1, §5.5, §5.6, §6.1): the live branch documents
 // fetched through the proxy, a copy-on-write draft over them, changed-path
 // tracking, cross-document validation on every accepted edit, sessionStorage
-// durability, and the sequential-PUT save pipeline with last_commit_sha
+// durability, and the sequential-PUT save pipeline with blob-sha
 // optimistic concurrency. Pure logic — the React glue lives in EditModeShell.
 import contentEnJson from './locales/en/content.json';
 import contentViJson from './locales/vi/content.json';
@@ -161,29 +161,38 @@ function encodeBase64(text: string): string {
 export async function fetchDoc(file: string, branch: string): Promise<DocBase> {
   const res = await fetch(proxyUrl(file, branch));
   if (!res.ok) throw new Error(`GET ${file}: ${res.status}`);
-  const json = (await res.json()) as { content?: string; last_commit_sha?: string };
+  // The contents response carries both the blob sha (`sha`) and the last
+  // commit that touched the file (`last_commit_sha`). Gitea 28's UpdateFile
+  // concurrency field is the blob sha — that is the value the draft keeps.
+  const json = (await res.json()) as { content?: string; sha?: string };
   return {
     data: JSON.parse(decodeBase64(json.content ?? '')),
-    sha: String(json.last_commit_sha ?? ''),
+    sha: String(json.sha ?? ''),
   };
 }
 
 export async function fetchTextFile(file: string, branch: string): Promise<{ text: string; sha: string }> {
   const res = await fetch(proxyUrl(file, branch));
   if (!res.ok) throw new Error(`GET ${file}: ${res.status}`);
-  const json = (await res.json()) as { content?: string; last_commit_sha?: string };
-  return { text: decodeBase64(json.content ?? ''), sha: String(json.last_commit_sha ?? '') };
+  const json = (await res.json()) as { content?: string; sha?: string };
+  return { text: decodeBase64(json.content ?? ''), sha: String(json.sha ?? '') };
 }
 
-export type PutResult = { ok: true; sha: string } | { ok: false; status: number };
+export type PutResult =
+  | { ok: true; sha: string }
+  | { ok: false; status: number; message: string };
 
 async function putBase64(
   file: string,
   encoded: string,
   message: string,
-  lastCommitSha: string,
+  blobSha: string,
   branch: string,
 ): Promise<PutResult> {
+  // Gitea 28 UpdateFileOptions: `sha` is the blob ID of the file to update —
+  // empty means create (an existing file then answers 422 "repository file
+  // already exists"), a stale one means a concurrency mismatch. The FileResponse
+  // returns the new blob sha at `content.sha`.
   const res = await fetch(proxyUrl(file, branch), {
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
@@ -191,12 +200,21 @@ async function putBase64(
       content: encoded,
       message,
       branch,
-      last_commit_sha: lastCommitSha,
+      sha: blobSha,
     }),
   });
-  if (!res.ok) return { ok: false, status: res.status };
-  const json = (await res.json()) as { last_commit_sha?: string };
-  return { ok: true, sha: String(json.last_commit_sha ?? '') };
+  if (!res.ok) {
+    let detail = '';
+    try {
+      const json = (await res.json()) as { message?: string };
+      detail = String(json.message ?? '');
+    } catch {
+      // non-JSON body — the status code alone still drives the caller
+    }
+    return { ok: false, status: res.status, message: detail };
+  }
+  const json = (await res.json()) as { content?: { sha?: string } };
+  return { ok: true, sha: String(json.content?.sha ?? '') };
 }
 
 // Serialize exactly as the repository file is formatted (2-space indent, key
@@ -333,7 +351,7 @@ export function recordForTitlePath(
 export class DraftStore {
   private base = new Map<DraftDocId, DocBase>();
   // The baseline the draft was taken against. `base` may be refreshed by a
-  // 412 conflict; `origin` never moves until a document lands, so a rebase
+  // 422/412 conflict; `origin` never moves until a document lands, so a rebase
   // can always tell my changes from theirs (§5.6).
   private origin = new Map<DraftDocId, unknown>();
   private working = new Map<DraftDocId, unknown>();
@@ -830,7 +848,7 @@ export class DraftStore {
   }
 
   // Re-apply a persisted draft onto freshly fetched baselines. A document
-  // whose last_commit_sha moved since the draft was taken is returned as
+  // whose blob sha moved since the draft was taken is returned as
   // drifted → the conflict flow (§5.6) owns it from here.
   applySaved(saved: SavedDraft): DraftDocId[] {
     this.created = new Set(saved.created ?? []);
@@ -902,10 +920,12 @@ export type DocSaveResult = {
   http?: number;
 };
 
-// Sequential PUTs, one commit per touched document (§6.1). A 412 refreshes
-// that document's base and reports a conflict without stopping the sequence;
-// any other failure stops so a retry resumes from the first unwritten
-// document — landed documents are never rewritten (§5.6).
+// Sequential PUTs, one commit per touched document (§6.1). A blob-sha
+// mismatch — Gitea 28 answers 422 with a "does not match" message, older
+// deployments answered 412 — refreshes that document's base and reports a
+// conflict without stopping the sequence; any other failure stops so a retry
+// resumes from the first unwritten document — landed documents are never
+// rewritten (§5.6).
 export async function saveDraft(
   store: DraftStore,
   onResult: (result: DocSaveResult) => void,
@@ -924,13 +944,13 @@ export async function saveDraft(
       onResult(result);
       continue;
     }
-    if (res.status === 412) {
+    if (res.status === 412 || (res.status === 422 && /does not match/i.test(res.message))) {
       try {
         store.resetBase(id, await fetchDoc(meta.file, branch));
       } catch {
         // keep the old base; the conflict UI still offers take-theirs
       }
-      const result: DocSaveResult = { id, status: 'conflict', http: 412 };
+      const result: DocSaveResult = { id, status: 'conflict', http: res.status };
       results.push(result);
       onResult(result);
       continue;
