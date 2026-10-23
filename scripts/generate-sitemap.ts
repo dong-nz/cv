@@ -14,13 +14,15 @@ if (!existsSync(distDir)) {
   process.exit(1);
 }
 
-// index.html carries the canonical origin as static markup; site.ts carries it as data.
-// A mismatch means one of the two was edited without the other.
+// The published head is generated from %SITE_URL% tokens (site-identity vite
+// plugin, spec-v4-deploy-infra D10); this guard validates that the injection
+// actually happened with the same value this script derives its URLs from — a
+// mismatch means the build ran without a consistent SITE_URL.
 const indexHtml = readFileSync(join(distDir, 'index.html'), 'utf-8');
 if (!indexHtml.includes(siteUrl)) {
   console.error(
-    `Canonical origin mismatch: index.html does not contain "${siteUrl}". ` +
-    `Update the canonical/og:url/theme-color block in index.html or src/data/site.ts.`
+    `Canonical origin mismatch: dist/index.html does not contain "${siteUrl}". ` +
+    `The site-identity plugin injects it from SITE_URL — check the build environment.`,
   );
   process.exit(1);
 }
@@ -42,3 +44,10 @@ const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.s
 
 writeFileSync(join(distDir, 'sitemap.xml'), xml);
 console.log(`sitemap.xml generated at ${join(distDir, 'sitemap.xml')} (${locations.length} urls)`);
+
+// robots.txt is generated here too (spec-v4-deploy-infra D10): the Sitemap:
+// pointer must derive from the same siteUrl as the sitemap itself, so there is
+// no committed robots.txt that could drift from it.
+const robots = `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`;
+writeFileSync(join(distDir, 'robots.txt'), robots);
+console.log(`robots.txt generated at ${join(distDir, 'robots.txt')}`);

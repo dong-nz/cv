@@ -1,0 +1,78 @@
+name: Redeploy Nginx
+
+# Infra files only (spec-v4-deploy-infra D1): a change to the nginx template,
+# the compose definition, or the Basic-auth file redeploys the container —
+# content commits never do. workflow_dispatch is the token-rotation runbook.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - nginx.conf
+      - compose.yaml
+      - deploy/htpasswd
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-infra
+  cancel-in-progress: false
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Ship exactly the three triggered files; -R keeps deploy/htpasswd under
+      # deploy/ in the stack directory. Never .env, never secrets/ (D6).
+      - name: Sync infra files
+        uses: burnett01/rsync-deployments@v9
+        with:
+          switches: -avzR
+          path: nginx.conf,compose.yaml,deploy/htpasswd
+          remote_path: /opt/stacks/dong-site/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+
+      # Test-before-touch (D3): the throwaway container runs the same entrypoint
+      # render pipeline as production, with placeholder values — nginx -t checks
+      # syntax only, so the real token never enters this container or the job.
+      # A failure here fails the job; the live container keeps serving.
+      - name: Test new config
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/stacks/dong-site
+            docker run --rm \
+              -v "$PWD/nginx.conf:/etc/nginx/templates/default.conf.template:ro" \
+              -v "$PWD/deploy/htpasswd:/etc/nginx/htpasswd:ro" \
+              -e GITEA_TOKEN=placeholder \
+              -e GITEA_CONTENTS_API=http://placeholder \
+              -e NGINX_ENVSUBST_FILTER=GITEA_TOKEN,GITEA_CONTENTS_API \
+              nginx:alpine nginx -t
+
+      # Apply + verify (D4): recreate is the same command the Dockge deploy
+      # button runs. The health probe uses wget because nginx:alpine carries no
+      # curl; on failure the job prints the container log and fails.
+      - name: Recreate and probe
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cd /opt/stacks/dong-site
+            docker compose up -d --force-recreate dong-site
+            sleep 2
+            if ! docker exec dong-site wget -q -O /dev/null http://127.0.0.1/; then
+              docker logs --tail 50 dong-site
+              exit 1
+            fi
+            docker exec dong-site nginx -t

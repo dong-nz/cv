@@ -22,12 +22,12 @@ Personal engineering portfolio — multi-page SPA built with React + TypeScript 
 | Command | Description |
 |---------|-------------|
 | `pnpm dev` | Start dev server with HMR |
-| `pnpm build` | Type-check (`tsc -b`), build for production, then generate `dist/sitemap.xml` |
+| `pnpm build` | Type-check (`tsc -b`), build for production (the site-identity plugin fills `%SITE_URL%` / `%SITE_NAME%` in `index.html`), then generate `dist/sitemap.xml` + `dist/robots.txt` |
 | `pnpm build:resume` | Generate resume PDF (default EN) via Playwright |
 | `pnpm build:resume-all` | Generate bilingual resume PDFs (EN + VI) |
 | `pnpm lint` | Run Oxlint |
 | `pnpm validate:content` | Validate the content dictionaries against the structure documents and the page manifests (also run by the loader at module load) |
-| `pnpm sitemap` | Regenerate `dist/sitemap.xml` on its own (also run by `pnpm build`) |
+| `pnpm sitemap` | Regenerate `dist/sitemap.xml` + `dist/robots.txt` on its own (also run by `pnpm build`) |
 | `pnpm preview` | Preview production build locally |
 
 ## Routing
@@ -81,7 +81,7 @@ Content is split once, at authoring time, into language-neutral **structure docu
 - `src/data/resume.ts` — resume availability, supported languages, URL generation, and `resumeQr` (the `{id, file, label}` descriptors the resume header renders as QR codes)
 - `src/data/navigation.ts` — `navPaths` (bar + sheet order: Home, About, Experience, Projects, Contact, Philosophy), `footerPaths`
 - `src/data/social.ts` — social tiles as `{id, href, external}` (github, linkedin, email, telegram); `email` is a `mailto:` link with `external: false`, so it renders no `target`/`rel`
-- `src/data/palettes.ts`, `src/data/site.ts` — code config, not content: `siteUrl` (the canonical origin) and `siteName`; every absolute URL the site publishes — canonical, Open Graph, JSON-LD, `robots.txt`, `sitemap.xml` — derives from it
+- `src/data/palettes.ts`, `src/data/site.ts` — code config, not content: `siteUrl` (the canonical origin) and `siteName` are read from the environment (`SITE_URL` / `SITE_NAME` — CI variables in production, the uncommitted local `.env` in development; unset → the build fails with an error naming the variable); every absolute URL the site publishes — canonical, Open Graph, JSON-LD, `robots.txt`, `sitemap.xml` — derives from it
 
 ## Live Edit Mode (`?edit`, v4)
 
@@ -92,7 +92,7 @@ Content is split once, at authoring time, into language-neutral **structure docu
 - `src/components/ui/EditableText.tsx` — the site's own element (`as` = the tag or motion component it renders today) becomes the inline editor only in edit mode; commit on blur only (Vietnamese IME-safe), Esc cancels, Enter commits single-line fields, paste is plain-text, empty required values are rejected at commit; without an `EditContext` provider it renders byte-identical markup to the plain element
 - `src/components/layout/EditBar.tsx` — fixed save bar: per-path diff with revert and "appears on" page annotations (computed from the page manifests via `manifestsClaiming`, never from component code), conflict resolution (rebase / take-theirs / per-field keep-mine–keep-theirs), per-document save status, partial-save resume, exit confirm
 - Editable surface: content text inline (pencil-triggered, click never edits) **and** structure — chip-level tag editors (technologies, categories, interests, roles, keywords, tagline emphasis), ghost add/delete/move on every record surface, per-record settings popover (`featured`, project section list + type picker, `variant`, location, logo), ids auto-generated from title slugs, social links handle-only with URLs derived in the loaders. Implemented 2026-10-23 (`spec-v4-inline-editing.md` + `spec-v4-data-organization.md`); the JSON panel is deleted. UI documents stay read-only in v4. Field provenance: hovering any pencil shows `document → pointer` (`describeField()` names the per-entity file automatically); the EditBar diff line and a `validate:content` error for the same field read identically
-- Dev parity: `vite.config.ts` proxies `/api/content/` to the Gitea Contents API exactly like production nginx — run `pnpm dev` with `GITEA_TOKEN` set; without it edit mode falls to the offline state (bundled content, save disabled)
+- Dev parity: `vite.config.ts` builds the `/api/content/` dev proxy from the same `GITEA_CONTENTS_API` value production nginx renders — run `pnpm dev` with `GITEA_TOKEN` + `GITEA_CONTENTS_API` set (local `.env`); without them edit mode falls to the offline state (bundled content, save disabled)
 - Spec: `docs/design/specs/v4/spec-v4-live-edit.md` §5–§6
 
 ## Component Structure
@@ -129,7 +129,7 @@ src/
 - `public/resume-logos/` — official company logo SVGs (Lazada, SAP from Wikimedia Commons), embedded in the resume timeline via `ExperienceEntry.logo`
 - `public/resume-qr/` — owner-supplied QR images (`telegram.jpg`, `zalo.jpg`) embedded in the resume header via `resumeQr` in `src/data/resume.ts`; committed like the other resume assets, so CI renders the QR block too — a missing file prints a warning and that QR is skipped
 - `public/profile-photo.webp` — profile photo
-- `public/robots.txt` — allow-all crawler rules plus the `Sitemap:` pointer to the canonical origin
+- `robots.txt` is generated, not committed: `scripts/generate-sitemap.ts` writes `dist/robots.txt` (allow-all + the `Sitemap:` pointer) from the same `SITE_URL` the sitemap uses — no `public/robots.txt` exists anymore
 
 ## Scripts
 
@@ -138,17 +138,19 @@ src/
 
 ## Deployment
 
-- Deployment is triggered automatically by gitea workflow `.gitea/workflows/deploy.yml`
+- Site deployment is triggered automatically by gitea workflow `.gitea/workflows/deploy.yml` (push to `master`); infra redeployment by `.gitea/workflows/deploy-infra.yml` — triggered ONLY by changes to `nginx.conf` / `compose.yaml` / `deploy/htpasswd`, plus `workflow_dispatch` (the token-rotation runbook): test-before-touch (`nginx -t` in a throwaway container with placeholder values), then `docker compose up -d --force-recreate` + health probe (spec: `docs/design/specs/v4/spec-v4-deploy-infra.md`)
+- Site identity is deployment-time configuration, not a repo literal: `SITE_URL` / `SITE_NAME` are Gitea Actions **variables** (`vars.` context — public values, not secrets) passed as job env to `build` and `generate-resume`; locally they live in the uncommitted `.env` (template `.env.example`). A production build without them fails with an error naming the variable
 - Three jobs: `build` (`pnpm build` → `dist/` artifact) → `generate-resume` (`pnpm tsx scripts/generate-resume.ts --lang=en`, then `--lang=vi`) → `deploy` rsyncs `dist/`, both PDFs included, to `/opt/stacks/dong-site/dist/`
-- `nginx.conf` — production Nginx SPA routing + caching config + the `/api/content/` location: auth_basic (`deploy/htpasswd`) in front of a proxied Gitea Contents API whose write token comes from the `GITEA_TOKEN` environment (envsubst at container start; the token never enters the SPA bundle)
-- `docker-compose.yaml` — Docker service for local nginx deployment; mounts the nginx template + `deploy/htpasswd`, passes `GITEA_TOKEN` through
+- `nginx.conf` — production Nginx SPA routing + caching config + the `/api/content/` location: auth_basic (`deploy/htpasswd`) in front of a proxied Gitea Contents API; the upstream URL and the write token are `${GITEA_CONTENTS_API}` / `${GITEA_TOKEN}` substituted by the image's envsubst step at container start — the token and the Gitea host never enter the SPA bundle or the repository
+- `compose.yaml` — the stack definition for local AND VPS use (repo copy == stack copy): runtime values live in `secrets/site_config` (gitignored file in the stack directory, two lines `GITEA_TOKEN=` / `GITEA_CONTENTS_API=`, chmod 600), sourced by an entrypoint override before the official entrypoint renders the template; the stack directory has no `.env`. On the VPS the same stack is managed by **Dockge** (upstream; stacks dir `/opt/stacks`, stack file `/opt/stacks/dong-site/compose.yaml`) — the repository is the single source of truth for `nginx.conf` / `compose.yaml` / `deploy/htpasswd`. Repo side implemented 2026-10-23; owner-side setup (Gitea Actions variables, stack `secrets/site_config`) and the first verified run are pending
 
 ```
 .gitea/
 └── workflows/
-    └── deploy.yml
+    ├── deploy.yml
+    └── deploy-infra.yml
 nginx.conf
-docker-compose.yaml
+compose.yaml
 ```
 
 ## CSS Architecture
@@ -191,7 +193,7 @@ All specification documents are in `docs/design/`:
 | `specs/ui/spec-ui-*.md` | UI specs per section (hero, about, expertise, etc.) |
 | `specs/v2/spec-v2-*.md` | v2 feature specs (resume, seo, blog, analytics, testing, cicd) |
 | `specs/v3/spec-v3-*.md` | v3 feature specs (theme colors, theme switch, theme palette switch, palette reference, UI enhancements, mobile navigation, nav & CTA enhancements, nav swatch & hamburger, typography, i18n, resume improvements, resume redesign, review fixes) |
-| `specs/v4/spec-v4-*.md` | v4 feature specs (i18n locale overlay, git-backed live edit with preview, authenticated Contents-API write path; supersedes v3-i18n Phase 2). `spec-v4-data-organization.md`: per-entity content files, per-page field-level manifests, per-feature-group UI — implemented 2026-10-23 (automated checks pass; browser walkthrough pending). `spec-v4-inline-editing.md`: edit everything on the page (pencil-icon triggers, tag chips, record add/delete/move, settings popover), JSON panel deleted — implemented 2026-10-23; it supersedes live-edit §5.1/§5.4 panel scope |
+| `specs/v4/spec-v4-*.md` | v4 feature specs (i18n locale overlay, git-backed live edit with preview, authenticated Contents-API write path; supersedes v3-i18n Phase 2). `spec-v4-data-organization.md`: per-entity content files, per-page field-level manifests, per-feature-group UI — implemented 2026-10-23 (automated checks pass; browser walkthrough pending). `spec-v4-inline-editing.md`: edit everything on the page (pencil-icon triggers, tag chips, record add/delete/move, settings popover), JSON panel deleted — implemented 2026-10-23; it supersedes live-edit §5.1/§5.4 panel scope. `spec-v4-deploy-infra.md`: pipeline redeploy of the VPS nginx container, Dockge-managed stack (paths-filtered `deploy-infra.yml`, test-before-touch, repo-as-source-of-truth, token-safety rules) + externalizing site identity — `SITE_URL` / `SITE_NAME` as CI Actions variables, `GITEA_TOKEN` + `GITEA_CONTENTS_API` in the stack's single config file `secrets/site_config` — repo side implemented 2026-10-23 (`deploy-infra.yml`, `compose.yaml` secret + entrypoint override, env-driven identity); owner-side variables/config file + first verified run pending |
 
 Read `spec.md` first for product context. Read `spec-v2.md` for current feature scope.
 

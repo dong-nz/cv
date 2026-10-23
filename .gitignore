@@ -24,3 +24,8 @@ dist-ssr
 *.sw?
 /.junie/
 *.pdf
+
+# Deployment/runtime config (spec-v4-deploy-infra D10/D13): the stack's
+# secrets/site_config and the local .env carry site identity and the write token.
+.env
+/secrets/

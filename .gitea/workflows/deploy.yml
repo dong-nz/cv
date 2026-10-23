@@ -12,6 +12,12 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Site identity (spec-v4-deploy-infra D10/D12): the build and the resume
+    # generator derive every published URL and the page title from these two
+    # values; the build fails loudly when either is missing.
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      SITE_NAME: ${{ vars.SITE_NAME }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/setup@v3
@@ -21,7 +27,7 @@ jobs:
           runtime: node@24
       - run: pnpm tsx scripts/validate-content.ts
       - run: pnpm build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: static-site
           path: dist/
@@ -30,6 +36,9 @@ jobs:
   generate-resume:
     runs-on: ubuntu-latest
     needs: build
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      SITE_NAME: ${{ vars.SITE_NAME }}
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/setup@v3

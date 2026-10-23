@@ -1,41 +1,44 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- The site identity values in this head are filled at build time by the
+         site-identity vite plugin; they come from the CI variables SITE_URL /
+         SITE_NAME or the local .env, never from this file. -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nguyễn Đông — Senior Software Engineer</title>
+    <title>%SITE_NAME%</title>
     <meta
       name="description"
       content="Portfolio of Nguyễn Đông, a Senior Software Engineer in Ho Chi Minh City working on distributed systems, logistics automation, computer vision and practical AI in Java, Go and TypeScript."
     />
     <meta name="author" content="Nguyễn Đông" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://cv.vugado.com/" />
+    <link rel="canonical" href="%SITE_URL%/" />
     <meta name="theme-color" content="#151914" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)" />
 
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Nguyễn Đông — Senior Software Engineer" />
-    <meta property="og:title" content="Nguyễn Đông — Senior Software Engineer" />
+    <meta property="og:site_name" content="%SITE_NAME%" />
+    <meta property="og:title" content="%SITE_NAME%" />
     <meta
       property="og:description"
       content="Distributed systems, logistics automation, computer vision and practical AI — SAP Lab Vietnam, Lazada, and a logistics digital-twin platform."
     />
-    <meta property="og:url" content="https://cv.vugado.com/" />
+    <meta property="og:url" content="%SITE_URL%/" />
     <meta property="og:locale" content="en_US" />
     <meta property="og:locale:alternate" content="vi_VN" />
-    <meta property="og:image" content="https://cv.vugado.com/profile-photo.webp" />
+    <meta property="og:image" content="%SITE_URL%/profile-photo.webp" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="1600" />
     <meta property="og:image:alt" content="Portrait of Nguyễn Đông" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Nguyễn Đông — Senior Software Engineer" />
+    <meta name="twitter:title" content="%SITE_NAME%" />
     <meta
       name="twitter:description"
       content="Distributed systems, logistics automation, computer vision and practical AI — SAP Lab Vietnam, Lazada, and a logistics digital-twin platform."
     />
-    <meta name="twitter:image" content="https://cv.vugado.com/profile-photo.webp" />
+    <meta name="twitter:image" content="%SITE_URL%/profile-photo.webp" />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
@@ -46,9 +49,9 @@
         "name": "Nguyễn Đông",
         "alternateName": "Dong Nguyen",
         "jobTitle": "Senior Software Engineer",
-        "url": "https://cv.vugado.com/",
+        "url": "%SITE_URL%/",
         "email": "mailto:nguyendong_bkdn@yahoo.com",
-        "image": "https://cv.vugado.com/profile-photo.webp",
+        "image": "%SITE_URL%/profile-photo.webp",
         "sameAs": [
           "https://github.com/dong-nz",
           "https://www.linkedin.com/in/dong-nz"

@@ -1,0 +1,36 @@
+# Repo-as-source-of-truth copy (spec-v4-deploy-infra D7/D9): rsynced to the
+# stack directory and run there by the pipeline or Dockge. Runtime values live
+# in secrets/site_config, which is NOT in the repository — the repo carries no
+# site identity (D10-D13).
+services:
+  dong-site:
+    image: nginx:alpine
+    container_name: dong-site
+    restart: unless-stopped
+    # Source the config file, then hand over to the image's official entrypoint.
+    # "$$@" is compose's escape: the rendered command sees "$@", forwarding the
+    # image's default CMD (nginx -g 'daemon off;') — without it nginx
+    # daemonizes and the container exits.
+    entrypoint: ["sh", "-c", ". /run/secrets/site_config && exec /docker-entrypoint.sh \"$$@\""]
+    environment:
+      # Names the variables the template renderer substitutes, so $uri/$host
+      # stay nginx runtime variables. The filter itself is not sensitive.
+      NGINX_ENVSUBST_FILTER: GITEA_TOKEN,GITEA_CONTENTS_API
+    volumes:
+      - ./dist:/usr/share/nginx/html:ro
+      # Mounted as a template: the image's envsubst step renders it to
+      # /etc/nginx/conf.d/default.conf with the variables sourced above.
+      - ./nginx.conf:/etc/nginx/templates/default.conf.template:ro
+      - ./deploy/htpasswd:/etc/nginx/htpasswd:ro
+    secrets:
+      - site_config
+    networks:
+      - docker-network
+
+secrets:
+  site_config:
+    file: ./secrets/site_config
+
+networks:
+  docker-network:
+    external: true
