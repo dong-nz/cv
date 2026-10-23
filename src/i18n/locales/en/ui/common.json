@@ -1,0 +1,10 @@
+{
+  "resumeDownload": "Get Resume",
+  "resumeModalTitle": "Get Resume",
+  "resumeModalAria": "Choose resume language",
+  "resumeModalHint": "Choose a language — the PDF downloads to your device.",
+  "resumeModalClose": "Close resume options",
+  "backToTop": "Scroll to top",
+  "contactTag": "Contact",
+  "experienceTag": "Experience"
+}

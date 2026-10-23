@@ -2229,6 +2229,11 @@
   white-space: nowrap;
 }
 
+.edit-bar-appears {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
 .edit-bar-conflicts {
   margin-top: 10px;
   display: grid;
@@ -2263,142 +2268,6 @@
 .edit-bar-note {
   margin-top: 8px;
   color: var(--success);
-}
-
-.json-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 950;
-  width: min(620px, 100%);
-  background: var(--bg-elevated);
-  border-left: 1px solid var(--border-strong);
-  padding: 14px 16px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 13px;
-}
-
-.json-panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.json-panel-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.json-panel-tab {
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 4px 8px;
-  color: var(--text-secondary);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.json-panel-tab.is-active {
-  border-color: var(--accent);
-  color: var(--accent);
-}
-
-.json-panel-conflict-flag {
-  color: var(--warning);
-}
-
-.json-panel-shape {
-  margin: 0;
-  padding: 8px 10px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  color: var(--text-muted);
-  font-size: 12px;
-  white-space: pre-wrap;
-}
-
-.json-panel-tools,
-.json-panel-records {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-}
-
-.json-panel-record {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 3px 8px;
-  color: var(--text-secondary);
-}
-
-.json-panel-readonly {
-  color: var(--text-muted);
-}
-
-.json-panel-section-add select {
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
-  padding: 4px 6px;
-  font: inherit;
-  font-size: 12px;
-}
-
-.json-panel-merge {
-  display: grid;
-  gap: 6px;
-  border: 1px solid var(--warning);
-  border-radius: 8px;
-  padding: 8px 10px;
-}
-
-.json-panel-merge textarea {
-  min-height: 140px;
-}
-
-.json-panel-editor {
-  flex: 1;
-  min-height: 300px;
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  padding: 10px;
-  font-family: ui-monospace, 'Cascadia Mono', 'Consolas', monospace;
-  font-size: 12.5px;
-  line-height: 1.5;
-  resize: vertical;
-}
-
-.json-panel-editor:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-}
-
-.json-panel-issues {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 3px;
-  color: var(--error);
-}
-
-.json-panel-status {
-  color: var(--text-muted);
 }
 
 /* Inline editing affordances (§5.3): outline only — the element itself stays
@@ -2682,10 +2551,6 @@
 }
 
 @media (max-width: 768px) {
-  .json-panel {
-    width: 100%;
-  }
-
   .edit-bar-actions {
     margin-left: 0;
   }

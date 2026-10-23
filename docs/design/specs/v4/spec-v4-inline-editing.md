@@ -1,6 +1,6 @@
 # Specification — v4 Inline Editing (edit everything on the page; no JSON panel)
 
-Status: **Design agreed 2026-10-23; implementation TODO.** Supersedes the JSON-panel parts of `spec-v4-live-edit.md` §5.1 ("Structural editing") and `spec-v4-data-organization.md` §6.4. The save pipeline (§5.4/§6 of live-edit), DraftStore semantics, conflict handling, branch targeting (D10), and the EditBar all stay as specified. Order decided 2026-10-23: this spec lands **before** `spec-v4-data-organization.md`.
+Status: **Design agreed 2026-10-23; implemented 2026-10-23** (see §7). The remaining gate is the owner's browser walkthrough of §6. Supersedes the JSON-panel parts of `spec-v4-live-edit.md` §5.1 ("Structural editing") and `spec-v4-data-organization.md` §6.4. The save pipeline (§5.4/§6 of live-edit), DraftStore semantics, conflict handling, branch targeting (D10), and the EditBar all stay as specified. Order decided 2026-10-23: this spec lands **before** `spec-v4-data-organization.md` — both have now landed, in that order.
 
 ## 1. Decisions
 
@@ -113,6 +113,6 @@ Page manifests (`spec-v4-data-organization.md` §5) are **read-only in the app**
 |---|---|---|
 | 0 | Design agreed (E1–E7) | ✅ Done 2026-10-23 |
 | 1–7 | Implementation §5 | ✅ Done 2026-10-23 — EditableText zone/pencil/provenance, TagListEditor over all tag arrays, tagline emphasis, `RecordControls` + `AddGhost` on every record surface (About, AboutPage, Expertise, Experience, ExperiencePage, Projects, ProjectsListPage, ProjectDetailPage incl. sections, PhilosophyPage), `RecordSettings` (featured, section list + type picker, variant, location, logo), id-slug rename on title commit, per-field conflict UI in EditBar; chrome CSS in `App.css`, labels in both `ui.json` |
-| 8 | Remove `JsonPanel` + panel labels | ⬜ TODO — kept until the inline surface is verified in a real browser |
-| 9 | Docs superseded notes | ⬜ TODO |
-| — | Acceptance §6 | 🟡 Partial — `pnpm build`, `pnpm validate:content`, `pnpm lint` (no new warnings), `pnpm tsx scripts/smoke-draft.ts` pass 2026-10-23; browser verification of the edit surfaces pending (user verifies in a real browser) |
+| 8 | Remove `JsonPanel` + panel labels | ✅ Done 2026-10-23 — `JsonPanel.tsx` deleted (already orphaned by the inline wiring; no imports remained); panel labels removed from both UI documents: `openPanel`, `closePanel`, `handMerge`, the whole `edit.panel.*` namespace |
+| 9 | Docs superseded notes | ✅ Done 2026-10-23 — superseded notes at live-edit §5.1 (panel shape) and §12 row 14; AGENTS.md "Live Edit Mode" + "Component Structure" rewritten for the inline surface |
+| — | Acceptance §6 | 🟡 Partial — `pnpm build`, `pnpm validate:content`, `pnpm lint` (no new warnings), `pnpm tsx scripts/smoke-draft.ts`, `pnpm build:resume-all` pass 2026-10-23; browser verification of the edit surfaces pending (user verifies in a real browser) |

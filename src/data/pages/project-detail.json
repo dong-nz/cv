@@ -1,0 +1,11 @@
+{
+  "id": "project-detail",
+  "route": "/projects/:id",
+  "content": [
+    {
+      "entity": "projects",
+      "fields": ["title", "summary", "role", "metrics", "technologies", "category", "sections.*"]
+    }
+  ],
+  "ui": ["projectDetail"]
+}

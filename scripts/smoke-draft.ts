@@ -1,4 +1,5 @@
-// Throwaway smoke test for the draft store (spec-v4 §5.1, §5.5, §5.6).
+// Throwaway smoke test for the draft store (spec-v4 §5.1, §5.5, §5.6;
+// registry per spec-v4-data-organization §6.1).
 // Run: pnpm tsx scripts/smoke-draft.ts
 import { DraftStore, bundledBase } from '../src/i18n/draft';
 
@@ -13,28 +14,30 @@ const store = new DraftStore(structuredClone(bases));
 const projects = store.dataOf('projects') as { id: string }[];
 const firstProject = projects[0].id;
 
-// 1. setValue on a text path is accepted and tracked.
+// 1. setValue on a text path is accepted and tracked in the entity document
+// of the edited language; the diff stores the document-relative pointer.
 const rejected = store.setValue('vi', `projects.${firstProject}.summary`, 'SUMMARY CHANGED');
 if (rejected !== null) fail(`valid edit rejected: ${JSON.stringify(rejected)}`);
 if (!store.isDirty()) fail('store not dirty after accepted edit');
-const paths = store.changedPaths('content.vi');
-if (!paths.includes(`projects.${firstProject}.summary`)) fail(`path not diffed: ${paths}`);
+const paths = store.changedPaths('projects.vi');
+if (!paths.includes(`${firstProject}.summary`)) fail(`path not diffed: ${paths}`);
 
 // 2. Empty required value is rejected and leaves the draft untouched.
-const before = structuredClone(store.dataOf('content.vi'));
+const before = structuredClone(store.dataOf('profile.vi'));
 const empty = store.setValue('vi', 'profile.bio', '   ');
 if (empty === null) fail('empty required value accepted');
-if (JSON.stringify(store.dataOf('content.vi')) !== JSON.stringify(before)) fail('rejected edit mutated draft');
+if (JSON.stringify(store.dataOf('profile.vi')) !== JSON.stringify(before))
+  fail('rejected edit mutated draft');
 
 // 3. Delete removes the structure record AND both text entries — no orphan.
 const del = store.deleteRecord('project', { id: firstProject });
 if (del !== null) fail(`delete rejected: ${JSON.stringify(del)}`);
 const stillListed = (store.dataOf('projects') as { id: string }[]).some((p) => p.id === firstProject);
 if (stillListed) fail('project still in structure after delete');
-const vi = store.dataOf('content.vi') as Record<string, Record<string, unknown>>;
-const en = store.dataOf('content.en') as Record<string, Record<string, unknown>>;
-if (vi.projects[firstProject]) fail('vi text orphan after delete');
-if (en.projects[firstProject]) fail('en text orphan after delete');
+const viText = store.dataOf('projects.vi') as Record<string, unknown>;
+const enText = store.dataOf('projects.en') as Record<string, unknown>;
+if (viText[firstProject]) fail('vi text orphan after delete');
+if (enText[firstProject]) fail('en text orphan after delete');
 const issues = store.validate();
 if (issues.length > 0) fail(`validate after delete: ${JSON.stringify(issues)}`);
 
@@ -61,37 +64,37 @@ if (!same) fail('restored draft differs from saved snapshot');
 const store2 = new DraftStore(structuredClone(bases));
 store2.setValue('vi', `projects.${firstProject}.summary`, 'MINE');
 const driftedBase = structuredClone(bases);
-(driftedBase['content.vi'].data as Record<string, Record<string, string>>).projects[firstProject].summary = 'THEIRS';
-store2.resetBase('content.vi', driftedBase['content.vi']);
-const rebaseIssues = store2.rebase('content.vi');
+(driftedBase['projects.vi'].data as Record<string, Record<string, string>>)[firstProject].summary = 'THEIRS';
+store2.resetBase('projects.vi', driftedBase['projects.vi']);
+const rebaseIssues = store2.rebase('projects.vi');
 if (rebaseIssues === null) fail('rebase silently took one side on a real conflict');
-store2.discardDocument('content.vi');
-if (store2.isPathDirty(`projects.${firstProject}.summary`)) fail('take-theirs left draft residue');
+store2.discardDocument('projects.vi');
+if (store2.changedPaths('projects.vi').includes(`${firstProject}.summary`))
+  fail('take-theirs left draft residue');
 
 // 7. Clean rebase: base changed at a DIFFERENT path → draft edit survives.
 const store3 = new DraftStore(structuredClone(bases));
 store3.setValue('vi', `projects.${firstProject}.summary`, 'MINE');
 const otherBase = structuredClone(bases);
 const otherId = projects[1].id;
-(otherBase['content.vi'].data as Record<string, Record<string, string>>).projects[otherId].summary = 'THEIRS';
-store3.resetBase('content.vi', otherBase['content.vi']);
-const clean = store3.rebase('content.vi');
+(otherBase['projects.vi'].data as Record<string, Record<string, string>>)[otherId].summary = 'THEIRS';
+store3.resetBase('projects.vi', otherBase['projects.vi']);
+const clean = store3.rebase('projects.vi');
 if (clean !== null) fail(`clean rebase rejected: ${JSON.stringify(clean)}`);
-const merged = (store3.dataOf('content.vi') as Record<string, Record<string, string>>).projects;
-if (merged[firstProject].summary !== 'MINE') fail('rebase lost the draft edit');
-if (merged[otherId].summary !== 'THEIRS') fail('rebase lost the base edit');
+const mergedText = store3.dataOf('projects.vi') as Record<string, Record<string, string>>;
+if (mergedText[firstProject].summary !== 'MINE') fail('rebase lost the draft edit');
+if (mergedText[otherId].summary !== 'THEIRS') fail('rebase lost the base edit');
 
 // 8. A text document that does not hold an array field yet (an older target
 // branch — the field still lives in the structure document) must gain a real
 // array when a [0] path is committed; an object-keyed pseudo-array crashed
 // TagListEditor's items.map on the re-render after the first tag edit.
 const store4 = new DraftStore(structuredClone(bases));
-const baseVi = store4.dataOf('content.vi') as Record<string, Record<string, unknown>>;
-delete baseVi.profile.currentInterests;
+const baseVi = store4.dataOf('profile.vi') as Record<string, Record<string, unknown>>;
+delete baseVi.currentInterests;
 const tagEdit = store4.setValue('vi', 'profile.currentInterests[0]', 'NEW TAG');
 if (tagEdit !== null) fail(`tag edit rejected: ${JSON.stringify(tagEdit)}`);
-const arr = (store4.dataOf('content.vi') as Record<string, Record<string, unknown>>).profile
-  .currentInterests;
+const arr = (store4.dataOf('profile.vi') as Record<string, Record<string, unknown>>).currentInterests;
 if (!Array.isArray(arr)) fail(`setPath made ${JSON.stringify(arr)}, not an array`);
 if (arr[0] !== 'NEW TAG') fail('array element not set');
 

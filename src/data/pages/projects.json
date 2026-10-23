@@ -1,0 +1,8 @@
+{
+  "id": "projects",
+  "route": "/projects",
+  "content": [
+    { "entity": "projects", "fields": ["*"] }
+  ],
+  "ui": ["projects"]
+}

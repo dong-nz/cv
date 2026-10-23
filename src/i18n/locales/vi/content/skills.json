@@ -1,0 +1,20 @@
+{
+  "software-engineering": {
+    "title": "Software Engineering"
+  },
+  "system-architecture": {
+    "title": "System Architecture"
+  },
+  "logistics-technology": {
+    "title": "Logistics Technology"
+  },
+  "ai-ml": {
+    "title": "AI / ML"
+  },
+  "infrastructure": {
+    "title": "Infrastructure"
+  },
+  "engineering-practices": {
+    "title": "Engineering Practices"
+  }
+}

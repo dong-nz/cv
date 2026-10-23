@@ -34,9 +34,12 @@ import { PencilIcon } from '@/components/ui/icons';
 type EditableTextProps = {
   // The element this site renders today — tag or motion component.
   as?: ElementType;
-  // Path inside the target document, e.g. `projects.iot-dws-integration.summary`.
+  // A text path carries its entity as the first segment (`profile.bio`,
+  // `projects.iot-dws-integration.summary`): the store resolves the entity
+  // text document of the language being edited (spec-v4-data-organization §3).
+  // `doc` instead names a structure document — the path is then relative to
+  // it, e.g. `3.featured` (E4).
   path: string;
-  // Target document; defaults to the text document of the edited language (E1).
   doc?: DraftDocId;
   // Human-readable field name for the accessibility label (§5.3).
   label: string;
@@ -76,9 +79,9 @@ export function EditableText({
     <EditableField
       edit={edit}
       Comp={Comp}
-      docId={doc ?? edit.textDoc}
       path={path}
       label={label}
+      doc={doc}
       multiline={multiline}
       fieldControls={fieldControls}
       className={className}
@@ -128,7 +131,7 @@ function readElementText(el: HTMLElement): string {
 function EditableField({
   edit,
   Comp,
-  docId,
+  doc,
   path,
   label,
   multiline,
@@ -139,7 +142,7 @@ function EditableField({
 }: {
   edit: EditApi;
   Comp: ElementType;
-  docId: DraftDocId;
+  doc?: DraftDocId;
   path: string;
   label: string;
   multiline: boolean;
@@ -154,9 +157,10 @@ function EditableField({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const info = edit.describe(docId, path);
+  const isText = doc === undefined;
+  const info = isText ? edit.describeText(path) : edit.describe(doc, path);
   const pointer = `${info.doc} → ${info.pointer}`;
-  const dirty = edit.isPathDirtyIn(docId, path);
+  const dirty = isText ? edit.isTextDirty(path) : edit.isPathDirtyIn(doc, path);
   const cls = [className, 'editable-text', dirty && 'edit-dirty', error && 'edit-invalid']
     .filter(Boolean)
     .join(' ');
@@ -185,10 +189,9 @@ function EditableField({
       el.focus(); // empty-required: the field keeps focus
       return;
     }
-    const issues =
-      docId === edit.textDoc
-        ? edit.commit(path, value)
-        : edit.apply(docId, setPath(edit.dataOf(docId), parsePath(path), value));
+    const issues = isText
+      ? edit.commit(path, value)
+      : edit.apply(doc, setPath(edit.dataOf(doc), parsePath(path), value));
     if (issues) {
       setError(issues[0]?.message ?? 'invalid');
       el.focus();

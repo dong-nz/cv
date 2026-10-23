@@ -6,7 +6,6 @@ import { TagListEditor } from '@/components/ui/TagListEditor'
 import { RecordControls, AddGhost } from '@/components/ui/RecordControls'
 import { useEdit } from '@/hooks/useEdit'
 import { useI18n } from '@/i18n/provider'
-import { setPath, parsePath } from '@/i18n/draft'
 
 // philosophyQuotes are text-only records: they live in the language document
 // being edited, so add and delete go through the plain document primitives.
@@ -44,14 +43,11 @@ export function PhilosophyPage() {
                                     label={quote.title}
                                     canUp={i > 0}
                                     canDown={i < c.profile.philosophyQuotes.length - 1}
-                                    onUp={() => edit.moveItem(edit.textDoc, quotesPath, i, i - 1)}
-                                    onDown={() => edit.moveItem(edit.textDoc, quotesPath, i, i + 1)}
-                                    onDelete={() => {
-                                        const doc = edit.dataOf(edit.textDoc) as Record<string, any>
-                                        const next = setPath(doc, parsePath(quotesPath),
-                                            (doc.profile.philosophyQuotes as unknown[]).filter((_, j) => j !== i))
-                                        edit.apply(edit.textDoc, next)
-                                    }}
+                                    onUp={() => edit.moveText(quotesPath, i, i - 1)}
+                                    onDown={() => edit.moveText(quotesPath, i, i + 1)}
+                                    onDelete={() =>
+                                        edit.deleteText(`profile.philosophyQuotes[${i}]`)
+                                    }
                                 />
                             )}
                             <EditableText
@@ -75,12 +71,12 @@ export function PhilosophyPage() {
                     {edit && (
                         <AddGhost
                             label={s.edit.addQuote}
-                            onClick={() => {
-                                const doc = edit.dataOf(edit.textDoc) as Record<string, any>
-                                const next = setPath(doc, parsePath(quotesPath),
-                                    [...(doc.profile.philosophyQuotes as unknown[]), { title: 'New quote', details: ['Write the quote here.'] }])
-                                edit.apply(edit.textDoc, next)
-                            }}
+                            onClick={() =>
+                                edit.setText(quotesPath, [
+                                    ...c.profile.philosophyQuotes,
+                                    { title: 'New quote', details: ['Write the quote here.'] },
+                                ])
+                            }
                         />
                     )}
                 </div>

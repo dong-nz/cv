@@ -3,8 +3,14 @@
 // tracking, cross-document validation on every accepted edit, sessionStorage
 // durability, and the sequential-PUT save pipeline with blob-sha
 // optimistic concurrency. Pure logic — the React glue lives in EditModeShell.
-import contentEnJson from './locales/en/content.json';
-import contentViJson from './locales/vi/content.json';
+import experienceEnTextJson from './locales/en/content/experience.json';
+import experienceViTextJson from './locales/vi/content/experience.json';
+import profileEnTextJson from './locales/en/content/profile.json';
+import profileViTextJson from './locales/vi/content/profile.json';
+import projectsEnTextJson from './locales/en/content/projects.json';
+import projectsViTextJson from './locales/vi/content/projects.json';
+import skillsEnTextJson from './locales/en/content/skills.json';
+import skillsViTextJson from './locales/vi/content/skills.json';
 import experienceJson from '../data/experience.json';
 import profileJson from '../data/profile.json';
 import projectsJson from '../data/projects.json';
@@ -19,8 +25,14 @@ export type DraftDocId =
   | 'skills'
   | 'experience'
   | 'projects'
-  | 'content.vi'
-  | 'content.en';
+  | 'profile.vi'
+  | 'profile.en'
+  | 'skills.vi'
+  | 'skills.en'
+  | 'experience.vi'
+  | 'experience.en'
+  | 'projects.vi'
+  | 'projects.en';
 
 export type DraftDocMeta = {
   id: DraftDocId;
@@ -29,16 +41,61 @@ export type DraftDocMeta = {
   lang?: Language;
 };
 
-// The six documents an edit session may write. `ui.{vi,en}.json` are shown
-// read-only in the panel (§5.1) and never enter a draft.
+// The twelve documents an edit session may write: four structure documents
+// plus one text document per entity per language (spec-v4-data-organization
+// §6.1). The page manifests and the UI group files are read-only in the app
+// and never enter a draft.
 export const DRAFT_DOCS: readonly DraftDocMeta[] = [
   { id: 'profile', file: 'src/data/profile.json', kind: 'structure' },
   { id: 'skills', file: 'src/data/skills.json', kind: 'structure' },
   { id: 'experience', file: 'src/data/experience.json', kind: 'structure' },
   { id: 'projects', file: 'src/data/projects.json', kind: 'structure' },
-  { id: 'content.vi', file: 'src/i18n/locales/vi/content.json', kind: 'text', lang: 'vi' },
-  { id: 'content.en', file: 'src/i18n/locales/en/content.json', kind: 'text', lang: 'en' },
+  { id: 'profile.vi', file: 'src/i18n/locales/vi/content/profile.json', kind: 'text', lang: 'vi' },
+  { id: 'profile.en', file: 'src/i18n/locales/en/content/profile.json', kind: 'text', lang: 'en' },
+  { id: 'skills.vi', file: 'src/i18n/locales/vi/content/skills.json', kind: 'text', lang: 'vi' },
+  { id: 'skills.en', file: 'src/i18n/locales/en/content/skills.json', kind: 'text', lang: 'en' },
+  { id: 'experience.vi', file: 'src/i18n/locales/vi/content/experience.json', kind: 'text', lang: 'vi' },
+  { id: 'experience.en', file: 'src/i18n/locales/en/content/experience.json', kind: 'text', lang: 'en' },
+  { id: 'projects.vi', file: 'src/i18n/locales/vi/content/projects.json', kind: 'text', lang: 'vi' },
+  { id: 'projects.en', file: 'src/i18n/locales/en/content/projects.json', kind: 'text', lang: 'en' },
 ];
+
+// Text entities, keyed by the leading path segment a text write carries
+// (`profile.bio` → entity `profile`). The record name is the joined-record
+// key the page manifests use (spec-v4-data-organization §3) — the mapping is
+// needed only there, so it lives in src/data/pages.ts.
+export const TEXT_ENTITIES = ['profile', 'skills', 'experience', 'projects'] as const;
+export type TextEntity = (typeof TEXT_ENTITIES)[number];
+
+export function textDocId(entity: TextEntity, lang: Language): DraftDocId {
+  return `${entity}.${lang}` as DraftDocId;
+}
+
+// A text path carries its entity as the first segment; inside the entity's
+// text document the pointer is the rest (E7: the provenance chip shows
+// `locales/vi/content/profile.json → bio`).
+export function splitTextPath(path: string): { entity: TextEntity; rest: string } | null {
+  const dot = path.indexOf('.');
+  const head = dot < 0 ? path : path.slice(0, dot);
+  if (!TEXT_ENTITIES.includes(head as TextEntity)) return null;
+  return { entity: head as TextEntity, rest: dot < 0 ? '' : path.slice(dot + 1) };
+}
+
+// The entity a draft document belongs to: text documents carry it in the id
+// (`projects.vi`), structure documents are named by it. EditBar uses this to
+// group changed paths against the page manifests (spec-v4-data-organization §6.3).
+const STRUCTURE_ENTITY: Record<string, TextEntity> = {
+  profile: 'profile',
+  skills: 'skills',
+  experience: 'experience',
+  projects: 'projects',
+};
+
+export function entityOfDoc(id: DraftDocId): TextEntity | null {
+  const dot = id.indexOf('.');
+  if (dot >= 0) return id.slice(0, dot) as TextEntity;
+  return STRUCTURE_ENTITY[id] ?? null;
+}
 
 export const PROXY_BASE = '/api/content/';
 export const TYPES_FILE = 'src/types/index.ts';
@@ -249,8 +306,14 @@ export function bundledBase(): Record<DraftDocId, DocBase> {
     skills: { data: structuredClone(skillsJson), sha: '' },
     experience: { data: structuredClone(experienceJson), sha: '' },
     projects: { data: structuredClone(projectsJson), sha: '' },
-    'content.vi': { data: structuredClone(contentViJson), sha: '' },
-    'content.en': { data: structuredClone(contentEnJson), sha: '' },
+    'profile.vi': { data: structuredClone(profileViTextJson), sha: '' },
+    'profile.en': { data: structuredClone(profileEnTextJson), sha: '' },
+    'skills.vi': { data: structuredClone(skillsViTextJson), sha: '' },
+    'skills.en': { data: structuredClone(skillsEnTextJson), sha: '' },
+    'experience.vi': { data: structuredClone(experienceViTextJson), sha: '' },
+    'experience.en': { data: structuredClone(experienceEnTextJson), sha: '' },
+    'projects.vi': { data: structuredClone(projectsViTextJson), sha: '' },
+    'projects.en': { data: structuredClone(projectsEnTextJson), sha: '' },
   };
 }
 
@@ -388,10 +451,6 @@ export class DraftStore {
     return this.working.size > 0;
   }
 
-  isPathDirty(path: string): boolean {
-    return this.touched().some((id) => this.changedPaths(id).includes(path));
-  }
-
   changedDocs(): { id: DraftDocId; paths: { path: string; before: unknown; after: unknown }[] }[] {
     return this.touched().map((id) => ({
       id,
@@ -430,8 +489,18 @@ export class DraftStore {
 
   draftTexts(): { vi: ContentVi; en: ContentEn } {
     return {
-      vi: this.dataOf('content.vi') as ContentVi,
-      en: this.dataOf('content.en') as ContentEn,
+      vi: {
+        profile: this.dataOf('profile.vi') as ContentVi['profile'],
+        skills: this.dataOf('skills.vi') as ContentVi['skills'],
+        experience: this.dataOf('experience.vi') as ContentVi['experience'],
+        projects: this.dataOf('projects.vi') as ContentVi['projects'],
+      },
+      en: {
+        profile: this.dataOf('profile.en') as ContentEn['profile'],
+        skills: this.dataOf('skills.en') as ContentEn['skills'],
+        experience: this.dataOf('experience.en') as ContentEn['experience'],
+        projects: this.dataOf('projects.en') as ContentEn['projects'],
+      },
     };
   }
 
@@ -440,36 +509,69 @@ export class DraftStore {
     return collectContentIssues(this.draftStructures(), texts.vi, texts.en);
   }
 
-  // Inline text edit (§5.3): the value lands in the text document of the
-  // language being edited; missing en entries are created, vi paths always
-  // exist. Returns the validator issues when the candidate draft is invalid,
-  // leaving the store untouched.
+  // --- text documents -----------------------------------------------------------
+  // A text path carries its entity as the first segment; the target document
+  // is that entity's text file in the language being edited, and the pointer
+  // inside it is the rest (spec-v4-data-organization §3, E7). Missing en
+  // entries are created, vi paths always exist (§5.3). Invalid candidates
+  // return the validator issues and leave the store untouched.
+
+  private textTarget(
+    lang: Language,
+    path: string,
+  ): { id: DraftDocId; segs: PathSeg[]; rest: string } | null {
+    const split = splitTextPath(path);
+    if (!split) return null;
+    return { id: textDocId(split.entity, lang), segs: parsePath(split.rest), rest: split.rest };
+  }
+
   setValue(lang: Language, path: string, value: string): ContentIssue[] | null {
-    const id: DraftDocId = lang === 'vi' ? 'content.vi' : 'content.en';
-    return this.tryApply(new Map([[id, setPath(this.dataOf(id), parsePath(path), value)]]));
+    return this.setText(lang, path, value);
   }
 
-  // Whole-document replacement from the JSON panel (§5.4).
-  setDocument(id: DraftDocId, data: unknown): ContentIssue[] | null {
-    return this.tryApply(new Map([[id, data]]));
+  // Write any value at a text path — a string leaf, a tag array, a tagline
+  // segment object. One write surface for every text shape (E1/E5).
+  setText(lang: Language, path: string, value: unknown): ContentIssue[] | null {
+    const t = this.textTarget(lang, path);
+    if (!t) return [{ path, message: 'not a text path' }];
+    return this.tryApply(new Map([[t.id, setPath(this.dataOf(t.id), t.segs, value)]]));
   }
 
-  // Per-field revert (§5.3): restore the baseline value at this path in every
-  // touched text document; a path that was newly created is removed instead.
-  revertPath(path: string): ContentIssue[] | null {
-    const segs = parsePath(path);
-    let lastIssues: ContentIssue[] | null = null;
-    for (const id of ['content.vi', 'content.en'] as const) {
-      if (!this.changedPaths(id).includes(path)) continue;
-      const original = getPath(this.base.get(id)!.data, segs);
-      const current = this.dataOf(id);
-      const next =
-        original === undefined
-          ? deletePath(current, segs)
-          : setPath(current, segs, original);
-      lastIssues = this.tryApply(new Map([[id, next]]));
+  deleteText(lang: Language, path: string): ContentIssue[] | null {
+    const t = this.textTarget(lang, path);
+    if (!t) return [{ path, message: 'not a text path' }];
+    return this.tryApply(new Map([[t.id, deletePath(this.dataOf(t.id), t.segs)]]));
+  }
+
+  moveText(lang: Language, path: string, from: number, to: number): ContentIssue[] | null {
+    const t = this.textTarget(lang, path);
+    if (!t) return [{ path, message: 'not a text path' }];
+    const arr = getPath(this.dataOf(t.id), t.segs);
+    if (!Array.isArray(arr) || from < 0 || to < 0 || from >= arr.length || to >= arr.length) {
+      return null;
     }
-    return lastIssues;
+    const next = [...arr];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    return this.tryApply(new Map([[t.id, setPath(this.dataOf(t.id), t.segs, next)]]));
+  }
+
+  isTextDirty(lang: Language, path: string): boolean {
+    const t = this.textTarget(lang, path);
+    return t !== null && this.changedPaths(t.id).includes(t.rest);
+  }
+
+  // Per-field revert (§5.3): restore the baseline value at this document-
+  // relative path in this document; a path that was newly created is removed.
+  revertIn(id: DraftDocId, path: string): ContentIssue[] | null {
+    if (!this.changedPaths(id).includes(path)) return null;
+    const segs = parsePath(path);
+    const original = getPath(this.base.get(id)!.data, segs);
+    const next =
+      original === undefined
+        ? deletePath(this.dataOf(id), segs)
+        : setPath(this.dataOf(id), segs, original);
+    return this.tryApply(new Map([[id, next]]));
   }
 
   discardDocument(id: DraftDocId): void {
@@ -481,9 +583,19 @@ export class DraftStore {
   // are created or removed in one action — orphan text is never produced.
   addRecord(kind: RecordKind, options: { projectId?: string } = {}): ContentIssue[] | null {
     const candidates = new Map<DraftDocId, unknown>();
-    const vi = structuredClone(this.dataOf('content.vi')) as Record<string, any>;
-    const en = structuredClone(this.dataOf('content.en')) as Record<string, any>;
     let createdIds: RecordIds | null = null;
+
+    // Structure record and text entries are created in one action — orphan
+    // text is never produced (§5.4). The text lives in the entity's own
+    // document in both languages.
+    const withTexts = (entity: TextEntity, mutate: (doc: Record<string, any>) => void) => {
+      for (const lang of ['vi', 'en'] as const) {
+        const id = textDocId(entity, lang);
+        const doc = structuredClone(this.dataOf(id)) as Record<string, any>;
+        mutate(doc);
+        candidates.set(id, doc);
+      }
+    };
 
     if (kind === 'project') {
       const projects = structuredClone(this.dataOf('projects')) as Record<string, any>[];
@@ -492,8 +604,9 @@ export class DraftStore {
       projects.push({ id, category: 'experiment', technologies: [], featured: false, sections: [] });
       candidates.set('projects', projects);
       const stub = { title: 'New project', summary: 'Write the summary here.', role: 'Owner', sections: {} };
-      vi.projects = { ...vi.projects, [id]: structuredClone(stub) };
-      en.projects = { ...en.projects, [id]: structuredClone(stub) };
+      withTexts('projects', (doc) => {
+        doc[id] = structuredClone(stub);
+      });
     } else if (kind === 'experience') {
       const experiences = structuredClone(this.dataOf('experience')) as Record<string, any>[];
       const id = uniqueId('new-experience', experiences.map((e) => e.id));
@@ -501,16 +614,18 @@ export class DraftStore {
       experiences.push({ id });
       candidates.set('experience', experiences);
       const stub = { title: 'New role', company: 'New company', duration: 'present', responsibilities: ['Write a responsibility here.'] };
-      vi.experience = { ...vi.experience, [id]: structuredClone(stub) };
-      en.experience = { ...en.experience, [id]: structuredClone(stub) };
+      withTexts('experience', (doc) => {
+        doc[id] = structuredClone(stub);
+      });
     } else if (kind === 'skill-group') {
       const groups = structuredClone(this.dataOf('skills')) as Record<string, any>[];
       const id = uniqueId('new-skill-group', groups.map((g) => g.id));
       createdIds = { id };
       groups.push({ id, skills: ['New skill'] });
       candidates.set('skills', groups);
-      vi.skills = { ...vi.skills, [id]: { title: 'New skill group' } };
-      en.skills = { ...en.skills, [id]: { title: 'New skill group' } };
+      withTexts('skills', (doc) => {
+        doc[id] = { title: 'New skill group' };
+      });
     } else if (kind === 'philosophy') {
       const profile = structuredClone(this.dataOf('profile')) as Record<string, any>;
       const points = profile.philosophy as Record<string, any>[];
@@ -519,8 +634,9 @@ export class DraftStore {
       points.push({ id });
       candidates.set('profile', profile);
       const stub = { title: 'New principle', description: 'Write the principle here.', keywords: ['new-keyword'] };
-      vi.profile = { ...vi.profile, philosophy: { ...vi.profile.philosophy, [id]: structuredClone(stub) } };
-      en.profile = { ...en.profile, philosophy: { ...en.profile.philosophy, [id]: structuredClone(stub) } };
+      withTexts('profile', (doc) => {
+        doc.philosophy = { ...doc.philosophy, [id]: structuredClone(stub) };
+      });
     } else {
       const projectId = options.projectId;
       if (!projectId) return [{ path: 'projects.json', message: 'pick a project first' }];
@@ -532,28 +648,25 @@ export class DraftStore {
       project.sections = [...project.sections, { id: sectionId, type: 'text' }];
       candidates.set('projects', projects);
       const stub = { title: 'New section', content: 'Write the section here.' };
-      for (const texts of [vi, en]) {
-        const text = texts.projects[projectId] as Record<string, any>;
-        texts.projects = {
-          ...texts.projects,
-          [projectId]: { ...text, sections: { ...text.sections, [sectionId]: structuredClone(stub) } },
-        };
-      }
+      withTexts('projects', (doc) => {
+        const text = doc[projectId] as Record<string, any>;
+        doc[projectId] = { ...text, sections: { ...text.sections, [sectionId]: structuredClone(stub) } };
+      });
     }
-    candidates.set('content.vi', vi);
-    candidates.set('content.en', en);
     const issues = this.tryApply(candidates);
     if (issues === null && createdIds) this.created.add(recordKey(kind, createdIds));
     return issues;
   }
 
-  // Delete removes the record's text entries from both language documents in
-  // the same action — the validator can never see orphan text (§5.4).
+  // Delete removes the structure record and the record's text entries from
+  // both language documents in the same action — the validator can never see
+  // orphan text (§5.4).
   deleteRecord(kind: RecordKind, ids: RecordIds): ContentIssue[] | null {
     const candidates = new Map<DraftDocId, unknown>();
 
-    const dropFromTexts = (mutate: (doc: Record<string, any>) => void) => {
-      for (const id of ['content.vi', 'content.en'] as const) {
+    const withTexts = (entity: TextEntity, mutate: (doc: Record<string, any>) => void) => {
+      for (const lang of ['vi', 'en'] as const) {
+        const id = textDocId(entity, lang);
         const doc = structuredClone(this.dataOf(id)) as Record<string, any>;
         mutate(doc);
         candidates.set(id, doc);
@@ -561,27 +674,26 @@ export class DraftStore {
     };
 
     if (kind === 'project') {
-      const projects = (this.dataOf('projects') as Record<string, any>[]).filter((p) => p.id !== ids.id);
-      candidates.set('projects', projects);
-      dropFromTexts((doc) => {
-        delete doc.projects[ids.id];
+      candidates.set('projects', (this.dataOf('projects') as Record<string, any>[]).filter((p) => p.id !== ids.id));
+      withTexts('projects', (doc) => {
+        delete doc[ids.id];
       });
     } else if (kind === 'experience') {
       candidates.set('experience', (this.dataOf('experience') as Record<string, any>[]).filter((e) => e.id !== ids.id));
-      dropFromTexts((doc) => {
-        delete doc.experience[ids.id];
+      withTexts('experience', (doc) => {
+        delete doc[ids.id];
       });
     } else if (kind === 'skill-group') {
       candidates.set('skills', (this.dataOf('skills') as Record<string, any>[]).filter((g) => g.id !== ids.id));
-      dropFromTexts((doc) => {
-        delete doc.skills[ids.id];
+      withTexts('skills', (doc) => {
+        delete doc[ids.id];
       });
     } else if (kind === 'philosophy') {
       const profile = structuredClone(this.dataOf('profile')) as Record<string, any>;
       profile.philosophy = (profile.philosophy as Record<string, any>[]).filter((p) => p.id !== ids.id);
       candidates.set('profile', profile);
-      dropFromTexts((doc) => {
-        delete doc.profile.philosophy[ids.id];
+      withTexts('profile', (doc) => {
+        delete doc.philosophy[ids.id];
       });
     } else {
       const projectId = ids.projectId;
@@ -591,8 +703,8 @@ export class DraftStore {
       if (!project) return [{ path: 'projects.json', message: `no project ${projectId}` }];
       project.sections = (project.sections as Record<string, any>[]).filter((s) => s.id !== ids.id);
       candidates.set('projects', projects);
-      dropFromTexts((doc) => {
-        const text = doc.projects[projectId];
+      withTexts('projects', (doc) => {
+        const text = doc[projectId];
         if (text) text.sections = { ...text.sections };
         delete text?.sections[ids.id];
       });
@@ -607,6 +719,14 @@ export class DraftStore {
   describeField(id: DraftDocId, path: string): FieldInfo {
     const file = DRAFT_DOCS.find((d) => d.id === id)?.file ?? id;
     return { doc: file.replace(/^src\//, ''), pointer: path, repoPath: file };
+  }
+
+  // Provenance for a text path (E7): resolves the entity document for the
+  // language being edited — the chip reads `locales/vi/content/profile.json → bio`.
+  describeText(lang: Language, path: string): FieldInfo {
+    const split = splitTextPath(path);
+    if (!split) return { doc: 'content', pointer: path, repoPath: path };
+    return this.describeField(textDocId(split.entity, lang), split.rest);
   }
 
   // --- generic document writes (E4/E5): structure fields and text arrays ----
@@ -651,12 +771,22 @@ export class DraftStore {
     const candidates = new Map<DraftDocId, unknown>();
     let newId = slug;
 
-    const renameInTexts = (mutate: (doc: Record<string, any>) => void) => {
-      for (const id of ['content.vi', 'content.en'] as const) {
+    const withTexts = (entity: TextEntity, mutate: (doc: Record<string, any>) => void) => {
+      for (const lang of ['vi', 'en'] as const) {
+        const id = textDocId(entity, lang);
         const doc = structuredClone(this.dataOf(id)) as Record<string, any>;
         mutate(doc);
         candidates.set(id, doc);
       }
+    };
+
+    // Rename a record key in place, keeping the document's key order so the
+    // committed file stays reviewable.
+    const renameKey = (doc: Record<string, any>, from: string, to: string) => {
+      if (doc[from] === undefined) return;
+      const entries = Object.entries(doc).map(([k, v]) => (k === from ? [to, v] : [k, v]));
+      for (const k of Object.keys(doc)) delete doc[k];
+      Object.assign(doc, Object.fromEntries(entries));
     };
 
     if (kind === 'project') {
@@ -667,12 +797,8 @@ export class DraftStore {
         if (p.id === ids.id) projects[i] = { ...p, id: newId };
       });
       candidates.set('projects', projects);
-      renameInTexts((doc) => {
-        const rec = doc.projects[ids.id];
-        if (rec === undefined) return;
-        const rest = { ...doc.projects };
-        delete rest[ids.id];
-        doc.projects = { ...rest, [newId]: rec };
+      withTexts('projects', (doc) => {
+        renameKey(doc, ids.id, newId);
       });
     } else if (kind === 'experience') {
       const experiences = structuredClone(this.dataOf('experience')) as Record<string, any>[];
@@ -682,12 +808,8 @@ export class DraftStore {
         if (e.id === ids.id) experiences[i] = { ...e, id: newId };
       });
       candidates.set('experience', experiences);
-      renameInTexts((doc) => {
-        const rec = doc.experience[ids.id];
-        if (rec === undefined) return;
-        const rest = { ...doc.experience };
-        delete rest[ids.id];
-        doc.experience = { ...rest, [newId]: rec };
+      withTexts('experience', (doc) => {
+        renameKey(doc, ids.id, newId);
       });
     } else if (kind === 'skill-group') {
       const groups = structuredClone(this.dataOf('skills')) as Record<string, any>[];
@@ -697,12 +819,8 @@ export class DraftStore {
         if (g.id === ids.id) groups[i] = { ...g, id: newId };
       });
       candidates.set('skills', groups);
-      renameInTexts((doc) => {
-        const rec = doc.skills[ids.id];
-        if (rec === undefined) return;
-        const rest = { ...doc.skills };
-        delete rest[ids.id];
-        doc.skills = { ...rest, [newId]: rec };
+      withTexts('skills', (doc) => {
+        renameKey(doc, ids.id, newId);
       });
     } else if (kind === 'philosophy') {
       const profile = structuredClone(this.dataOf('profile')) as Record<string, any>;
@@ -713,12 +831,8 @@ export class DraftStore {
         if (p.id === ids.id) points[i] = { ...p, id: newId };
       });
       candidates.set('profile', profile);
-      renameInTexts((doc) => {
-        const rec = doc.profile.philosophy[ids.id];
-        if (rec === undefined) return;
-        const rest = { ...doc.profile.philosophy };
-        delete rest[ids.id];
-        doc.profile.philosophy = { ...rest, [newId]: rec };
+      withTexts('profile', (doc) => {
+        renameKey(doc.philosophy, ids.id, newId);
       });
     } else {
       const projectId = ids.projectId;
@@ -733,16 +847,9 @@ export class DraftStore {
         if (s.id === ids.id) sections[i] = { ...s, id: newId };
       });
       candidates.set('projects', projects);
-      renameInTexts((doc) => {
-        const text = doc.projects[projectId];
-        const rec = text?.sections?.[ids.id];
-        if (rec === undefined) return;
-        const rest = { ...text.sections };
-        delete rest[ids.id];
-        doc.projects = {
-          ...doc.projects,
-          [projectId]: { ...text, sections: { ...rest, [newId]: rec } },
-        };
+      withTexts('projects', (doc) => {
+        const text = doc[projectId];
+        if (text?.sections) renameKey(text.sections, ids.id, newId);
       });
     }
 
@@ -935,7 +1042,7 @@ export async function saveDraft(
   for (const id of store.touched()) {
     const meta = DRAFT_DOCS.find((d) => d.id === id)!;
     const paths = store.changedPaths(id);
-    const message = `content: ${paths[0] ?? meta.file} (${paths.length} path${paths.length === 1 ? '' : 's'})`;
+    const message = `content: ${meta.file} (${paths.length} path${paths.length === 1 ? '' : 's'})`;
     const res = await putDoc(meta.file, store.dataOf(id), message, store.shaOf(id), branch);
     if (res.ok) {
       store.markWritten(id, res.sha);

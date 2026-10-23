@@ -10,7 +10,6 @@ import {HeroParticles} from '@/components/sections/HeroParticles'
 import {EditableText} from '@/components/ui/EditableText'
 import {SocialLinks} from "@/components/ui/SocialLinks"
 import {useEdit} from '@/hooks/useEdit'
-import {deletePath, parsePath, setPath} from '@/i18n/draft'
 import {ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon} from '@/components/ui/icons'
 
 export function Hero() {
@@ -88,11 +87,10 @@ export function Hero() {
                                         aria-label={`${s.edit.emphasis} — ${s.edit.fields.tagline} ${i + 1}`}
                                         onMouseDown={(event) => event.stopPropagation()}
                                         onClick={() => {
-                                            const segs = parsePath(`profile.tagline[${i}].emphasis`)
                                             if (segment.emphasis) {
-                                                edit.apply(edit.textDoc, deletePath(edit.dataOf(edit.textDoc), segs))
+                                                edit.deleteText(`profile.tagline[${i}].emphasis`)
                                             } else {
-                                                edit.apply(edit.textDoc, setPath(edit.dataOf(edit.textDoc), segs, true))
+                                                edit.setText(`profile.tagline[${i}].emphasis`, true)
                                             }
                                         }}
                                     >
@@ -104,7 +102,7 @@ export function Hero() {
                                         aria-label={`${s.edit.moveUp} — ${s.edit.fields.tagline} ${i + 1}`}
                                         disabled={i === 0}
                                         onMouseDown={(event) => event.stopPropagation()}
-                                        onClick={() => edit.moveItem(edit.textDoc, 'profile.tagline', i, i - 1)}
+                                        onClick={() => edit.moveText('profile.tagline', i, i - 1)}
                                     >
                                         <ChevronUpIcon size={12}/>
                                     </button>
@@ -114,7 +112,7 @@ export function Hero() {
                                         aria-label={`${s.edit.moveDown} — ${s.edit.fields.tagline} ${i + 1}`}
                                         disabled={i === c.profile.tagline.length - 1}
                                         onMouseDown={(event) => event.stopPropagation()}
-                                        onClick={() => edit.moveItem(edit.textDoc, 'profile.tagline', i, i + 1)}
+                                        onClick={() => edit.moveText('profile.tagline', i, i + 1)}
                                     >
                                         <ChevronDownIcon size={12}/>
                                     </button>
@@ -125,7 +123,7 @@ export function Hero() {
                                         onMouseDown={(event) => event.stopPropagation()}
                                         onClick={() => {
                                             if (window.confirm(s.edit.removeConfirm)) {
-                                                edit.apply(edit.textDoc, deletePath(edit.dataOf(edit.textDoc), parsePath(`profile.tagline[${i}]`)))
+                                                edit.deleteText(`profile.tagline[${i}]`)
                                             }
                                         }}
                                     >
@@ -160,7 +158,7 @@ export function Hero() {
                             <button
                                 type="button"
                                 className="edit-add-inline"
-                                onClick={() => edit.apply(edit.textDoc, setPath(edit.dataOf(edit.textDoc), parsePath('profile.tagline'), [...c.profile.tagline, {text: s.edit.newTag}]))}
+                                onClick={() => edit.setText('profile.tagline', [...c.profile.tagline, { text: s.edit.newTag }])}
                             >
                                 <PlusIcon size={12}/>
                                 {s.edit.addTaglineSegment}

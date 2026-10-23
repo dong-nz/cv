@@ -1,0 +1,25 @@
+{
+  "id": "resume",
+  "route": null,
+  "content": [
+    {
+      "entity": "profile",
+      "fields": [
+        "name",
+        "title",
+        "bio",
+        "email",
+        "githubUrl",
+        "githubHandle",
+        "linkedinUrl",
+        "linkedinHandle",
+        "telegramUrl",
+        "telegramHandle"
+      ]
+    },
+    { "entity": "skillGroups", "fields": ["*"] },
+    { "entity": "experiences", "fields": ["*"] },
+    { "entity": "projects", "fields": ["*"] }
+  ],
+  "ui": []
+}

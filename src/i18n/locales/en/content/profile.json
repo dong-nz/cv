@@ -1,0 +1,37 @@
+{
+  "name": "Dong Nguyen",
+  "bio": "Senior Software Engineer with experience building distributed systems, logistics technology, and AI/ML applications for real-world problems. Focused on system architecture, integration, and production-grade solutions.",
+  "subtitle": "Senior Software Engineer with deep expertise in distributed systems, logistics technology, and practical AI applications.",
+  "tldr": "15 years of experience, more than 8 companies along the way. Too long to tell.",
+  "tagline": [
+    {
+      "text": "Building scalable software systems, intelligent logistics solutions, and practical AI applications."
+    }
+  ],
+  "philosophyQuotes": [
+    {
+      "title": "Time is priceless",
+      "details": [
+        "Time is priceless. You can’t buy it, pause it, or rewind it. Once it’s gone, it’s gone for good.",
+        "We spend so much of our lives chasing things—money, status, validation—but time is the one thing we can never earn back.",
+        "So be mindful of how you use it. Invest it in what truly matters: the people you love, the goals that inspire you, the moments that feed your soul."
+      ]
+    }
+  ],
+  "philosophy": {
+    "build-for-the-real-problem": {
+      "title": "Build for the real problem",
+      "description": "Don't start with technology. Start with the problem."
+    },
+    "think-in-systems": {
+      "description": "Care about the overall architecture, not just individual components."
+    },
+    "measure-impact": {
+      "description": "Technical implementation must be tied to measurable outcomes."
+    },
+    "business-domain-knowledge-is-a-key-of-success": {
+      "title": "Business domain knowledge is a key of success",
+      "description": "Don't start with technology. Start with the problem."
+    }
+  }
+}

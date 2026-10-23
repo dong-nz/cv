@@ -9,7 +9,20 @@ import type {
   ProjectId,
   SkillGroupId,
 } from '../types/index';
-import uiViJson from './locales/vi/ui.json';
+import navJson from './locales/vi/ui/navigation.json';
+import footerJson from './locales/vi/ui/footer.json';
+import socialJson from './locales/vi/ui/social.json';
+import heroJson from './locales/vi/ui/hero.json';
+import aboutJson from './locales/vi/ui/about.json';
+import expertiseJson from './locales/vi/ui/expertise.json';
+import experienceJson from './locales/vi/ui/experience.json';
+import projectsJson from './locales/vi/ui/projects.json';
+import contactJson from './locales/vi/ui/contact.json';
+import projectDetailJson from './locales/vi/ui/project-detail.json';
+import philosophyJson from './locales/vi/ui/philosophy.json';
+import commonJson from './locales/vi/ui/common.json';
+import resumeJson from './locales/vi/ui/resume.json';
+import editJson from './locales/vi/ui/edit.json';
 
 // --- structure (src/data/*.json) ---
 
@@ -121,8 +134,25 @@ type PartialDeep<T> = T extends readonly unknown[]
 
 export type ContentEn = { [K in keyof ContentVi]?: PartialDeep<ContentVi[K]> };
 
-// --- UI (src/i18n/locales/{vi,en}/ui.json) ---
+// --- UI (src/i18n/locales/{vi,en}/ui/{group}.json) ---
 
-// Derived from the complete Vietnamese tree; the en import is checked against
-// this type in index.ts — both files are complete by construction (§3.3).
-export type UIDict = typeof uiViJson;
+// Derived from the complete Vietnamese group files (spec-v4-data-organization
+// §4); index.ts assembles the merged record in this key order and the en
+// groups are checked against the same type — both sides are complete by
+// construction (§3.3).
+export type UIDict = {
+  nav: typeof navJson;
+  social: typeof socialJson;
+  footer: typeof footerJson;
+  hero: typeof heroJson;
+  about: typeof aboutJson;
+  expertise: typeof expertiseJson;
+  experience: typeof experienceJson;
+  projects: typeof projectsJson;
+  contact: typeof contactJson;
+  projectDetail: typeof projectDetailJson;
+  philosophy: typeof philosophyJson;
+  common: typeof commonJson;
+  resume: typeof resumeJson;
+  edit: typeof editJson;
+};

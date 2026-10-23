@@ -1,0 +1,14 @@
+{
+  "featured": "Dự án nổi bật",
+  "all": "Dự án",
+  "viewAll": "Xem tất cả",
+  "viewDetails": "Xem chi tiết",
+  "categories": {
+    "software-engineering": "Kỹ thuật phần mềm",
+    "logistics": "Logistics",
+    "ai-ml": "AI / ML",
+    "computer-vision": "Computer Vision",
+    "architecture": "Kiến trúc",
+    "experiment": "Thử nghiệm"
+  }
+}

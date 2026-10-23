@@ -1,0 +1,14 @@
+{
+  "featured": "Featured Projects",
+  "all": "Projects",
+  "viewAll": "View All",
+  "viewDetails": "View Details",
+  "categories": {
+    "software-engineering": "Software Engineering",
+    "logistics": "Logistics",
+    "ai-ml": "AI / ML",
+    "computer-vision": "Computer Vision",
+    "architecture": "Architecture",
+    "experiment": "Experiment"
+  }
+}

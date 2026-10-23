@@ -15,11 +15,13 @@ import type { DraftDocId } from '@/i18n/draft';
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon } from '@/components/ui/icons';
 
 type TagListEditorProps = {
-  // Structure document to edit; defaults to the text document of the edited
-  // language (E1) — text arrays need no explicit doc.
+  // Structure document to edit. Without it the array is a text array: the
+  // path carries its entity (`profile.currentInterests`,
+  // `projects.lazada.metrics`) and the store resolves the entity document of
+  // the language being edited (spec-v4-data-organization §3).
   doc?: DraftDocId;
-  // Array path inside that document: `profile.currentInterests` for a text
-  // document, `[2].technologies` for a structure document.
+  // Array path inside the target document: `3.technologies` for a structure
+  // document (document-relative), the entity-prefixed path for a text one.
   arrayPath: string;
   items: string[];
   // The container and item elements the site renders today.
@@ -62,10 +64,12 @@ export function TagListEditor({
       </Container>
     );
   }
-  const docId = doc ?? edit.textDoc;
 
+  // Whole-array write — one call for a text or a structure document (E1).
   const write = (next: string[]) =>
-    edit.apply(docId, setPath(edit.dataOf(docId), parsePath(arrayPath), next));
+    doc
+      ? edit.apply(doc, setPath(edit.dataOf(doc), parsePath(arrayPath), next))
+      : edit.setText(arrayPath, next);
 
   const controls = (i: number) => (
     <>
@@ -75,7 +79,7 @@ export function TagListEditor({
         aria-label={`${s.edit.moveUp} — ${labelPrefix} ${i + 1}`}
         disabled={i === 0}
         onMouseDown={(event) => event.stopPropagation()}
-        onClick={() => edit.moveItem(docId, arrayPath, i, i - 1)}
+        onClick={() => (doc ? edit.moveItem(doc, arrayPath, i, i - 1) : edit.moveText(arrayPath, i, i - 1))}
       >
         <ChevronUpIcon size={12} />
       </button>
@@ -85,7 +89,7 @@ export function TagListEditor({
         aria-label={`${s.edit.moveDown} — ${labelPrefix} ${i + 1}`}
         disabled={i === items.length - 1}
         onMouseDown={(event) => event.stopPropagation()}
-        onClick={() => edit.moveItem(docId, arrayPath, i, i + 1)}
+        onClick={() => (doc ? edit.moveItem(doc, arrayPath, i, i + 1) : edit.moveText(arrayPath, i, i + 1))}
       >
         <ChevronDownIcon size={12} />
       </button>
@@ -109,7 +113,7 @@ export function TagListEditor({
         <EditableText
           key={i}
           as={Comp}
-          doc={docId}
+          doc={doc}
           path={`${arrayPath}[${i}]`}
           label={`${labelPrefix} ${i + 1}`}
           className={itemClassName}

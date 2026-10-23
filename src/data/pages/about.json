@@ -1,0 +1,12 @@
+{
+  "id": "about",
+  "route": "/about",
+  "content": [
+    {
+      "entity": "profile",
+      "fields": ["name", "bio", "subtitle", "currentInterests", "philosophy"]
+    },
+    { "entity": "skillGroups", "fields": ["*"] }
+  ],
+  "ui": ["about"]
+}

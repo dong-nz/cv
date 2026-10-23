@@ -7,7 +7,8 @@
 // the whole-document operations.
 import { useState } from 'react';
 import { useI18n } from '@/i18n/provider';
-import { DRAFT_DOCS } from '@/i18n/draft';
+import { DRAFT_DOCS, entityOfDoc } from '@/i18n/draft';
+import { manifestsClaiming, recordEntity } from '@/data/pages';
 import { DEFAULT_BRANCH } from '@/i18n/edit-mode';
 import type { ConflictField, DocSaveResult, DraftDocId } from '@/i18n/draft';
 import type { ContentIssue } from '@/i18n/validate';
@@ -33,7 +34,7 @@ type EditBarProps = {
   onTakeTheirs: (id: DraftDocId) => void;
   onResolveField: (id: DraftDocId, path: string, side: 'mine' | 'theirs') => void;
   onDiscardDoc: (id: DraftDocId) => void;
-  onRevertPath: (path: string) => void;
+  onRevertPath: (id: DraftDocId, path: string) => void;
 };
 
 function fileOf(id: DraftDocId): string {
@@ -80,6 +81,19 @@ export function EditBar({
       : result.status === 'conflict'
         ? s.conflictStatus
         : `${s.failed} (${result.http ?? 0})`;
+
+  // "appears on" annotation (spec-v4-data-organization §6.3): the pages whose
+  // manifest claims this document-relative path — grouping is computed from
+  // the manifests, never from component code.
+  const appearsOn = (docId: DraftDocId, path: string): string | null => {
+    const entity = entityOfDoc(docId);
+    if (!entity) return null;
+    const pages = manifestsClaiming(recordEntity(entity), path);
+    if (pages.length === 0) return null;
+    return pages
+      .map((m) => (m.id === 'resume' ? s.appearsResume : m.id === 'home' ? s.appearsHome : m.route))
+      .join(', ');
+  };
 
   return (
     <footer className="edit-bar" aria-label={s.title}>
@@ -138,17 +152,25 @@ export function EditBar({
                 </button>
               </div>
               <ul>
-                {doc.paths.map((p) => (
-                  <li key={p.path}>
-                    <code className="edit-bar-path">{p.path}</code>
-                    <span className="edit-bar-value">{truncate(p.before)}</span>
-                    <span aria-hidden="true">→</span>
-                    <span className="edit-bar-value">{truncate(p.after)}</span>
-                    <button type="button" className="edit-btn" onClick={() => onRevertPath(p.path)}>
-                      {s.revert}
-                    </button>
-                  </li>
-                ))}
+                {doc.paths.map((p) => {
+                  const appears = appearsOn(doc.id, p.path);
+                  return (
+                    <li key={p.path}>
+                      <code className="edit-bar-path">{p.path}</code>
+                      <span className="edit-bar-value">{truncate(p.before)}</span>
+                      <span aria-hidden="true">→</span>
+                      <span className="edit-bar-value">{truncate(p.after)}</span>
+                      {appears && (
+                        <span className="edit-bar-appears">
+                          {s.appearsOn}: {appears}
+                        </span>
+                      )}
+                      <button type="button" className="edit-btn" onClick={() => onRevertPath(doc.id, p.path)}>
+                        {s.revert}
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

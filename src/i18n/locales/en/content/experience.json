@@ -1,0 +1,39 @@
+{
+  "open-to-work": {
+    "title": "Seeking a New Place",
+    "company": "Open to new opportunities",
+    "duration": "Nov 2026 – Present",
+    "responsibilities": [
+      "Open to Senior Engineer roles: system architecture, integration platforms, full-stack delivery"
+    ]
+  },
+  "relax-gap": {
+    "title": "Relax",
+    "company": "Career break",
+    "duration": "Aug 2026 – Oct 2026",
+    "responsibilities": [
+      "Intentional break between roles — recovering the rhythm before the next system"
+    ]
+  },
+  "lazada-senior-swe": {
+    "duration": "Jan 2020 – Aug 2026",
+    "responsibilities": [
+      "System ownership and architecture design for logistics integration systems",
+      "Developed IoT-DWS integration solution deployed across 16 sortations",
+      "Led system maintenance and modernization for production environments",
+      "Applied Computer Vision and ML to solve real-world operational problems",
+      "Scrum Master responsibilities — team achieved Scrum Level L3"
+    ]
+  },
+  "nexts-founder": {
+    "title": "CTO & Founder",
+    "responsibilities": [
+      "Developed a solution for autonomous vehicles to collect real-time data from onboard sensors and systems, including LiDAR, cameras, GPS, and CAN bus."
+    ]
+  },
+  "sap-senior-swe": {
+    "responsibilities": [
+      "Team leader managing the B1 Integration product"
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "experience",
+  "route": "/experience",
+  "content": [
+    { "entity": "profile", "fields": ["tldr"] },
+    { "entity": "experiences", "fields": ["*"] }
+  ],
+  "ui": ["experience"]
+}

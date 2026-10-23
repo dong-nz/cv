@@ -5,10 +5,42 @@ import { experiences } from '../data/experience';
 import { profile } from '../data/profile';
 import { projects } from '../data/projects';
 import { skillGroups } from '../data/skills';
-import contentEnJson from './locales/en/content.json';
-import contentViJson from './locales/vi/content.json';
-import uiEnJson from './locales/en/ui.json';
-import uiViJson from './locales/vi/ui.json';
+import profileViJson from './locales/vi/content/profile.json';
+import skillsViJson from './locales/vi/content/skills.json';
+import experienceViJson from './locales/vi/content/experience.json';
+import projectsViJson from './locales/vi/content/projects.json';
+import profileEnJson from './locales/en/content/profile.json';
+import skillsEnJson from './locales/en/content/skills.json';
+import experienceEnJson from './locales/en/content/experience.json';
+import projectsEnJson from './locales/en/content/projects.json';
+import uiNavViJson from './locales/vi/ui/navigation.json';
+import uiSocialViJson from './locales/vi/ui/social.json';
+import uiFooterViJson from './locales/vi/ui/footer.json';
+import uiHeroViJson from './locales/vi/ui/hero.json';
+import uiAboutViJson from './locales/vi/ui/about.json';
+import uiExpertiseViJson from './locales/vi/ui/expertise.json';
+import uiExperienceViJson from './locales/vi/ui/experience.json';
+import uiProjectsViJson from './locales/vi/ui/projects.json';
+import uiContactViJson from './locales/vi/ui/contact.json';
+import uiProjectDetailViJson from './locales/vi/ui/project-detail.json';
+import uiPhilosophyViJson from './locales/vi/ui/philosophy.json';
+import uiCommonViJson from './locales/vi/ui/common.json';
+import uiResumeViJson from './locales/vi/ui/resume.json';
+import uiEditViJson from './locales/vi/ui/edit.json';
+import uiNavEnJson from './locales/en/ui/navigation.json';
+import uiSocialEnJson from './locales/en/ui/social.json';
+import uiFooterEnJson from './locales/en/ui/footer.json';
+import uiHeroEnJson from './locales/en/ui/hero.json';
+import uiAboutEnJson from './locales/en/ui/about.json';
+import uiExpertiseEnJson from './locales/en/ui/expertise.json';
+import uiExperienceEnJson from './locales/en/ui/experience.json';
+import uiProjectsEnJson from './locales/en/ui/projects.json';
+import uiContactEnJson from './locales/en/ui/contact.json';
+import uiProjectDetailEnJson from './locales/en/ui/project-detail.json';
+import uiPhilosophyEnJson from './locales/en/ui/philosophy.json';
+import uiCommonEnJson from './locales/en/ui/common.json';
+import uiResumeEnJson from './locales/en/ui/resume.json';
+import uiEditEnJson from './locales/en/ui/edit.json';
 import type {
   ContentEn,
   ContentVi,
@@ -25,15 +57,61 @@ import type {
   UIDict,
 } from './dict-types';
 import type { Language, PhilosophyId } from '../types/index';
-import { validateContent } from './validate';
+import { validateContent, validateManifests } from './validate';
 import type { ContentStructures } from './validate';
 
-const uiVi: UIDict = uiViJson;
-// tsc enforces en completeness against the derived Vietnamese tree (§3.3).
-const uiEn: UIDict = uiEnJson;
+// The per-entity text files merge back into the same ContentVi/ContentEn
+// records every consumer reads (spec-v4-data-organization §3); key order is
+// the record shape, unchanged from the single-file layout. Each file is
+// checked against its slice type by these annotations.
+const contentVi: ContentVi = {
+  profile: profileViJson,
+  skills: skillsViJson,
+  experience: experienceViJson,
+  projects: projectsViJson,
+};
+const contentEn: ContentEn = {
+  profile: profileEnJson,
+  skills: skillsEnJson,
+  experience: experienceEnJson,
+  projects: projectsEnJson,
+};
 
-const contentVi: ContentVi = contentViJson;
-const contentEn: ContentEn = contentEnJson;
+// Feature-group UI files merge into the same UIDict record (§4); the key
+// order matches the old ui.json namespaces exactly.
+const uiVi: UIDict = {
+  nav: uiNavViJson,
+  social: uiSocialViJson,
+  footer: uiFooterViJson,
+  hero: uiHeroViJson,
+  about: uiAboutViJson,
+  expertise: uiExpertiseViJson,
+  experience: uiExperienceViJson,
+  projects: uiProjectsViJson,
+  contact: uiContactViJson,
+  projectDetail: uiProjectDetailViJson,
+  philosophy: uiPhilosophyViJson,
+  common: uiCommonViJson,
+  resume: uiResumeViJson,
+  edit: uiEditViJson,
+};
+// tsc enforces en completeness against the Vietnamese tree (§3.3).
+const uiEn: UIDict = {
+  nav: uiNavEnJson,
+  social: uiSocialEnJson,
+  footer: uiFooterEnJson,
+  hero: uiHeroEnJson,
+  about: uiAboutEnJson,
+  expertise: uiExpertiseEnJson,
+  experience: uiExperienceEnJson,
+  projects: uiProjectsEnJson,
+  contact: uiContactEnJson,
+  projectDetail: uiProjectDetailEnJson,
+  philosophy: uiPhilosophyEnJson,
+  common: uiCommonEnJson,
+  resume: uiResumeEnJson,
+  edit: uiEditEnJson,
+};
 
 const structures = {
   profile,
@@ -149,3 +227,9 @@ export const CONTENT: Record<Language, ResolvedContent> = resolveContent(
   contentVi,
   contentEn,
 );
+
+// The manifest rules (spec-v4-data-organization §5.1) run at the same point
+// as the content rules: a manifest that claims a field no page renders, or
+// a text field no manifest claims, fails the build — not a silent hole in
+// EditBar's provenance.
+validateManifests(structures, contentVi, contentEn, Object.keys(uiVi));

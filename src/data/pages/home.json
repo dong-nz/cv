@@ -1,0 +1,29 @@
+{
+  "id": "home",
+  "route": "/",
+  "content": [
+    {
+      "entity": "profile",
+      "fields": [
+        "name",
+        "tagline",
+        "roles",
+        "bio",
+        "currentInterests",
+        "philosophy",
+        "tldr",
+        "email",
+        "githubUrl",
+        "githubHandle",
+        "linkedinUrl",
+        "linkedinHandle",
+        "telegramUrl",
+        "telegramHandle"
+      ]
+    },
+    { "entity": "skillGroups", "fields": ["*"] },
+    { "entity": "experiences", "fields": ["*"] },
+    { "entity": "projects", "fields": ["featured", "title", "summary", "technologies", "category"] }
+  ],
+  "ui": ["hero", "about", "expertise", "experience", "projects", "contact"]
+}

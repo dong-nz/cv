@@ -1,0 +1,8 @@
+{
+  "id": "philosophy",
+  "route": "/philosophy",
+  "content": [
+    { "entity": "profile", "fields": ["philosophyQuotes"] }
+  ],
+  "ui": ["philosophy"]
+}

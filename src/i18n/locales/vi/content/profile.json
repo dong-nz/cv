@@ -1,0 +1,92 @@
+{
+  "name": "Nguyễn Đông",
+  "title": "Senior Software Engineer",
+  "bio": "Senior Software Engineer với kinh nghiệm xây dựng hệ thống phân tán, logistics technology, và ứng dụng AI/ML vào bài toán thực tế. Tập trung vào system architecture, integration, và production-grade solutions.",
+  "subtitle": "Kỹ sư phần mềm cao cấp với chuyên môn sâu về hệ thống phân tán, công nghệ logistics và ứng dụng AI thực tiễn.",
+  "tldr": "15 năm kinh nghiệm, hơn 8 công ty đã đi qua. Quá dài để kể hết.",
+  "tagline": [
+    {
+      "text": "Phần lớn thời gian tôi là Backend Software Engineer. Muốn tôi là Full Stack Developer, "
+    },
+    {
+      "text": "yes",
+      "emphasis": true
+    },
+    {
+      "text": ", có thể."
+    }
+  ],
+  "currentInterests": [
+    "AI in logistics",
+    "Simulation",
+    "Digital twins",
+    "LLM",
+    "Computer Vision",
+    "High-performance systems"
+  ],
+  "roles": [
+    "System Architect",
+    "Full-Stack Developer",
+    "System Engineer",
+    "AI/ML Application Engineer"
+  ],
+  "philosophyQuotes": [
+    {
+      "title": "Thời gian là vô giá",
+      "details": [
+        "Thời gian là vô giá. Bạn không thể mua nó bằng tiền, không thể khiến nó dừng lại, cũng chẳng thể quay ngược về quá khứ. Một khi thời gian đã trôi qua, nó sẽ mãi mãi không trở lại.",
+        "Chúng ta dành quá nhiều thời gian trong cuộc đời để theo đuổi những thứ như tiền bạc, địa vị và sự công nhận từ người khác. Nhưng thời gian là thứ duy nhất mà chúng ta không bao giờ có thể lấy lại.",
+        "Vì vậy, hãy luôn ý thức về cách bạn sử dụng thời gian của mình. Hãy dành thời gian cho những điều thực sự quan trọng: những người bạn yêu thương, những mục tiêu truyền cảm hứng cho bạn và những khoảnh khắc nuôi dưỡng tâm hồn bạn."
+      ]
+    }
+  ],
+  "philosophy": {
+    "build-for-the-real-problem": {
+      "title": "Giải pháp được xây dựng dựa trên vấn đề thực tế",
+      "description": "Không bắt đầu bằng technology. Bắt đầu bằng problem.",
+      "keywords": [
+        "Problem-first",
+        "Business value",
+        "Measurement"
+      ]
+    },
+    "think-in-systems": {
+      "title": "Think in systems",
+      "description": "Quan tâm đến kiến trúc tổng thể, không chỉ từng component.",
+      "keywords": [
+        "Architecture",
+        "Integration",
+        "Scalability",
+        "Reliability"
+      ]
+    },
+    "measure-impact": {
+      "title": "Measure impact",
+      "description": "Technical implementation phải gắn với measurable outcome.",
+      "keywords": [
+        "Performance",
+        "Reliability",
+        "Cost",
+        "Efficiency"
+      ]
+    },
+    "keep-learning": {
+      "title": "Keep learning",
+      "description": "Continuous exploration of new technologies and approaches.",
+      "keywords": [
+        "AI/ML",
+        "Computer Vision",
+        "LLM",
+        "Distributed systems"
+      ]
+    },
+    "business-domain-knowledge-is-a-key-of-success": {
+      "title": "Kiến thức nghiệp vụ là chìa khóa thành công",
+      "description": "Hiểu sâu về business domain giúp hiểu rõ vấn đề và đưa ra giải pháp phù hợp.",
+      "keywords": [
+        "Biz knowledge",
+        "Business value"
+      ]
+    }
+  }
+}

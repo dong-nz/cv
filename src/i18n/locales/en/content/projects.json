@@ -1,0 +1,65 @@
+{
+  "iot-dws-integration": {
+    "title": "IoT-DWS Integration System",
+    "summary": "Designed and deployed an integration system between IoT devices and DWS (Dimensioning Weighing Scanning) machines across 16 sortations.",
+    "metrics": [
+      "16 sortations deployed"
+    ],
+    "sections": {
+      "context": {
+        "content": "Took over and rapidly mastered an IoT-DWS system after the previous responsible team member left the project. Needed to quickly understand the current architecture and continue developing the integration solution."
+      },
+      "problem": {
+        "content": "Needed integration between IoT devices (sensors, cameras) and DWS machines — a complex physical system with multiple different protocols (HMI, FTP, HTTP)."
+      },
+      "solution": {
+        "content": "Designed an HTTP-based integration engine with HMAC security, RocketMQ messaging, and protocol adapters for HMI/FTP/HTTP."
+      },
+      "challenges": {
+        "content": "Multiple different protocols, security requirements (HMAC signature), real-time data processing, production reliability."
+      },
+      "result": {
+        "content": "Solution deployed across 16 sortations, stable in production, supporting 3 protocols (HMI, FTP, HTTP)."
+      }
+    }
+  },
+  "awb-detection": {
+    "summary": "Applied Computer Vision and Machine Learning to automatically detect and OCR shipping labels from camera images on sortation lines.",
+    "metrics": [
+      "70,000 images/month processed"
+    ],
+    "sections": {
+      "context": {
+        "content": "Sortation machines capture images of packages as they move on conveyor belts. Need to automatically read AWB (Air Waybill) from images for tracking and sorting."
+      },
+      "problem": {
+        "content": "White label on white package — traditional CV methods are not robust enough. Needed ML-based detection."
+      },
+      "result": {
+        "content": "Model fine-tuned for AWB detection, processing 70,000 images/month. Presented at Tech Talk workshop."
+      }
+    }
+  },
+  "facility-management": {
+    "summary": "Built a digital twin platform for logistics facilities — facility modeling, real-time monitoring, and recommendation system.",
+    "sections": {
+      "vision": {
+        "content": "Transition from manual operations to an Operation Intelligence Platform — collect data, monitor, analyze, recommend, decide."
+      },
+      "result": {
+        "content": "Platform supports facility modeling, real-time visibility, and recommendations for capacity planning."
+      }
+    }
+  },
+  "local-llm-experiments": {
+    "summary": "Technical exploration of running local MoE LLMs with llama.cpp — GPU offloading, VRAM optimization, performance tracing.",
+    "sections": {
+      "exploration": {
+        "content": "Technical exploration of MoE (Mixture of Experts), expert routing, GPU offloading, VRAM optimization, prefill/decode pipeline."
+      },
+      "learnings": {
+        "content": "Understand the system → Measure → Analyze → Optimize. Not about showing off hardware — but demonstrating engineering approach."
+      }
+    }
+  }
+}

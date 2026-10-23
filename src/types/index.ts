@@ -44,3 +44,39 @@ export type PhilosophyId =
   | 'measure-impact'
   | 'keep-learning'
   | 'business-domain-knowledge-is-a-key-of-success';
+
+// Page manifests (spec-v4-data-organization §5): one per route plus the
+// synthetic resume consumer. A manifest claims which joined records a page
+// reads — provenance for EditBar grouping and the orphan-field rule.
+export type PageId =
+  | 'home'
+  | 'about'
+  | 'experience'
+  | 'projects'
+  | 'project-detail'
+  | 'contact'
+  | 'philosophy';
+
+export type ManifestId = PageId | 'resume';
+
+// Entity ids join the structure document, the text documents, and the
+// manifest claims (§3 table).
+export type ContentEntityId = 'profile' | 'skillGroups' | 'experiences' | 'projects';
+
+export type PageManifestClaim = {
+  entity: ContentEntityId;
+  // Paths into the joined records; "*" claims the whole entity. Record-level
+  // fields are named record-relative ("summary"); "sections.*" claims every
+  // sub-field of the sections record.
+  fields: string[];
+};
+
+export type PageManifest = {
+  id: ManifestId;
+  // null for the synthetic resume consumer — it has no route.
+  route: string | null;
+  content: PageManifestClaim[];
+  // Page-owned UI groups only; component-owned groups are never repeated
+  // (§4 ownership table).
+  ui: string[];
+};

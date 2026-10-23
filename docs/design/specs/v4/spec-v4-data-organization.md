@@ -1,6 +1,6 @@
 # Specification — v4 Data Organization (per-entity content, per-page manifests, per-group UI)
 
-Status: **Design agreed 2026-10-23; implementation TODO.** Follow-up to `spec-v4-live-edit.md`; does not change its D1–D10 decisions, only the physical document layout and the edit-mode document registry.
+Status: **Design agreed 2026-10-23; implemented 2026-10-23** (§9). Automated gates pass; the remaining open items are the owner's browser walkthrough (§8 last two rows) and pushing the new file layout to the Gitea content repository (live-edit row 11 dependency — the proxy answers 404 for paths the repository does not have). Follow-up to `spec-v4-live-edit.md`; does not change its D1–D10 decisions, only the physical document layout and the edit-mode document registry.
 
 ## 1. Decisions from the 2026-10-23 discussion
 
@@ -146,10 +146,10 @@ Order decided 2026-10-23: this spec lands **after** `spec-v4-inline-editing.md` 
 
 ## 8. Acceptance criteria
 
-- [ ] Merged `CONTENT` and `UI` byte-identical before/after the split (automated comparison script, throwaway).
-- [ ] `pnpm build`, `pnpm validate:content`, `pnpm lint` (no new warnings), `pnpm build:resume-all` pass.
-- [ ] `pnpm tsx scripts/smoke-draft.ts` passes against the new registry.
-- [ ] Validator rejects: unknown entity, unresolvable field path, orphan content field, unknown ui group, missing manifest.
+- [x] Merged `CONTENT` and `UI` byte-identical before/after the split (automated comparison script, throwaway). — verified 2026-10-23 against baseline dumps captured before the cutover: `CONTENT.vi`/`CONTENT.en` identical; `UI` differs only by the intentional label changes of the inline-editing cutover (panel labels removed, `edit.fields` + `appears*` labels added).
+- [x] `pnpm build`, `pnpm validate:content`, `pnpm lint` (no new warnings), `pnpm build:resume-all` pass. — verified 2026-10-23; the resume generator consumes the merged `UI`/`CONTENT` with zero call-site changes, both PDFs render.
+- [x] `pnpm tsx scripts/smoke-draft.ts` passes against the new registry. — 8/8 checks 2026-10-23, fixtures over `experience.json` / `experience.vi.json` / `projects.json`.
+- [x] Validator rejects: unknown entity, unresolvable field path, orphan content field, unknown ui group, missing manifest. — verified 2026-10-23 by a throwaway mutation harness (all five rejects + a clean acceptance asserted); the unknown-ui-group rule caught a real mistake during implementation (`project-detail.json` naming the group by file name instead of namespace).
 - [ ] Edit mode end-to-end (browser): edit one bio line + one project summary → EditBar shows two documents with page annotations → save produces two per-file commits on the target branch.
 - [ ] Browser walkthrough unchanged for visitors: all 7 routes, both languages, identical rendering.
 
@@ -158,5 +158,5 @@ Order decided 2026-10-23: this spec lands **after** `spec-v4-inline-editing.md` 
 | # | Task | Status |
 |---|---|---|
 | 0 | Design agreed (D1–D5) | ✅ Done 2026-10-23 |
-| 1–6 | Implementation steps §7 | ⬜ TODO |
-| — | Acceptance §8 | ⬜ TODO |
+| 1–6 | Implementation steps §7 | ✅ Done 2026-10-23 — content split (4 files × 2 languages) + UI split (14 groups × 2) with merge asserted in `index.ts`; `src/data/pages/*.json` (8 manifests) + `pages.ts` + `PageId`/`PageManifestClaim`/`PageManifest` in `src/types/index.ts`; validator rules 1–4 in `validate.ts` (run at load and by `validate:content`); `draft.ts` registry data-driven over 12 writable documents (4 structure + 8 text, `entityOfDoc`/`docEntityMap` exported for provenance + EditBar); `describeField()` names the per-entity file automatically; EditBar "appears on" annotations via `manifestsClaiming`/`recordEntity`; AGENTS.md Data Layer + Live Edit Mode + Component Structure updated |
+| — | Acceptance §8 | 🟡 Automated rows verified 2026-10-23 (see §8 checkboxes); browser rows open — the owner verifies in a real browser |

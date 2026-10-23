@@ -1,0 +1,19 @@
+{
+  "id": "contact",
+  "route": "/contact",
+  "content": [
+    {
+      "entity": "profile",
+      "fields": [
+        "email",
+        "githubUrl",
+        "githubHandle",
+        "linkedinUrl",
+        "linkedinHandle",
+        "telegramUrl",
+        "telegramHandle"
+      ]
+    }
+  ],
+  "ui": ["contact"]
+}

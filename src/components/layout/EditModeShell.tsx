@@ -173,7 +173,6 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     () =>
       store && (phase === 'ready' || phase === 'offline')
         ? {
-            textDoc: lang === 'en' ? 'content.en' : 'content.vi',
             commit: (path, value) => {
               const rejected = store.setValue(lang, path, value);
               setIssues(rejected ?? []);
@@ -183,13 +182,26 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
               refresh(store);
               return null;
             },
-            revert: (path) => {
-              const rejected = store.revertPath(path);
+            describeText: (path) => store.describeText(lang, path),
+            isTextDirty: (path) => store.isTextDirty(lang, path),
+            setText: (path, value) => {
+              const rejected = store.setText(lang, path, value);
               setIssues(rejected ?? []);
               if (!rejected) refresh(store);
               return rejected;
             },
-            isPathDirty: (path) => store.isPathDirty(path),
+            deleteText: (path) => {
+              const rejected = store.deleteText(lang, path);
+              setIssues(rejected ?? []);
+              if (!rejected) refresh(store);
+              return rejected;
+            },
+            moveText: (path, from, to) => {
+              const rejected = store.moveText(lang, path, from, to);
+              if (rejected) setIssues(rejected);
+              else refresh(store);
+              return rejected;
+            },
             describe: (doc, path) => store.describeField(doc, path),
             apply: (doc, next) => {
               const rejected = store.apply(doc, next);
@@ -342,10 +354,10 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     [store, refresh],
   );
 
-  const revertPath = useCallback(
-    (path: string) => {
+  const revertField = useCallback(
+    (id: DraftDocId, path: string) => {
       if (!store) return;
-      const rejected = store.revertPath(path);
+      const rejected = store.revertIn(id, path);
       setIssues(rejected ?? []);
       if (!rejected) refresh(store);
     },
@@ -391,7 +403,7 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
               onTakeTheirs={resolveTakeTheirs}
               onResolveField={(id, path, side) => void resolveConflictField(id, path, side)}
               onDiscardDoc={discardDoc}
-              onRevertPath={revertPath}
+              onRevertPath={revertField}
             />
           </>
         )}
