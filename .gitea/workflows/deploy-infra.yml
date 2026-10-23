@@ -77,8 +77,8 @@ jobs:
               -v "$PWD/nginx.conf:/etc/nginx/templates/default.conf.template:ro" \
               -v "$PWD/deploy/htpasswd:/etc/nginx/htpasswd:ro" \
               -e GITEA_TOKEN=placeholder \
-              -e GITEA_CONTENTS_API=http://placeholder \
-              -e NGINX_ENVSUBST_FILTER=GITEA_TOKEN,GITEA_CONTENTS_API \
+              -e GITEA_CONTENTS_API=http://127.0.0.1:1 \
+              -e 'NGINX_ENVSUBST_FILTER=GITEA_TOKEN|GITEA_CONTENTS_API' \
               nginx:alpine nginx -t
 
       # Apply + verify (D4): recreate is the same command the Dockge deploy

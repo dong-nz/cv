@@ -13,9 +13,13 @@ services:
     # daemonizes and the container exits.
     entrypoint: ["sh", "-c", ". /run/secrets/site_config && exec /docker-entrypoint.sh \"$$@\""]
     environment:
-      # Names the variables the template renderer substitutes, so $uri/$host
-      # stay nginx runtime variables. The filter itself is not sensitive.
-      NGINX_ENVSUBST_FILTER: GITEA_TOKEN,GITEA_CONTENTS_API
+      # Names the variables the template renderer substitutes. The filter is a
+      # REGEX the official entrypoint matches against each variable name
+      # (`t ~ /^(filter)$/`) — alternatives MUST be separated with |, a comma
+      # matches nothing and leaves ${…} in the rendered config (nginx -t then
+      # fails: unknown "gitea_contents_api" variable — reproduced 2026-10-23).
+      # $uri/$host stay nginx runtime variables. The filter is not sensitive.
+      NGINX_ENVSUBST_FILTER: GITEA_TOKEN|GITEA_CONTENTS_API
     volumes:
       - ./dist:/usr/share/nginx/html:ro
       # Mounted as a template: the image's envsubst step renders it to
