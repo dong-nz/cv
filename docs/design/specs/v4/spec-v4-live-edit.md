@@ -1,7 +1,7 @@
 # Specification — v4 Live Edit (i18n Overlay + Git-backed Content Editing)
 
 > **Parent:** `spec.md` (product vision), `specs/v3/spec-v3-i18n.md` (supersedes its Phase 2)
-> **Status:** rev.4 — Phases 1–3 implemented 2026-10-22 (see §12 rows 3–15). Remaining: the production nginx step (§6.3), pushing the content documents to the repository, `GITEA_TOKEN`, and the owner's browser walkthrough.
+> **Status:** rev.4 — Phases 1–3 implemented 2026-10-22 (see §12 rows 3–15). Remaining (2026-10-23): the owner-side infra setup + first verified run per `spec-v4-deploy-infra.md` rev.7 (Gitea Actions variables `SITE_URL`/`SITE_NAME`, stack `secrets/site_config` with the restricted `GITEA_TOKEN`), and the owner's browser walkthrough. Content documents are pushed and on `master` (§12 row 11); the production nginx step (§6.3) is automated repo-side by `deploy-infra.yml`.
 
 ---
 
@@ -444,7 +444,7 @@ location /api/content/ {
 
 ### 6.3 Production deployment of the proxy (operational step — was missing in rev.1)
 
-`deploy.yml` rsyncs `dist/` only — `nginx.conf` is **not** deployed by the pipeline. Phase 2 therefore includes an explicit one-time server step: update the stack's nginx config + `htpasswd`, set `GITEA_TOKEN` in the stack environment, and reload the nginx container on `/opt/stacks/dong-site`. Recorded as Phase 2 step 0 in §7 and §12.
+`deploy.yml` rsyncs `dist/` only — `nginx.conf` is **not** deployed by the pipeline. Phase 2 therefore includes an explicit one-time server step: update the stack's nginx config + `htpasswd`, set `GITEA_TOKEN` in the stack environment, and reload the nginx container on `/opt/stacks/dong-site`. Recorded as Phase 2 step 0 in §7 and §12. **Superseded 2026-10-23 by `spec-v4-deploy-infra.md`:** `deploy-infra.yml` ships `nginx.conf` / `compose.yaml` / `deploy/htpasswd` and redeploys the container automatically; `GITEA_TOKEN` now lives in the stack's `secrets/site_config` (D13), not the stack environment.
 
 ### 6.4 Authorization tiers (future-ready, no custom RBAC)
 
