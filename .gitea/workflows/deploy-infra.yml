@@ -23,16 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Ship exactly the three triggered files; -R keeps deploy/htpasswd under
-      # deploy/ in the stack directory. Never .env, never secrets/ (D6).
-      # The action passes `path` to rsync as ONE quoted argument — a comma list
-      # reaches rsync as a single literal filename (first real run 2026-10-23:
-      # link_stat "nginx.conf,compose.yaml,deploy/htpasswd" failed). One step
-      # per file = the spec §4 fallback.
+      # Ship exactly the three triggered files. Never .env, never secrets/ (D6).
+      # The action builds the rsync source as "$GITHUB_WORKSPACE/$path" and passes
+      # it as one argument (entrypoint.sh) — so NO --relative: -R mirrors the whole
+      # absolute workspace path onto the server (run 2026-10-23 created
+      # dong-site/workspace/dong.nguyen/cv/… on the VPS). Plain -avz lands each
+      # file's basename in remote_path; the htpasswd step names deploy/ itself.
       - name: Sync nginx.conf
         uses: burnett01/rsync-deployments@v9
         with:
-          switches: -avzR
+          switches: -avz
           path: nginx.conf
           remote_path: /opt/stacks/dong-site/
           remote_host: ${{ secrets.DEPLOY_HOST }}
@@ -42,7 +42,7 @@ jobs:
       - name: Sync compose.yaml
         uses: burnett01/rsync-deployments@v9
         with:
-          switches: -avzR
+          switches: -avz
           path: compose.yaml
           remote_path: /opt/stacks/dong-site/
           remote_host: ${{ secrets.DEPLOY_HOST }}
@@ -52,9 +52,9 @@ jobs:
       - name: Sync deploy/htpasswd
         uses: burnett01/rsync-deployments@v9
         with:
-          switches: -avzR
+          switches: -avz
           path: deploy/htpasswd
-          remote_path: /opt/stacks/dong-site/
+          remote_path: /opt/stacks/dong-site/deploy/
           remote_host: ${{ secrets.DEPLOY_HOST }}
           remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
           remote_user: ${{ secrets.DEPLOY_USER }}

@@ -51,10 +51,10 @@ jobs:
   redeploy:
     steps:
       1  actions/checkout
-         2  burnett01/rsync-deployments x3 — switches: -avzR (no --delete; -R keeps deploy/htpasswd under deploy/)
+         2  burnett01/rsync-deployments x3 — switches: -avz (no --delete, no -R)
             path: nginx.conf / compose.yaml / deploy/htpasswd — one step per file
-            (rev.: the action passes `path` as ONE quoted argument; the comma list reached rsync as a single literal filename — verified on the first real run 2026-10-23)
-            remote_path: <dockge stack dir>/dong-site/   (existing DEPLOY_* secrets)
+            remote_path: <dockge stack dir>/dong-site/ for the first two, <dockge stack dir>/dong-site/deploy/ for htpasswd   (existing DEPLOY_* secrets)
+            (The action builds the rsync source as "$GITHUB_WORKSPACE/$path" and passes it as one argument — entrypoint.sh. A comma-list therefore fails as one literal filename, and --relative/-R mirrors the absolute workspace path onto the server; both proven on the 2026-10-23 runs.)
       3  appleboy/ssh-action — script:
          cd <stack dir>/dong-site
          docker run --rm \
@@ -74,7 +74,7 @@ jobs:
 ```
 
 Notes:
-- The test container renders the template with **pure placeholders on the command line** — `nginx -t` validates syntax only, and `proxy_pass http://placeholder/…` is valid syntax (a literal host needs no resolver check at `-t`). It mounts the template and the htpasswd file (`-t` opens `auth_basic_user_file`); it reads no config file and no secrets: the real values never enter the test container or the job. [Resolved 2026-10-23 on the first real run: the rsync action's comma-separated `path` input reaches rsync as ONE quoted literal filename (`link_stat "nginx.conf,compose.yaml,deploy/htpasswd"` failed); the workflow now uses the fallback — three single-path steps.]
+- The test container renders the template with **pure placeholders on the command line** — `nginx -t` validates syntax only, and `proxy_pass http://placeholder/…` is valid syntax (a literal host needs no resolver check at `-t`). It mounts the template and the htpasswd file (`-t` opens `auth_basic_user_file`); it reads no config file and no secrets: the real values never enter the test container or the job. [Resolved on the 2026-10-23 runs: (1) the comma-separated `path` input reaches rsync as ONE quoted literal filename (`link_stat "nginx.conf,compose.yaml,deploy/htpasswd"` failed) → three single-path steps; (2) the action prepends `$GITHUB_WORKSPACE` to `path` (`LOCAL_PATH="$GITHUB_WORKSPACE/$INPUT_PATH"`), so `-R` mirrored the absolute workspace path — a `workspace/dong.nguyen/cv/…` tree appeared on the VPS → the workflow uses plain `-avz` with a per-step `remote_path` instead.]
 - The health probe uses `wget` (busybox) because `nginx:alpine` carries no curl.
 - Restart gap is ~1–2 s (single container). Accepted for a personal site; a two-container swap is explicitly out of scope.
 - `on.push.paths` is evaluated by the act runner — assumed supported on this Gitea [INFERENCE: verify on the first real run — the first run did execute after the push that touched the three files; confirm the trigger event label in the Actions UI to close this]. Fallback if the filter is ignored: a first step that diffs `$GITHUB_BASE_REF..$GITHUB_SHA` (or the head commit) against the trigger paths and exits early.
@@ -166,9 +166,9 @@ GITEA_CONTENTS_API=https://<gitea-host>/api/v1/repos/<owner>/<repo>/contents/
 | 0 | Design agreed (D1–D9, rev.3 owner facts confirmed) | ✅ Done 2026-10-23 |
 | 1 | Owner-side confirmations: stack path `/opt/stacks` ✅, upstream Dockge ✅, stack-file name `compose.yaml` ✅ (all confirmed 2026-10-23); remaining: stack-vs-repo drift diff (§6) | 🟡 TODO — drift diff blocks the first run |
 | 1b | Rename `docker-compose.yaml` → `compose.yaml` (D9) + AGENTS.md references | ✅ Done 2026-10-23 — `git mv`; `docker compose config --quiet` validates (only the expected local `GITEA_TOKEN`-unset warning) |
-| 2 | `.gitea/workflows/deploy-infra.yml` per §4 | ✅ Done 2026-10-23 — checkout → three single-path rsync steps (-avzR) → test container (placeholders + htpasswd mount) → recreate + wget/nginx -t probe; appleboy/ssh-action pinned v1.2.0. First-run fix 2026-10-23: the original comma-list `path` failed (action passes it as one quoted argument) — §4 fallback applied |
+| 2 | `.gitea/workflows/deploy-infra.yml` per §4 | ✅ Done 2026-10-23 — checkout → three single-path rsync steps (-avz, per-step remote_path; htpasswd → …/dong-site/deploy/) → test container (placeholders + htpasswd mount) → recreate + wget/nginx -t probe; appleboy/ssh-action pinned v1.2.0. Run fixes 2026-10-23: comma-list `path` failed (single quoted argument) → three steps; `-R` + the action's workspace-prefixed source mirrored `workspace/dong.nguyen/cv/…` onto the VPS → `-R` dropped |
 | 3 | Restricted Gitea token `site-contents-write` (Contents write, expiry) + create stack `secrets/site_config` (chmod 600, two KEY=value lines) | ⬜ TODO — owner-side |
-| 4 | First verified run + acceptance §7 | 🟡 First run 2026-10-23 failed at the rsync step (comma-list `path` → single literal filename), nothing shipped, live container untouched; fixed with the three-step fallback — re-run via `workflow_dispatch` after the fix lands |
+| 4 | First verified run + acceptance §7 | 🟡 Runs 2026-10-23: run 1 failed at rsync (comma-list), nothing shipped; run 2 shipped to the wrong places (workspace mirror; `deploy/htpasswd` landed as a directory). Both causes fixed in the workflow. Owner-side before the next dispatch: delete the stray `workspace/` dir in the stack directory, and make `deploy/` hold the htpasswd as a FILE (rsync cannot overwrite a directory with a file) — then `workflow_dispatch` |
 | 5 | Docs: AGENTS.md Deployment table + live-edit §12 row 11 status | ✅ Done 2026-10-23 |
 | 6 | D10–D12 implementation: `site.ts` env read, `index.html` tokens + vite plugin, robots generation, `nginx.conf` variables, `vite.config.ts` env proxy, `deploy.yml` env, `.env.example`, AGENTS.md | ✅ Done 2026-10-23 — verified: `pnpm build` with `.env` filled emits injected meta + `dist/robots.txt`; `SITE_URL=` empty fails with the named-variable error; runtime files grep-clean of `vugado` |
 | 9 | D13 implementation: `compose.yaml` per §4.1 (secret `site_config` + entrypoint override), `.gitignore` += `secrets/`; VPS: create `secrets/site_config`, delete stack `.env` | 🟡 Repo side Done 2026-10-23 (`compose config --quiet` validates); owner-side file + stack `.env` removal TODO |
