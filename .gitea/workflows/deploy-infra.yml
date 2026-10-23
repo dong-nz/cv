@@ -25,11 +25,35 @@ jobs:
 
       # Ship exactly the three triggered files; -R keeps deploy/htpasswd under
       # deploy/ in the stack directory. Never .env, never secrets/ (D6).
-      - name: Sync infra files
+      # The action passes `path` to rsync as ONE quoted argument — a comma list
+      # reaches rsync as a single literal filename (first real run 2026-10-23:
+      # link_stat "nginx.conf,compose.yaml,deploy/htpasswd" failed). One step
+      # per file = the spec §4 fallback.
+      - name: Sync nginx.conf
         uses: burnett01/rsync-deployments@v9
         with:
           switches: -avzR
-          path: nginx.conf,compose.yaml,deploy/htpasswd
+          path: nginx.conf
+          remote_path: /opt/stacks/dong-site/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      - name: Sync compose.yaml
+        uses: burnett01/rsync-deployments@v9
+        with:
+          switches: -avzR
+          path: compose.yaml
+          remote_path: /opt/stacks/dong-site/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      - name: Sync deploy/htpasswd
+        uses: burnett01/rsync-deployments@v9
+        with:
+          switches: -avzR
+          path: deploy/htpasswd
           remote_path: /opt/stacks/dong-site/
           remote_host: ${{ secrets.DEPLOY_HOST }}
           remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
