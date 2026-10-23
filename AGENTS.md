@@ -142,7 +142,8 @@ src/
 - Site identity is deployment-time configuration, not a repo literal: `SITE_URL` / `SITE_NAME` are Gitea Actions **variables** (`vars.` context — public values, not secrets) passed as job env to `build` and `generate-resume`; locally they live in the uncommitted `.env` (template `.env.example`). A production build without them fails with an error naming the variable
 - Three jobs: `build` (`pnpm build` → `dist/` artifact) → `generate-resume` (`pnpm tsx scripts/generate-resume.ts --lang=en`, then `--lang=vi`) → `deploy` rsyncs `dist/`, both PDFs included, to `/opt/stacks/dong-site/dist/`
 - `nginx.conf` — production Nginx SPA routing + caching config + the `/api/content/` location: auth_basic (`deploy/htpasswd`) in front of a proxied Gitea Contents API; the upstream URL and the write token are `${GITEA_CONTENTS_API}` / `${GITEA_TOKEN}` substituted by the image's envsubst step at container start — the token and the Gitea host never enter the SPA bundle or the repository
-- `compose.yaml` — the stack definition for local AND VPS use (repo copy == stack copy): runtime values live in `secrets/site_config` (gitignored file in the stack directory, two lines `GITEA_TOKEN=` / `GITEA_CONTENTS_API=`, chmod 600), sourced by an entrypoint override before the official entrypoint renders the template; the stack directory has no `.env`. On the VPS the same stack is managed by **Dockge** (upstream; stacks dir `/opt/stacks`, stack file `/opt/stacks/dong-site/compose.yaml`) — the repository is the single source of truth for `nginx.conf` / `compose.yaml` / `deploy/htpasswd`. Repo side implemented 2026-10-23; owner-side setup (Gitea Actions variables, stack `secrets/site_config`) and the first verified run are pending
+- `compose.yaml` — the stack definition for local AND VPS use (repo copy == stack copy): runtime values live in `secrets/site_config` (gitignored file in the stack directory, two lines `GITEA_TOKEN=` / `GITEA_CONTENTS_API=`, chmod 600), sourced by an entrypoint override (`set -a` + inline `nginx -g 'daemon off;'` — a compose entrypoint override drops the image's CMD) before the official entrypoint renders the template; the stack directory has no `.env`. On the VPS the same stack is managed by **Dockge** (upstream; stacks dir `/opt/stacks`, stack file `/opt/stacks/dong-site/compose.yaml`) — the repository is the single source of truth for `nginx.conf` / `compose.yaml` / `deploy/htpasswd`
+- `compose.override.yaml` — local-only, auto-merged by `docker compose`, never rsynced by the pipeline: publishes the container on `127.0.0.1:8081` so the production stack can be browsed locally; the VPS stack is unaffected
 
 ```
 .gitea/
@@ -151,6 +152,7 @@ src/
     └── deploy-infra.yml
 nginx.conf
 compose.yaml
+compose.override.yaml
 ```
 
 ## CSS Architecture

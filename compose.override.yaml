@@ -1,0 +1,9 @@
+# Local-only compose override (compose spec: `docker compose` auto-merges this
+# file on top of compose.yaml). The deploy-infra pipeline rsyncs exactly
+# nginx.conf / compose.yaml / deploy/htpasswd — never this file — so the VPS
+# stack is unaffected. It publishes the container on the local loopback so the
+# site is reachable from a browser for testing the real serving path.
+services:
+  dong-site:
+    ports:
+      - "127.0.0.1:8081:80"

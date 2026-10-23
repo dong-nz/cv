@@ -79,7 +79,7 @@ docker network create docker-network   # once; compose.yaml joins it
 docker compose up -d
 ```
 
-The site serves at `http://127.0.0.1/`; `?edit` there asks for HTTP Basic credentials from `deploy/htpasswd`.
+`compose.yaml` defines no published port (the VPS container is reached through its own fronting); `compose.override.yaml` — auto-merged by `docker compose`, never shipped by the pipeline — publishes the container on the local loopback. Open **`http://127.0.0.1:8081/`** in a browser; `?edit` there asks for HTTP Basic credentials from `deploy/htpasswd`. If 8081 is taken on your machine, change the host port in `compose.override.yaml`. Stop the stack with `docker compose stop`.
 
 ## Production deployment (Gitea CI)
 

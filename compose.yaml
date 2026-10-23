@@ -8,10 +8,13 @@ services:
     container_name: dong-site
     restart: unless-stopped
     # Source the config file, then hand over to the image's official entrypoint.
-    # "$$@" is compose's escape: the rendered command sees "$@", forwarding the
-    # image's default CMD (nginx -g 'daemon off;') — without it nginx
-    # daemonizes and the container exits.
-    entrypoint: ["sh", "-c", ". /run/secrets/site_config && exec /docker-entrypoint.sh \"$$@\""]
+    # set -a is REQUIRED: a sourced assignment is a shell variable, not an env var —
+    # without export the entrypoint child (and its envsubst step) sees nothing and
+    # the template renders unsubstituted (reproduced locally 2026-10-23: unknown
+    # "gitea_contents_api" variable). The nginx command is inline: a compose
+    # entrypoint override does NOT keep the image's CMD (CMD=[]) — an empty "$@"
+    # makes the exec a no-op, exit 0, restart loop.
+    entrypoint: ["sh", "-c", "set -a; . /run/secrets/site_config; exec /docker-entrypoint.sh nginx -g 'daemon off;'"]
     environment:
       # Names the variables the template renderer substitutes. The filter is a
       # REGEX the official entrypoint matches against each variable name
