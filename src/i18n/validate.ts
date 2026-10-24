@@ -27,6 +27,12 @@ export type ContentStructures = {
   projects: ProjectStructure[];
 };
 
+// Rule 7 reads the category labels, which live in the UI group files — a
+// read-only part of the dictionary tree (spec-v4-data-organization §4). They
+// are passed in as a slice rather than owned here: the load-time and CI
+// callers have the whole tree, the edit session fetches only this group.
+export type CategoryLabels = { vi: Record<string, unknown>; en: Record<string, unknown> };
+
 const hasHtml = (value: string) => value.includes('<') || value.includes('>');
 
 // Walks every string value of a text document, collecting the document paths
@@ -70,6 +76,7 @@ export function collectContentIssues(
   structures: ContentStructures,
   vi: ContentVi,
   en: ContentEn,
+  categoryLabels: CategoryLabels | null,
 ): ContentIssue[] {
   const issues: ContentIssue[] = [];
 
@@ -164,6 +171,28 @@ export function collectContentIssues(
     }
   }
 
+  // Rule 7: every category a project uses has a non-empty label in both
+  // languages (spec-v5 D4). The category union is generated from these very
+  // values, so the failure worth catching is not an unknown category but a
+  // badge that renders empty. `null` means the labels are not available to
+  // this caller — the edit session's read-only fetch failed — and the rule is
+  // skipped, never guessed at.
+  if (categoryLabels) {
+    const used = new Set(structures.projects.map((project) => project.category));
+    for (const lang of ['vi', 'en'] as const) {
+      const labels = categoryLabels[lang];
+      for (const category of used) {
+        const label = labels[category];
+        if (typeof label !== 'string' || label.trim() === '') {
+          issues.push({
+            path: `src/i18n/locales/${lang}/ui/projects.json: categories.${category}`,
+            message: 'category used by a project has no label in this language',
+          });
+        }
+      }
+    }
+  }
+
   return issues;
 }
 
@@ -171,8 +200,9 @@ export function validateContent(
   structures: ContentStructures,
   vi: ContentVi,
   en: ContentEn,
+  categoryLabels: CategoryLabels | null,
 ): void {
-  const issues = collectContentIssues(structures, vi, en);
+  const issues = collectContentIssues(structures, vi, en, categoryLabels);
   if (issues.length > 0) {
     const detail = issues.map((i) => `  ${i.path}: ${i.message}`).join('\n');
     throw new Error(`content validation failed (${issues.length} issue(s)):\n${detail}`);

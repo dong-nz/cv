@@ -1,19 +1,28 @@
 // Smoke test for the draft store (spec-v4 §5.1, §5.5, §5.6; registry per
-// spec-v4-data-organization §6.1; id-union legs per §3.1).
+// spec-v4-data-organization §6.1). Id unions are no longer the store's
+// business — scripts/generate-content-types.ts derives them from these very
+// documents (spec-v5), so what is checked here is the draft itself: text
+// writes, record add/delete/rename, conflicts and rebase, and the validator
+// rules a rejected edit is reported through.
 // Run: pnpm tsx scripts/smoke-draft.ts
-import { readFileSync } from 'node:fs';
-import { DraftStore, applyUnionChanges, bundledBase, diffIdsWithUnions } from '../src/i18n/draft';
+import { DraftStore, bundledBase } from '../src/i18n/draft';
+import type { CategoryLabels } from '../src/i18n/validate';
+import projectsEnUiJson from '../src/i18n/locales/en/ui/projects.json';
+import projectsViUiJson from '../src/i18n/locales/vi/ui/projects.json';
 
 const fail = (msg: string): never => {
   console.error(`FAIL: ${msg}`);
   process.exit(1);
 };
 
-// The file the save pipeline patches.
-const TYPES = readFileSync(new URL('../src/types/index.ts', import.meta.url), 'utf8');
+// Rule 7's read-only input, exactly as the edit session supplies it.
+const LABELS: CategoryLabels = {
+  vi: projectsViUiJson.categories as Record<string, unknown>,
+  en: projectsEnUiJson.categories as Record<string, unknown>,
+};
 
 const bases = bundledBase();
-const store = new DraftStore(structuredClone(bases));
+const store = new DraftStore(structuredClone(bases), LABELS);
 
 const projects = store.dataOf('projects') as { id: string }[];
 const firstProject = projects[0].id;
@@ -65,7 +74,7 @@ if (!same) fail('restored draft differs from saved snapshot');
 
 // 6. Conflict: base changed at a path the draft also touched → rebase reports
 // a conflict; take-theirs (discardDocument) clears it.
-const store2 = new DraftStore(structuredClone(bases));
+const store2 = new DraftStore(structuredClone(bases), LABELS);
 store2.setValue('vi', `projects.${firstProject}.summary`, 'MINE');
 const driftedBase = structuredClone(bases);
 (driftedBase['projects.vi'].data as Record<string, Record<string, string>>)[firstProject].summary = 'THEIRS';
@@ -77,7 +86,7 @@ if (store2.changedPaths('projects.vi').includes(`${firstProject}.summary`))
   fail('take-theirs left draft residue');
 
 // 7. Clean rebase: base changed at a DIFFERENT path → draft edit survives.
-const store3 = new DraftStore(structuredClone(bases));
+const store3 = new DraftStore(structuredClone(bases), LABELS);
 store3.setValue('vi', `projects.${firstProject}.summary`, 'MINE');
 const otherBase = structuredClone(bases);
 const otherId = projects[1].id;
@@ -93,7 +102,7 @@ if (mergedText[otherId].summary !== 'THEIRS') fail('rebase lost the base edit');
 // branch — the field still lives in the structure document) must gain a real
 // array when a [0] path is committed; an object-keyed pseudo-array crashed
 // TagListEditor's items.map on the re-render after the first tag edit.
-const store4 = new DraftStore(structuredClone(bases));
+const store4 = new DraftStore(structuredClone(bases), LABELS);
 const baseVi = store4.dataOf('profile.vi') as Record<string, Record<string, unknown>>;
 delete baseVi.currentInterests;
 const tagEdit = store4.setValue('vi', 'profile.currentInterests[0]', 'NEW TAG');
@@ -102,55 +111,24 @@ const arr = (store4.dataOf('profile.vi') as Record<string, Record<string, unknow
 if (!Array.isArray(arr)) fail(`setPath made ${JSON.stringify(arr)}, not an array`);
 if (arr[0] !== 'NEW TAG') fail('array element not set');
 
-// 9. The shipped documents and the shipped id unions agree. This is the check
-// that was missing: a skill group deleted in edit mode left 'logistics-
-// technology' in SkillGroupId, and `Record<SkillGroupId, …>` then failed the
-// build with TS2741.
-const drift = diffIdsWithUnions(new DraftStore(structuredClone(bases)), TYPES);
-if (drift.added.length + drift.removed.length > 0)
-  fail(`documents and id unions disagree: ${JSON.stringify(drift)}`);
-
-// 10. A deleted record prunes its union member — and only that line, in
-// either line ending (git stores LF, a Windows checkout reads CRLF).
-const store5 = new DraftStore(structuredClone(bases));
+// 9. A skill-group delete removes the record and its text in both languages,
+// and the draft still validates.
+const store5 = new DraftStore(structuredClone(bases), LABELS);
 const groupIds = (store5.dataOf('skills') as { id: string }[]).map((g) => g.id);
 const victim = groupIds[groupIds.length - 1];
 const delGroup = store5.deleteRecord('skill-group', { id: victim });
 if (delGroup !== null) fail(`skill-group delete rejected: ${JSON.stringify(delGroup)}`);
 const afterDelete = store5.validate();
 if (afterDelete.length > 0) fail(`validate after delete: ${JSON.stringify(afterDelete)}`);
-// The union leg follows ids whose documents actually landed.
-for (const id of ['skills', 'skills.vi', 'skills.en'] as const) store5.markWritten(id, 'simulated-sha');
-const stale = diffIdsWithUnions(store5, TYPES);
-if (stale.added.length > 0) fail(`a delete reported additions: ${JSON.stringify(stale.added)}`);
-if (stale.removed.length !== 1 || stale.removed[0].id !== victim || stale.removed[0].union !== 'SkillGroupId')
-  fail(`stale union member not reported: ${JSON.stringify(stale.removed)}`);
-const pruned = applyUnionChanges(TYPES, [{ union: 'SkillGroupId', add: [], remove: [victim] }]);
-if (pruned === null) fail('prune refused a multi-line union');
-if (pruned.includes(`'${victim}'`)) fail('stale member survived the prune');
-const EOL = TYPES.includes('\r\n') ? '\r\n' : '\n';
-const expectedBlock = `export type SkillGroupId =${EOL}${groupIds
-  .filter((id) => id !== victim)
-  .map((id) => `  | '${id}'`)
-  .join(EOL)};${EOL}`;
-const expected = TYPES.replace(/export type SkillGroupId =\r?\n(?:[ \t]*\| '[^']+';?\r?\n)+/, () => expectedBlock);
-if (pruned !== expected) fail('prune rewrote more than the SkillGroupId member list');
-const afterPrune = diffIdsWithUnions(store5, pruned);
-if (afterPrune.added.length + afterPrune.removed.length > 0)
-  fail(`union still mismatched after the prune: ${JSON.stringify(afterPrune)}`);
-const lfTypes = TYPES.replace(/\r\n/g, '\n');
-const prunedLf = applyUnionChanges(lfTypes, [{ union: 'SkillGroupId', add: [], remove: [victim] }]);
-if (prunedLf === null) fail('prune refused an LF union');
-if (prunedLf.includes('\r\n')) fail('an LF patch introduced CRLF');
-if (prunedLf !== expected.replace(/\r\n/g, '\n')) fail('LF patch differs from the LF source');
-const afterPruneLf = diffIdsWithUnions(store5, prunedLf);
-if (afterPruneLf.added.length + afterPruneLf.removed.length > 0)
-  fail(`union still mismatched after the LF prune: ${JSON.stringify(afterPruneLf)}`);
+if ((store5.dataOf('skills.vi') as Record<string, unknown>)[victim])
+  fail('vi skill-group text orphan after delete');
+if ((store5.dataOf('skills.en') as Record<string, unknown>)[victim])
+  fail('en skill-group text orphan after delete');
 
-// 11. An id that also reads as a string elsewhere in the file is still
-// appended. 'home' is a PageId member, so a substring test would have skipped
-// this leg and the build would have broken the other way.
-const store6 = new DraftStore(structuredClone(bases));
+// 10. A created record keeps following its title: renaming re-sluges the id in
+// the structure document and both text documents at once (E3). 'Home' → 'home'
+// is the case a naive substring replacement would break.
+const store6 = new DraftStore(structuredClone(bases), LABELS);
 const addGroup = store6.addRecord('skill-group');
 if (addGroup !== null) fail(`skill-group add rejected: ${JSON.stringify(addGroup)}`);
 const known = new Set(groupIds);
@@ -158,41 +136,31 @@ const created = (store6.dataOf('skills') as { id: string }[]).find((g) => !known
 if (!created) fail('no new skill group created');
 const rename = store6.renameRecord('skill-group', { id: created.id }, 'Home');
 if (rename !== null) fail(`rename rejected: ${JSON.stringify(rename)}`);
-if (!(store6.dataOf('skills') as { id: string }[]).some((g) => g.id === 'home'))
-  fail('rename did not apply');
+const renamed = (store6.dataOf('skills') as { id: string }[]).map((g) => g.id);
+if (!renamed.includes('home')) fail('rename did not apply');
+if (renamed.includes(created.id)) fail('the pre-rename id survived');
+const renamedText = store6.dataOf('skills.vi') as Record<string, unknown>;
+if (renamedText[created.id]) fail('text kept the pre-rename id');
+if (!renamedText.home) fail('text did not follow the renamed id');
 const afterRename = store6.validate();
 if (afterRename.length > 0) fail(`validate after rename: ${JSON.stringify(afterRename)}`);
-for (const id of ['skills', 'skills.vi', 'skills.en'] as const) store6.markWritten(id, 'simulated-sha');
-const missing = diffIdsWithUnions(store6, TYPES);
-if (!missing.added.some((a) => a.union === 'SkillGroupId' && a.id === 'home'))
-  fail(`id colliding with another union member was not appended: ${JSON.stringify(missing.added)}`);
-if (missing.removed.length > 0) fail(`an add reported removals: ${JSON.stringify(missing.removed)}`);
-const appended = applyUnionChanges(TYPES, [{ union: 'SkillGroupId', add: ['home'], remove: [] }]);
-if (appended === null) fail('append refused a multi-line union');
-const afterAppend = diffIdsWithUnions(store6, appended);
-if (afterAppend.added.length + afterAppend.removed.length > 0)
-  fail(`union still mismatched after the append: ${JSON.stringify(afterAppend)}`);
 
-// 12. An emptied document prunes its union to `never`, and a record added on
-// top of that state is appended back rather than silently skipped.
-const emptied = applyUnionChanges(TYPES, [{ union: 'SkillGroupId', add: [], remove: groupIds }]);
-if (emptied === null) fail('prune of every member refused');
-if (!emptied.includes('export type SkillGroupId = never;')) fail('emptied union is not never');
-const store7 = new DraftStore(structuredClone(bases));
-if (store7.addRecord('skill-group') !== null) fail('skill-group add rejected on a never union');
-const addedGroup = (store7.dataOf('skills') as { id: string }[]).find((g) => !known.has(g.id));
-if (!addedGroup) fail('no new skill group created for the never case');
-for (const id of ['skills', 'skills.vi', 'skills.en'] as const) store7.markWritten(id, 'simulated-sha');
-const revived = diffIdsWithUnions(store7, emptied);
-if (!revived.added.some((a) => a.union === 'SkillGroupId' && a.id === addedGroup.id))
-  fail(`never union skipped the new id: ${JSON.stringify(revived.added)}`);
-if (revived.removed.length > 0) fail(`the never case reported removals: ${JSON.stringify(revived.removed)}`);
-const back = applyUnionChanges(
-  emptied,
-  [{ union: 'SkillGroupId', add: revived.added.map((a) => a.id), remove: [] }],
-);
-if (back === null) fail('append onto never refused');
-const afterNever = diffIdsWithUnions(store7, back);
-if (afterNever.added.length + afterNever.removed.length > 0)
-  fail(`never round-trip left a mismatch: ${JSON.stringify(afterNever)}`);
-console.log('draft store smoke: all 12 checks passed');
+// 11. Rule 7 (spec-v5 D4): a category a project uses must have a label in
+// both languages — the badge would render empty. The category union is
+// generated from the documents, so a value written straight into
+// src/data/projects.json is exactly what this catches.
+const store7 = new DraftStore(structuredClone(bases), LABELS);
+const rejectedCategory = store7.setStructured('projects', '[0].category', 'not-a-category');
+if (rejectedCategory === null) fail('a label-less category was accepted');
+const issuePaths = rejectedCategory.map((issue) => issue.path).sort();
+const expectedPaths = [
+  'src/i18n/locales/en/ui/projects.json: categories.not-a-category',
+  'src/i18n/locales/vi/ui/projects.json: categories.not-a-category',
+].sort();
+if (JSON.stringify(issuePaths) !== JSON.stringify(expectedPaths))
+  fail(`rule 7 reported the wrong issues: ${JSON.stringify(issuePaths)}`);
+if (store7.isDirty()) fail('a rejected structure write mutated the draft');
+const acceptedCategory = store7.setStructured('projects', '[0].category', 'logistics');
+if (acceptedCategory !== null) fail(`labeled category rejected: ${JSON.stringify(acceptedCategory)}`);
+
+console.log('draft store smoke: all 11 checks passed');

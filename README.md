@@ -59,8 +59,11 @@ Edit mode: open any route with `?edit` (or `?edit=<branch>` to read and write a 
 | `pnpm build:resume-all` | generate both resume PDFs (EN + VI) |
 | `pnpm build:resume-preview` | render the resume HTML preview without writing a PDF |
 | `pnpm sitemap` | regenerate `dist/sitemap.xml` + `dist/robots.txt` on its own |
+| `pnpm generate:ids` | regenerate `src/types/content-ids.ts` from `src/data/*.json` (also runs as `predev` / `prebuild` / `prepare`) |
 
 Content validation is a hard gate: a malformed document fails `pnpm build`, CI, and the browser load — never a silent half-render.
+
+Content ids are generated the same way: `src/types/content-ids.ts` is written from the structure documents and is gitignored, so adding or deleting a content record touches JSON only — never a TypeScript file. A fresh checkout gets it from `pnpm install`; `pnpm generate:ids` regenerates it on its own.
 
 Gotcha: while a generated `dist/resume*.pdf` is open in a viewer, `pnpm build:resume-all` fails with `EBUSY` and `pnpm build` fails too (vite `emptyDir` → `EPERM`). Close the viewer first.
 

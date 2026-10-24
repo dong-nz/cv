@@ -16,7 +16,7 @@ import profileJson from '../data/profile.json';
 import projectsJson from '../data/projects.json';
 import skillsJson from '../data/skills.json';
 import { collectContentIssues } from './validate';
-import type { ContentIssue, ContentStructures } from './validate';
+import type { CategoryLabels, ContentIssue, ContentStructures } from './validate';
 import type { ContentEn, ContentVi } from './dict-types';
 import type { Language } from '../types/index';
 
@@ -98,7 +98,6 @@ export function entityOfDoc(id: DraftDocId): TextEntity | null {
 }
 
 export const PROXY_BASE = '/api/content/';
-export const TYPES_FILE = 'src/types/index.ts';
 
 export function proxyUrl(file: string, ref: string): string {
   return `${PROXY_BASE}${file}?ref=${encodeURIComponent(ref)}`;
@@ -228,13 +227,6 @@ export async function fetchDoc(file: string, branch: string): Promise<DocBase> {
   };
 }
 
-export async function fetchTextFile(file: string, branch: string): Promise<{ text: string; sha: string }> {
-  const res = await fetch(proxyUrl(file, branch));
-  if (!res.ok) throw new Error(`GET ${file}: ${res.status}`);
-  const json = (await res.json()) as { content?: string; sha?: string };
-  return { text: decodeBase64(json.content ?? ''), sha: String(json.sha ?? '') };
-}
-
 export type PutResult =
   | { ok: true; sha: string }
   | { ok: false; status: number; message: string };
@@ -287,16 +279,6 @@ export function putDoc(
   return putBase64(file, encodeBase64(`${JSON.stringify(data, null, 2)}\n`), message, lastCommitSha, branch);
 }
 
-export function putTextFile(
-  file: string,
-  text: string,
-  message: string,
-  lastCommitSha: string,
-  branch: string,
-): Promise<PutResult> {
-  return putBase64(file, encodeBase64(text), message, lastCommitSha, branch);
-}
-
 // Offline fallback (§5.1): the bundled build-time documents, flagged stale in
 // the UI, save disabled — the draft is never initialized from a bundle that
 // might be older than master when the proxy is reachable.
@@ -315,115 +297,6 @@ export function bundledBase(): Record<DraftDocId, DocBase> {
     'projects.vi': { data: structuredClone(projectsViTextJson), sha: '' },
     'projects.en': { data: structuredClone(projectsEnTextJson), sha: '' },
   };
-}
-
-// --- id unions (§3.1) ------------------------------------------------------------
-// Adding a content item is three edits: a union member, a structure record,
-// its Vietnamese text. Deleting one is the mirror image: the record and its
-// text go, and the union member must go with them. The editor does every leg
-// — once the content documents land, saveIdUnions brings each union in
-// src/types/index.ts to exactly the ids its document carries.
-
-const UNION_SPECS: ReadonlyArray<{ union: string; ids: (s: ContentStructures) => string[] }> = [
-  { union: 'ProjectId', ids: (s) => s.projects.map((p) => p.id) },
-  { union: 'ExperienceId', ids: (s) => s.experience.map((e) => e.id) },
-  { union: 'SkillGroupId', ids: (s) => s.skills.map((g) => g.id) },
-  { union: 'PhilosophyId', ids: (s) => s.profile.philosophy.map((p) => p.id) },
-];
-
-// A union is read as a block — `export type X =` followed by its `  | 'id'`
-// member lines — never as a substring search: an id slug can legitimately
-// appear elsewhere in the same file (ProjectCategory carries slugs that also
-// read as project ids), and a substring test would silently skip that leg. An
-// emptied union (`never`, the state an emptied document leaves) reads as an
-// empty member list, so a record added on top of it is appended back. Any
-// other shape (a one-line union) is reported as unpatchable, never corrupted.
-type UnionBlock = { union: string; members: string[]; from: number; to: number };
-
-const MEMBER_LINE = /^[ \t]*\| '([^']+)'[ \t]*;?[ \t]*\r?\n?$/;
-const CLOSING_LINE = /^[ \t]*;[ \t]*\r?\n?$/;
-
-// One line of the source including its terminator, or null at end of file.
-function nextLine(source: string, from: number): { text: string; end: number } | null {
-  if (from >= source.length) return null;
-  const at = source.indexOf('\n', from);
-  const end = at < 0 ? source.length : at + 1;
-  return { text: source.slice(from, end), end };
-}
-
-// `from`/`to` are the exact span of the declaration, so nothing else in the
-// file is ever rewritten.
-function readUnionBlock(source: string, union: string): UnionBlock | null {
-  const never = new RegExp(`^export type ${union} = never;\\r?\\n?`, 'm').exec(source);
-  if (never) return { union, members: [], from: never.index, to: never.index + never[0].length };
-  const header = new RegExp(`^export type ${union} =\\r?\\n`, 'm').exec(source);
-  if (!header) return null;
-  const from = header.index;
-  let pos = from + header[0].length;
-  const members: string[] = [];
-  for (;;) {
-    const line = nextLine(source, pos);
-    if (!line) break;
-    const member = MEMBER_LINE.exec(line.text);
-    if (!member) break;
-    members.push(member[1]);
-    pos = line.end;
-  }
-  if (members.length === 0) return null;
-  const closing = nextLine(source, pos);
-  if (closing && CLOSING_LINE.test(closing.text)) pos = closing.end;
-  return { union, members, from, to: pos };
-}
-
-// An emptied union is `never`, which keeps `Record<never, T>` valid against an
-// empty document.
-function renderUnion(union: string, members: readonly string[], eol: string): string {
-  if (members.length === 0) return `export type ${union} = never;${eol}`;
-  const body = members.map((id) => `  | '${id}'`).join(eol);
-  return `export type ${union} =${eol}${body};${eol}`;
-}
-
-// One pass per union: surviving members keep their order, removed ids are
-// dropped, added ids follow the document order. Null when a union's shape is
-// not the one the editor writes.
-export function applyUnionChanges(
-  source: string,
-  changes: { union: string; add: string[]; remove: string[] }[],
-): string | null {
-  // git stores LF; a Windows checkout reads CRLF. A patch keeps the line
-  // ending the file already uses, so the commit the owner reviews is one line.
-  const eol = source.includes('\r\n') ? '\r\n' : '\n';
-  let out = source;
-  for (const change of changes) {
-    const block = readUnionBlock(out, change.union);
-    if (!block) return null;
-    const removed = new Set(change.remove);
-    const members = block.members.filter((id) => !removed.has(id));
-    for (const id of change.add) if (!members.includes(id)) members.push(id);
-    out = `${out.slice(0, block.from)}${renderUnion(change.union, members, eol)}${out.slice(block.to)}`;
-  }
-  return out;
-}
-
-// Ids whose documents have landed but whose union does not match them:
-// missing members to append, stale members to drop. committedStructures() reads
-// the post-PUT base, so a document that has not landed keeps the branch's ids
-// and never reads as stale.
-export function diffIdsWithUnions(
-  store: DraftStore,
-  typesSource: string,
-): { added: { union: string; id: string }[]; removed: { union: string; id: string }[] } {
-  const structures = store.committedStructures();
-  const added: { union: string; id: string }[] = [];
-  const removed: { union: string; id: string }[] = [];
-  for (const spec of UNION_SPECS) {
-    const block = readUnionBlock(typesSource, spec.union);
-    if (!block) continue;
-    const live = new Set(spec.ids(structures));
-    for (const id of live) if (!block.members.includes(id)) added.push({ union: spec.union, id });
-    for (const id of block.members) if (!live.has(id)) removed.push({ union: spec.union, id });
-  }
-  return { added, removed };
 }
 
 // --- the store ---------------------------------------------------------------------
@@ -502,7 +375,14 @@ export class DraftStore {
   // is published and fixed (E3).
   private created = new Set<string>();
 
-  constructor(bases: Record<DraftDocId, DocBase>) {
+  // Rule 7 needs the category labels of the branch being edited. They are
+  // read-only documents, fetched by EditModeShell beside the rest of the
+  // session (spec-v5 §5.4); `null` is the offline state — the rule is then
+  // skipped, never guessed at.
+  private categoryLabels: CategoryLabels | null;
+
+  constructor(bases: Record<DraftDocId, DocBase>, categoryLabels: CategoryLabels | null) {
+    this.categoryLabels = categoryLabels;
     for (const meta of DRAFT_DOCS) {
       this.base.set(meta.id, bases[meta.id]);
       this.origin.set(meta.id, bases[meta.id].data);
@@ -549,22 +429,6 @@ export class DraftStore {
     } as unknown as ContentStructures;
   }
 
-  baseDataOf(id: DraftDocId): unknown {
-    return this.base.get(id)!.data;
-  }
-
-  // Structures as they would exist in master after the already-written PUTs —
-  // the union patch only covers ids whose documents actually landed.
-  committedStructures(): ContentStructures {
-    const baseData = (id: DraftDocId) => this.base.get(id)!.data;
-    return {
-      profile: baseData('profile'),
-      skills: baseData('skills'),
-      experience: baseData('experience'),
-      projects: baseData('projects'),
-    } as unknown as ContentStructures;
-  }
-
   draftTexts(): { vi: ContentVi; en: ContentEn } {
     return {
       vi: {
@@ -584,7 +448,7 @@ export class DraftStore {
 
   validate(): ContentIssue[] {
     const texts = this.draftTexts();
-    return collectContentIssues(this.draftStructures(), texts.vi, texts.en);
+    return collectContentIssues(this.draftStructures(), texts.vi, texts.en, this.categoryLabels);
   }
 
   // --- text documents -----------------------------------------------------------
@@ -1146,44 +1010,4 @@ export async function saveDraft(
     return { results, stoppedEarly: true };
   }
   return { results, stoppedEarly: false };
-}
-
-// The third leg of §3.1: once the documents that add or drop ids have landed,
-// bring their unions in src/types/index.ts to exactly those ids so the next CI
-// build compiles. Returns the updated source/sha, or null when nothing needs
-// changing (an unpatchable shape or a rejected PUT is reported to the EditBar,
-// and the owner finishes that edit in Gitea).
-export async function saveIdUnions(
-  store: DraftStore,
-  types: { source: string; sha: string },
-  branch: string,
-): Promise<{
-  added: { union: string; id: string }[];
-  removed: { union: string; id: string }[];
-  source?: string;
-  sha?: string;
-  failed?: number;
-} | null> {
-  const { added, removed } = diffIdsWithUnions(store, types.source);
-  if (added.length === 0 && removed.length === 0) return null;
-  const grouped = new Map<string, { add: string[]; remove: string[] }>();
-  const bucket = (union: string) => {
-    const existing = grouped.get(union);
-    if (existing) return existing;
-    const fresh = { add: [] as string[], remove: [] as string[] };
-    grouped.set(union, fresh);
-    return fresh;
-  };
-  for (const { union, id } of added) bucket(union).add.push(id);
-  for (const { union, id } of removed) bucket(union).remove.push(id);
-  const source = applyUnionChanges(
-    types.source,
-    [...grouped].map(([union, change]) => ({ union, ...change })),
-  );
-  if (source === null) return { added, removed, failed: 0 };
-  const summary = [...added.map((a) => `+${a.id}`), ...removed.map((r) => `-${r.id}`)].join(', ');
-  const message = `content: update id union members (${summary})`;
-  const res = await putTextFile(TYPES_FILE, source, message, types.sha, branch);
-  if (!res.ok) return { added, removed, failed: res.status };
-  return { added, removed, source, sha: res.sha };
 }

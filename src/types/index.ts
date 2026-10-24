@@ -4,43 +4,18 @@ export type Palette = 'red' | 'blue';
 
 export type SocialId = 'github' | 'linkedin' | 'email' | 'telegram';
 
-export type ProjectCategory =
-  | "software-engineering"
-  | "logistics"
-  | "ai-ml"
-  | "computer-vision"
-  | "architecture"
-  | "experiment";
-
-// Stable id unions (spec-v4 §3.1). Text dictionaries are type-safe only against
-// closed unions: adding a content item means adding a union member, a structure
-// record, and its Vietnamese text — tsc catches a missing text entry, the
-// validator (src/i18n/validate.ts) catches id mismatches across documents.
-// SkillGroupId and PhilosophyId are internal keys and never appear in URLs.
-export type ProjectId =
-  | 'iot-dws-integration'
-  | 'awb-detection';
-
-export type ExperienceId =
-  | 'open-to-work'
-  | 'relax-gap'
-  | 'lazada-senior-swe'
-  | 'nexts-founder'
-  | 'sap-senior-swe';
-
-export type SkillGroupId =
-  | 'software-engineering'
-  | 'system-architecture'
-  | 'ai-ml'
-  | 'infrastructure'
-  | 'engineering-practices';
-
-export type PhilosophyId =
-  | 'build-for-the-real-problem'
-  | 'think-in-systems'
-  | 'measure-impact'
-  | 'keep-learning'
-  | 'business-domain-knowledge-is-a-key-of-success';
+// Content ids and the category values a project uses are generated from the
+// structure documents by scripts/generate-content-types.ts (spec-v5): the union
+// is exactly the document, so a record delete cannot leave a stale member and a
+// text entry for it is a tsc error. Type-only re-export — erased at emit, no
+// runtime import.
+export type {
+  ExperienceId,
+  PhilosophyId,
+  ProjectCategory,
+  ProjectId,
+  SkillGroupId,
+} from './content-ids';
 
 // Page manifests (spec-v4-data-organization §5): one per route plus the
 // synthetic resume consumer. A manifest claims which joined records a page

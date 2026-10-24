@@ -122,7 +122,11 @@ const structures = {
 
 // Cross-document rules run at module load: a malformed content document fails
 // the build here, in CI, and in the browser — never silently half-renders.
-validateContent(structures, contentVi, contentEn);
+// Rule 7 reads the category labels straight out of the UI tree built above.
+validateContent(structures, contentVi, contentEn, {
+  vi: uiVi.projects.categories,
+  en: uiEn.projects.categories,
+});
 
 // Missing en fields fall back to vi per field; arrays are atomic — a whole
 // array is replaced or inherited, never merged item by item (§3.2).

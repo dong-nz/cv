@@ -29,3 +29,7 @@ dist-ssr
 # secrets/site_config and the local .env carry site identity and the write token.
 .env
 /secrets/
+
+# Generated code (spec-v5): src/types/content-ids.ts is produced by
+# scripts/generate-content-types.ts from src/data/*.json on predev/prebuild/prepare.
+/src/types/content-ids.ts

@@ -34,7 +34,10 @@ const contentEn: ContentEn = {
 const structures = { profile, skills: skillGroups, experience: experiences, projects };
 
 const issues = [
-  ...collectContentIssues(structures, contentVi, contentEn),
+  ...collectContentIssues(structures, contentVi, contentEn, {
+    vi: UI.vi.projects.categories,
+    en: UI.en.projects.categories,
+  }),
   ...collectManifestIssues(structures, contentVi, contentEn, Object.keys(UI.vi)),
 ];
 

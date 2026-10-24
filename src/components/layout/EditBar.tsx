@@ -24,7 +24,7 @@ type EditBarProps = {
   saving: boolean;
   saveStopped: boolean;
   saveResults: DocSaveResult[];
-  unionNote: 'ok' | 'failed' | null;
+  labelsUnavailable: boolean;
   draftRestored: boolean;
   branch: string;
   getConflictFields: (id: DraftDocId) => ConflictField[];
@@ -56,7 +56,7 @@ export function EditBar({
   saving,
   saveStopped,
   saveResults,
-  unionNote,
+  labelsUnavailable,
   draftRestored,
   branch,
   getConflictFields,
@@ -248,9 +248,7 @@ export function EditBar({
         </ul>
       )}
 
-      {unionNote && (
-        <p className="edit-bar-note">{unionNote === 'ok' ? s.unionNote : s.unionFailed}</p>
-      )}
+      {labelsUnavailable && <p className="edit-bar-note">{s.labelsUnavailable}</p>}
       {allWritten && !dirty && (
         <p className="edit-bar-note">
           {branch === DEFAULT_BRANCH ? s.deployQueued : s.mergeHint}

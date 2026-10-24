@@ -3,7 +3,7 @@
 // master documents, holds the draft, and re-wraps the tree in an
 // I18nProvider override — the seven routes ARE the preview. Visitors never
 // mount this component; its code is never in the entry chunk (§7 P3.4).
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -13,12 +13,9 @@ import type { ResolvedContent } from '@/i18n';
 import {
   DRAFT_DOCS,
   DraftStore,
-  TYPES_FILE,
   bundledBase,
   fetchDoc,
-  fetchTextFile,
   saveDraft,
-  saveIdUnions,
   recordForTitlePath,
 } from '@/i18n/draft';
 import type { DocBase, DocSaveResult, DraftDocId } from '@/i18n/draft';
@@ -34,10 +31,25 @@ import {
 } from '@/i18n/edit-mode';
 import { EditContext } from '@/hooks/useEdit';
 import type { EditApi } from '@/hooks/useEdit';
-import type { ContentIssue } from '@/i18n/validate';
+import type { CategoryLabels, ContentIssue } from '@/i18n/validate';
 import { EditBar } from './EditBar';
 
 type Phase = 'authenticating' | 'loading' | 'ready' | 'offline';
+
+// The category labels are read-only UI documents (spec-v4-data-organization §4);
+// rule 7 compares a project's category against them on the branch being edited
+// (spec-v5 §5.4), so they are fetched beside the draft documents instead of
+// taken from this bundle.
+const LABEL_FILES: Record<'vi' | 'en', string> = {
+  vi: 'src/i18n/locales/vi/ui/projects.json',
+  en: 'src/i18n/locales/en/ui/projects.json',
+};
+const categoryMap = (data: unknown): Record<string, unknown> => {
+  if (!data || typeof data !== 'object' || !('categories' in data)) return {};
+  const categories = data.categories;
+  if (typeof categories !== 'object' || categories === null || Array.isArray(categories)) return {};
+  return Object.fromEntries(Object.entries(categories));
+};
 
 export default function EditModeShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -48,7 +60,6 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
   // render reads it legally, and `revision` is the invalidation counter that
   // re-derives everything the draft feeds to the UI.
   const [store, setStore] = useState<DraftStore | null>(null);
-  const typesRef = useRef<{ source: string; sha: string } | null>(null);
   const [phase, setPhase] = useState<Phase>('authenticating');
   const [branch, setBranch] = useState<string>(DEFAULT_BRANCH);
   const [resolved, setResolved] = useState<Record<'vi' | 'en', ResolvedContent> | null>(null);
@@ -60,7 +71,7 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
   const [saveResults, setSaveResults] = useState<DocSaveResult[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveStopped, setSaveStopped] = useState(false);
-  const [unionNote, setUnionNote] = useState<'ok' | 'failed' | null>(null);
+  const [labelsUnavailable, setLabelsUnavailable] = useState(false);
 
   const stripEditQuery = useCallback(() => {
     const params = new URLSearchParams(location.search);
@@ -123,7 +134,21 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
       }
       if (!bases) bases = bundledBase();
 
-      const created = new DraftStore(bases);
+      // Rule 7's inputs. A failed read leaves the labels null: the save bar
+      // says the label check could not run, and the rule is skipped rather
+      // than guessed at from a bundle that may predate the branch.
+      let labels: CategoryLabels | null = null;
+      try {
+        const [viLabels, enLabels] = await Promise.all([
+          fetchDoc(LABEL_FILES.vi, branch),
+          fetchDoc(LABEL_FILES.en, branch),
+        ]);
+        labels = { vi: categoryMap(viLabels.data), en: categoryMap(enLabels.data) };
+      } catch {
+        setLabelsUnavailable(true);
+      }
+
+      const created = new DraftStore(bases, labels);
 
       const stored = sessionStorage.getItem(DRAFT_STORAGE);
       if (stored) {
@@ -134,13 +159,6 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
         } catch {
           clearDraftStorage();
         }
-      }
-
-      try {
-        const file = await fetchTextFile(TYPES_FILE, branch);
-        typesRef.current = { source: file.text, sha: file.sha };
-      } catch {
-        typesRef.current = null;
       }
 
       if (cancelled) return;
@@ -271,7 +289,6 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     }
     setSaving(true);
     setSaveStopped(false);
-    setUnionNote(null);
     setSaveResults([]);
     const { results, stoppedEarly } = await saveDraft(store, (result) => {
       setSaveResults((prev) => [...prev, result]);
@@ -280,20 +297,6 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     const written = new Set(results.filter((r) => r.status === 'written').map((r) => r.id));
     const conflicted = results.filter((r) => r.status === 'conflict').map((r) => r.id);
     setConflicts((prev) => [...new Set([...prev.filter((id) => !written.has(id)), ...conflicted])]);
-
-    // The third leg of §3.1: bring the unions to the ids whose documents
-    // landed — appended when a record was added, dropped when one was deleted.
-    const types = typesRef.current;
-    if (types) {
-      const union = await saveIdUnions(store, types, branch);
-      if (union) {
-        if (union.failed !== undefined) setUnionNote('failed');
-        else {
-          typesRef.current = { source: union.source!, sha: union.sha! };
-          setUnionNote('ok');
-        }
-      }
-    }
     setSaving(false);
     refresh(store);
   }, [store, phase, refresh, branch]);
@@ -394,7 +397,7 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
               saving={saving}
               saveStopped={saveStopped}
               saveResults={saveResults}
-              unionNote={unionNote}
+              labelsUnavailable={labelsUnavailable}
               draftRestored={draftRestored}
               branch={branch}
               getConflictFields={(id) => store.conflictFields(id)}
