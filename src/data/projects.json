@@ -73,11 +73,13 @@
   },
   {
     "id": "test",
-    "category": "experiment",
+    "category": "software-engineering",
     "technologies": [
-      "typescript"
+      "typescript",
+      "html",
+      "nginx"
     ],
-    "featured": false,
+    "featured": true,
     "sections": []
   }
 ]
