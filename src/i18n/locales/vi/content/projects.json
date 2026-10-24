@@ -67,6 +67,11 @@
     "title": "New project",
     "summary": "Write the summary here.",
     "role": "Owner",
-    "sections": {}
+    "sections": {
+      "new-section": {
+        "title": "New section",
+        "content": "Write the section here."
+      }
+    }
   }
 }
