@@ -70,52 +70,5 @@
         "type": "text"
       }
     ]
-  },
-  {
-    "id": "facility-management",
-    "category": "software-engineering",
-    "technologies": [
-      "Go",
-      "TypeScript",
-      "Docker",
-      "Event-driven"
-    ],
-    "featured": true,
-    "sections": [
-      {
-        "id": "vision",
-        "type": "text"
-      },
-      {
-        "id": "architecture",
-        "type": "diagram"
-      },
-      {
-        "id": "result",
-        "type": "text"
-      }
-    ]
-  },
-  {
-    "id": "local-llm-experiments",
-    "category": "experiment",
-    "technologies": [
-      "llama.cpp",
-      "Qwen",
-      "MoE",
-      "Python",
-      "CUDA"
-    ],
-    "featured": true,
-    "sections": [
-      {
-        "id": "exploration",
-        "type": "text"
-      },
-      {
-        "id": "learnings",
-        "type": "text"
-      }
-    ]
   }
 ]
