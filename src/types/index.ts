@@ -19,9 +19,7 @@ export type ProjectCategory =
 // SkillGroupId and PhilosophyId are internal keys and never appear in URLs.
 export type ProjectId =
   | 'iot-dws-integration'
-  | 'awb-detection'
-  | 'facility-management'
-  | 'local-llm-experiments';
+  | 'awb-detection';
 
 export type ExperienceId =
   | 'open-to-work'
