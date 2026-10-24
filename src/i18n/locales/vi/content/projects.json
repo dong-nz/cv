@@ -62,39 +62,5 @@
         "content": "Model fine-tuned cho AWB detection, xử lý 70,000 images/month. Presentation tại Tech Talk workshop."
       }
     }
-  },
-  "facility-management": {
-    "title": "Facility Management Platform",
-    "summary": "Xây dựng nền tảng digital twin cho logistics facilities — mô hình hóa facility, theo dõi real-time, và recommendation system.",
-    "role": "Senior Software Engineer — Platform Design",
-    "sections": {
-      "vision": {
-        "title": "Vision",
-        "content": "Chuyển đổi từ manual operations sang Operation Intelligence Platform — thu thập data, monitor, analyze, recommend, decide."
-      },
-      "architecture": {
-        "title": "Architecture",
-        "content": "```text\nPhysical Facility\n    ↓\nData Collection\n    ↓\nFacility Model\n    ↓\nDigital Twin\n    ↓\nSimulation\n    ↓\nAnalytics\n    ↓\nRecommendation\n    ↓\nOperation Decision\n```"
-      },
-      "result": {
-        "title": "Result",
-        "content": "Platform hỗ trợ facility modeling, real-time visibility, và recommendation cho capacity planning."
-      }
-    }
-  },
-  "local-llm-experiments": {
-    "title": "Local LLM Experiments",
-    "summary": "Technical exploration về running local MoE LLMs với llama.cpp — GPU offloading, VRAM optimization, performance tracing.",
-    "role": "Engineering Experiment",
-    "sections": {
-      "exploration": {
-        "title": "Exploration",
-        "content": "Technical exploration về MoE (Mixture of Experts), expert routing, GPU offloading, VRAM optimization, prefill/decode pipeline."
-      },
-      "learnings": {
-        "title": "Lessons Learned",
-        "content": "Understand the system → Measure → Analyze → Optimize. Không phải khoe hardware — mà thể hiện engineering approach."
-      }
-    }
   }
 }
