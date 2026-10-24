@@ -3,7 +3,7 @@
 // master documents, holds the draft, and re-wraps the tree in an
 // I18nProvider override — the seven routes ARE the preview. Visitors never
 // mount this component; its code is never in the entry chunk (§7 P3.4).
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useLanguage } from '@/hooks/useLanguage';
@@ -23,12 +23,13 @@ import {
   DEFAULT_BRANCH,
   DRAFT_STORAGE,
   clearDraftStorage,
-  ensureEditorAuth,
+  editRequested,
   getEditBranch,
   requestedBranch,
   setEditBranch,
   setEditFlag,
-} from '@/i18n/edit-mode';
+} from '@/i18n/edit-session';
+import { ensureEditorAuth } from '@/i18n/edit-mode';
 import { EditContext } from '@/hooks/useEdit';
 import type { EditApi } from '@/hooks/useEdit';
 import type { CategoryLabels, ContentIssue } from '@/i18n/validate';
@@ -73,12 +74,22 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
   const [saveStopped, setSaveStopped] = useState(false);
   const [labelsUnavailable, setLabelsUnavailable] = useState(false);
 
+  // The entry URL is read once. The session keeps its branch across internal
+  // navigation (the guard below re-attaches `?edit` to every route), so a
+  // navigation must not re-run the initialization and re-fetch every document.
+  const entrySearchRef = useRef(location.search);
+
+  // Stable across navigations: it reads the live URL instead of closing over
+  // `location`, so the initialization effect that calls it on a failed auth
+  // does not re-run on every route change.
   const stripEditQuery = useCallback(() => {
-    const params = new URLSearchParams(location.search);
+    const params = new URLSearchParams(window.location.search);
     params.delete('edit');
     const query = params.toString();
-    navigate(`${location.pathname}${query ? `?${query}` : ''}${location.hash}`, { replace: true });
-  }, [navigate, location.pathname, location.search, location.hash]);
+    navigate(`${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`, {
+      replace: true,
+    });
+  }, [navigate]);
 
   // Every accepted edit re-derives the resolved content from the draft
   // documents (same join, same fallback rules as the bundled loader) and
@@ -94,13 +105,31 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     else clearDraftStorage();
   }, []);
 
+  // Edit mode survives navigation (owner request 2026-10-24): a route change
+  // that dropped `?edit` gets the parameter back immediately, so the address
+  // keeps describing the mode the session is actually in and a reload from
+  // here reopens it. Only the EditBar's Exit — or a failed auth — ends the
+  // session, and both clear the flag, which unmounts this shell before this
+  // guard could run against them.
+  useEffect(() => {
+    if (phase === 'authenticating') return;
+    if (editRequested(location.search)) return;
+    const params = new URLSearchParams(location.search);
+    params.delete('edit');
+    const rest = params.toString();
+    navigate(`${location.pathname}?edit${rest ? `&${rest}` : ''}${location.hash}`, { replace: true });
+  }, [phase, location.pathname, location.search, location.hash, navigate]);
+
+  // The session's initialization runs once per mount: the entry URL is read
+  // from a ref and `stripEditQuery` is stable, so a route change inside the
+  // session neither re-authenticates nor re-fetches the documents.
   useEffect(() => {
     let cancelled = false;
     const init = async () => {
       // `?edit=<branch>` targets that branch; a bare `?edit` resumes the
       // session's branch or the default. An illegal name exits edit mode the
       // same way a failed auth does.
-      const requested = requestedBranch(location.search);
+      const requested = requestedBranch(entrySearchRef.current);
       if (requested === null) {
         setEditFlag(false);
         clearDraftStorage();
@@ -170,7 +199,7 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [refresh, stripEditQuery, location.search]);
+  }, [refresh, stripEditQuery]);
 
   // Mid-edit navigation guard (§5.2).
   useEffect(() => {

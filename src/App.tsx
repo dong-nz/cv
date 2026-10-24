@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/hooks/useTheme'
 import { Layout } from '@/components/layout/Layout'
 import { LanguageProvider } from '@/hooks/useLanguage'
 import { I18nProvider } from '@/i18n/provider'
+import { editRequested, hasEditFlag } from '@/i18n/edit-session'
 import { HomePage } from '@/pages/HomePage'
 
 // HomePage stays eager: it is the landing route and owns the LCP, so its code must
@@ -19,13 +20,18 @@ const PhilosophyPage = lazy(() => import('@/pages/PhilosophyPage').then((m) => (
 const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ default: m.ContactPage })))
 
 // Edit mode is lazy too: visitors never download the draft store, the panel
-// or the save pipeline (spec-v4 §7 P3.4). The gate only mounts the shell when
-// `?edit` is present; the shell then authenticates or strips the query again.
+// or the save pipeline (spec-v4 §7 P3.4). The gate opens the shell on `?edit`
+// or on a session that is already in the mode; the shell authenticates, or it
+// closes the session again.
 const EditModeShell = lazy(() => import('@/components/layout/EditModeShell'))
 
 function MaybeEditMode({ children }: { children: ReactNode }) {
   const location = useLocation()
-  const editing = new URLSearchParams(location.search).has('edit')
+  // `?edit` opens edit mode; from there the session flag keeps it across every
+  // navigation and every reload until the EditBar's Exit ends it. The flag and
+  // the query test live in `edit-session.ts`, which carries no dependency on
+  // the draft store, so this gate keeps the edit code out of the entry chunk.
+  const editing = editRequested(location.search) || hasEditFlag()
   if (!editing) return <>{children}</>
   return (
     <Suspense fallback={null}>

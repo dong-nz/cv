@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useI18n } from '@/i18n/provider';
 import { DRAFT_DOCS, entityOfDoc } from '@/i18n/draft';
 import { manifestsClaiming, recordEntity } from '@/data/pages';
-import { DEFAULT_BRANCH } from '@/i18n/edit-mode';
+import { DEFAULT_BRANCH } from '@/i18n/edit-session';
 import type { ConflictField, DocSaveResult, DraftDocId } from '@/i18n/draft';
 import type { ContentIssue } from '@/i18n/validate';
 
