@@ -6,7 +6,13 @@
 import { PROXY_BASE } from './draft';
 import { hasEditFlag } from './edit-session';
 
-const PROBE_FILE = 'src/data/profile.json';
+// The probe must not be a draft document: every page manifest claims `profile`
+// (the footer renders `profile.name` on every route), so probing
+// `src/data/profile.json` made the auth check and the page's own document read
+// fetch the identical URL twice per session (owner report 2026-10-25). AGENTS.md
+// is a stable, tracked file on every branch, and the proxy passes any repository
+// path through unchanged.
+const PROBE_FILE = 'AGENTS.md';
 
 function probeUrl(branch: string, cacheBust: boolean): string {
   const url = new URL(`${PROXY_BASE}${PROBE_FILE}`, window.location.origin);
