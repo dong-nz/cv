@@ -80,6 +80,11 @@
       "nginx"
     ],
     "featured": true,
-    "sections": []
+    "sections": [
+      {
+        "id": "new-section",
+        "type": "text"
+      }
+    ]
   }
 ]
