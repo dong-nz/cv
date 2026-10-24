@@ -5,7 +5,7 @@
   "tldr": "15 years of experience, more than 8 companies along the way. Too long to tell.",
   "tagline": [
     {
-      "text": "Building scalable software systems, intelligent logistics solutions, and practical AI applications."
+      "text": "Building scalable software systems, intelligent solutions, and practical AI applications."
     }
   ],
   "philosophyQuotes": [
@@ -31,7 +31,16 @@
     },
     "business-domain-knowledge-is-a-key-of-success": {
       "title": "Business domain knowledge is a key of success",
-      "description": "Don't start with technology. Start with the problem."
+      "description": "Don't start with technology. Start with the problem.",
+      "keywords": [
+        "Business knowledge"
+      ]
     }
-  }
+  },
+  "currentInterests": [
+    "Simulation",
+    "LLM",
+    "Computer Vision",
+    "High-performance systems"
+  ]
 }
