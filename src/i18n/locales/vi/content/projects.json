@@ -62,16 +62,5 @@
         "content": "Model fine-tuned cho AWB detection, xử lý 70,000 images/month. Presentation tại Tech Talk workshop."
       }
     }
-  },
-  "test": {
-    "title": "New project",
-    "summary": "Write the summary here.",
-    "role": "Owner",
-    "sections": {
-      "new-section": {
-        "title": "New section",
-        "content": "Write the section here."
-      }
-    }
   }
 }
