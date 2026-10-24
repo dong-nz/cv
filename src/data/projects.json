@@ -84,10 +84,6 @@
       {
         "id": "new-section",
         "type": "text"
-      },
-      {
-        "id": "new-section-2",
-        "type": "text"
       }
     ]
   }
