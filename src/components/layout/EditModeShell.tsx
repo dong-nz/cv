@@ -155,10 +155,31 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
       // (§5.1); the bundle is only the offline fallback, flagged stale.
       let offline = false;
       let bases: Record<DraftDocId, DocBase> | null = null;
-      try {
+      // One concurrent wave instead of 14 serialized round-trips. The handlers
+      // are attached in the same tick the requests are made, so a label
+      // rejection that lands while the documents are still in flight is not an
+      // unhandled rejection; the two failure paths stay separate — a document
+      // failure is the offline state, a label failure only disables rule 7.
+      const docsRequest = Promise.all(
+        DRAFT_DOCS.map((meta) => fetchDoc(meta.file, branch)),
+      ).then(
+        (docs) => ({ ok: true as const, docs }),
+        () => ({ ok: false as const }),
+      );
+      const labelsRequest = Promise.all([
+        fetchDoc(LABEL_FILES.vi, branch),
+        fetchDoc(LABEL_FILES.en, branch),
+      ]).then(
+        ([vi, en]) => ({ ok: true as const, vi, en }),
+        () => ({ ok: false as const }),
+      );
+      const docs = await docsRequest;
+      if (docs.ok) {
         bases = {} as Record<DraftDocId, DocBase>;
-        for (const meta of DRAFT_DOCS) bases[meta.id] = await fetchDoc(meta.file, branch);
-      } catch {
+        DRAFT_DOCS.forEach((meta, index) => {
+          bases![meta.id] = docs.docs[index];
+        });
+      } else {
         offline = true;
       }
       if (!bases) bases = bundledBase();
@@ -167,13 +188,10 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
       // says the label check could not run, and the rule is skipped rather
       // than guessed at from a bundle that may predate the branch.
       let labels: CategoryLabels | null = null;
-      try {
-        const [viLabels, enLabels] = await Promise.all([
-          fetchDoc(LABEL_FILES.vi, branch),
-          fetchDoc(LABEL_FILES.en, branch),
-        ]);
-        labels = { vi: categoryMap(viLabels.data), en: categoryMap(enLabels.data) };
-      } catch {
+      const labelDocs = await labelsRequest;
+      if (labelDocs.ok) {
+        labels = { vi: categoryMap(labelDocs.vi.data), en: categoryMap(labelDocs.en.data) };
+      } else {
         setLabelsUnavailable(true);
       }
 
