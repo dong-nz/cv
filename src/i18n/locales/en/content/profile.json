@@ -30,8 +30,8 @@
       "description": "Technical implementation must be tied to measurable outcomes."
     },
     "business-domain-knowledge-is-a-key-of-success": {
-      "title": "Business domain knowledge is a key of success",
-      "description": "Don't start with technology. Start with the problem.",
+      "title": "Business domain knowledge",
+      "description": "Domain knowledge is not only important for business man, but also for technical people.",
       "keywords": [
         "Business knowledge",
         "Business value"
