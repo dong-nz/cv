@@ -66,12 +66,12 @@ export function ProjectSettingsPanel({ project }: { project: ProjectStructure })
   return (
     <>
       <label className="record-settings-field">
+        <span>{s.edit.featured}</span>
         <input
           type="checkbox"
           checked={project.featured === true}
           onChange={(event) => edit.setStructured('projects', `[${index}].featured`, event.target.checked)}
         />
-        {s.edit.featured}
       </label>
 
       <label className="record-settings-field">
@@ -108,7 +108,7 @@ export function ProjectSettingsPanel({ project }: { project: ProjectStructure })
             </select>
             <button
               type="button"
-              className="edit-record-btn"
+              className="edit-record-btn record-settings-move-up"
               aria-label={`${s.edit.moveUp} — ${section.id}`}
               disabled={i === 0}
               onClick={() => edit.moveItem('projects', `[${index}].sections`, i, i - 1)}
@@ -117,7 +117,7 @@ export function ProjectSettingsPanel({ project }: { project: ProjectStructure })
             </button>
             <button
               type="button"
-              className="edit-record-btn"
+              className="edit-record-btn record-settings-move-down"
               aria-label={`${s.edit.moveDown} — ${section.id}`}
               disabled={i === sections.length - 1}
               onClick={() => edit.moveItem('projects', `[${index}].sections`, i, i + 1)}
