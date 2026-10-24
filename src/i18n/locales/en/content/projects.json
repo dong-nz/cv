@@ -39,5 +39,11 @@
         "content": "Model fine-tuned for AWB detection, processing 70,000 images/month. Presented at Tech Talk workshop."
       }
     }
+  },
+  "test": {
+    "title": "Test",
+    "summary": "hello world.",
+    "role": "Owner",
+    "sections": {}
   }
 }
