@@ -150,6 +150,8 @@ export type { ProjectCategory, ExperienceId, PhilosophyId, ProjectId, SkillGroup
 
 In `collectContentIssues` (`src/i18n/validate.ts:69-168`), after rule 6: for each unique category in `structures.projects`, require `ui[lang].projects.categories[value]` to be a non-empty string for `vi` and `en`; issue path `src/i18n/locales/<lang>/ui/projects.json: categories.<value>`.
 
+The same label map is the **category vocabulary in the editing UI**: `ProjectSettingsPanel`'s category select (`spec-v4-inline-editing.md` §2.4, follow-up 11, added 2026-10-24) offers `Object.entries(ui.<lang>.projects.categories)` plus the project's current value and writes through `setStructured('projects', '[i].category', …)`. A value chosen from that list has a label in the bundle by construction; when the branch's copy of `ui/projects.json` lacks it, the write is rejected with exactly this rule-7 issue naming both files. Rule 7 therefore stays the gate for a category written straight into `src/data/projects.json` — the editor cannot bypass it, only pre-fill it.
+
 **Plumbing — corrected by the self-review.** The draft store does **not** hold UI documents: `DRAFT_DOCS` (`draft.ts:48-61`) is exactly the 12 writable content documents, and `DraftStore.validate()` (`draft.ts:585-588`) calls `collectContentIssues` with structures and content texts only. The rule therefore needs a UI source at each call site, and `collectContentIssues` / `validateContent` gain a `ui` argument:
 
 - `src/i18n/index.ts` (load-time): both UI trees are already built there — pass them.

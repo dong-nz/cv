@@ -2484,7 +2484,8 @@
   margin: 8px 0;
 }
 
-.record-settings-field input {
+.record-settings-field input,
+.record-settings-field select {
   background: var(--bg-surface);
   color: inherit;
   border: 1px solid var(--border);

@@ -45,8 +45,8 @@ export function RecordSettings({ title, onClose, children }: RecordSettingsProps
   );
 }
 
-// A project's structure: featured visibility and the section list — order,
-// type, delete, add (spec-v4-inline-editing §2.4).
+// A project's structure: featured visibility, its category, and the section
+// list — order, type, delete, add (spec-v4-inline-editing §2.4).
 export function ProjectSettingsPanel({ project }: { project: ProjectStructure }) {
   const edit = useEdit();
   const { ui: s } = useI18n();
@@ -56,6 +56,12 @@ export function ProjectSettingsPanel({ project }: { project: ProjectStructure })
   if (index < 0) return null;
   const sections = project.sections;
   const typeLabels = s.edit.sectionTypes;
+  // The category vocabulary is the label map the UI documents carry — the same
+  // map the badge renders from, and the one rule 7 checks a project against
+  // (spec-v5 §5.4). The current value is kept in the list even when its label
+  // is missing, so opening this panel never rewrites a project silently.
+  const categoryLabels = new Map<string, string>(Object.entries(s.projects.categories));
+  const categoryIds = [...new Set([...categoryLabels.keys(), project.category])];
 
   return (
     <>
@@ -66,6 +72,21 @@ export function ProjectSettingsPanel({ project }: { project: ProjectStructure })
           onChange={(event) => edit.setStructured('projects', `[${index}].featured`, event.target.checked)}
         />
         {s.edit.featured}
+      </label>
+
+      <label className="record-settings-field">
+        <span>{s.edit.category}</span>
+        <select
+          aria-label={`${s.edit.category} — ${project.id}`}
+          value={project.category}
+          onChange={(event) => edit.setStructured('projects', `[${index}].category`, event.target.value)}
+        >
+          {categoryIds.map((id) => (
+            <option key={id} value={id}>
+              {categoryLabels.get(id) ?? id}
+            </option>
+          ))}
+        </select>
       </label>
 
       <div className="record-settings-group-title">{s.edit.sections}</div>
