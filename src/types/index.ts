@@ -33,7 +33,6 @@ export type ExperienceId =
 export type SkillGroupId =
   | 'software-engineering'
   | 'system-architecture'
-  | 'logistics-technology'
   | 'ai-ml'
   | 'infrastructure'
   | 'engineering-practices';

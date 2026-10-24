@@ -66,7 +66,7 @@
   "mergeHint": "written to the branch — merge into master to deploy",
   "offline": "offline — showing bundled content, save disabled",
   "draftRestored": "draft restored from this session",
-  "unionNote": "new ids are also appended to src/types/index.ts",
+  "unionNote": "id unions in src/types/index.ts updated to match the saved content",
   "unionFailed": "could not update src/types/index.ts — finish that edit in Gitea",
   "appearsHome": "home",
   "appearsResume": "resume PDF",

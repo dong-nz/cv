@@ -319,8 +319,10 @@ export function bundledBase(): Record<DraftDocId, DocBase> {
 
 // --- id unions (§3.1) ------------------------------------------------------------
 // Adding a content item is three edits: a union member, a structure record,
-// its Vietnamese text. The editor does all three: after the content documents
-// land, saveIdUnions appends the new ids to src/types/index.ts.
+// its Vietnamese text. Deleting one is the mirror image: the record and its
+// text go, and the union member must go with them. The editor does every leg
+// — once the content documents land, saveIdUnions brings each union in
+// src/types/index.ts to exactly the ids its document carries.
 
 const UNION_SPECS: ReadonlyArray<{ union: string; ids: (s: ContentStructures) => string[] }> = [
   { union: 'ProjectId', ids: (s) => s.projects.map((p) => p.id) },
@@ -329,23 +331,99 @@ const UNION_SPECS: ReadonlyArray<{ union: string; ids: (s: ContentStructures) =>
   { union: 'PhilosophyId', ids: (s) => s.profile.philosophy.map((p) => p.id) },
 ];
 
-export function newIdsInCommitted(store: DraftStore, typesSource: string): { union: string; id: string }[] {
-  const structures = store.committedStructures();
-  const out: { union: string; id: string }[] = [];
-  for (const spec of UNION_SPECS) {
-    for (const id of spec.ids(structures)) {
-      if (!typesSource.includes(`'${id}'`)) out.push({ union: spec.union, id });
-    }
+// A union is read as a block — `export type X =` followed by its `  | 'id'`
+// member lines — never as a substring search: an id slug can legitimately
+// appear elsewhere in the same file (ProjectCategory carries slugs that also
+// read as project ids), and a substring test would silently skip that leg. An
+// emptied union (`never`, the state an emptied document leaves) reads as an
+// empty member list, so a record added on top of it is appended back. Any
+// other shape (a one-line union) is reported as unpatchable, never corrupted.
+type UnionBlock = { union: string; members: string[]; from: number; to: number };
+
+const MEMBER_LINE = /^[ \t]*\| '([^']+)'[ \t]*;?[ \t]*\r?\n?$/;
+const CLOSING_LINE = /^[ \t]*;[ \t]*\r?\n?$/;
+
+// One line of the source including its terminator, or null at end of file.
+function nextLine(source: string, from: number): { text: string; end: number } | null {
+  if (from >= source.length) return null;
+  const at = source.indexOf('\n', from);
+  const end = at < 0 ? source.length : at + 1;
+  return { text: source.slice(from, end), end };
+}
+
+// `from`/`to` are the exact span of the declaration, so nothing else in the
+// file is ever rewritten.
+function readUnionBlock(source: string, union: string): UnionBlock | null {
+  const never = new RegExp(`^export type ${union} = never;\\r?\\n?`, 'm').exec(source);
+  if (never) return { union, members: [], from: never.index, to: never.index + never[0].length };
+  const header = new RegExp(`^export type ${union} =\\r?\\n`, 'm').exec(source);
+  if (!header) return null;
+  const from = header.index;
+  let pos = from + header[0].length;
+  const members: string[] = [];
+  for (;;) {
+    const line = nextLine(source, pos);
+    if (!line) break;
+    const member = MEMBER_LINE.exec(line.text);
+    if (!member) break;
+    members.push(member[1]);
+    pos = line.end;
+  }
+  if (members.length === 0) return null;
+  const closing = nextLine(source, pos);
+  if (closing && CLOSING_LINE.test(closing.text)) pos = closing.end;
+  return { union, members, from, to: pos };
+}
+
+// An emptied union is `never`, which keeps `Record<never, T>` valid against an
+// empty document.
+function renderUnion(union: string, members: readonly string[], eol: string): string {
+  if (members.length === 0) return `export type ${union} = never;${eol}`;
+  const body = members.map((id) => `  | '${id}'`).join(eol);
+  return `export type ${union} =${eol}${body};${eol}`;
+}
+
+// One pass per union: surviving members keep their order, removed ids are
+// dropped, added ids follow the document order. Null when a union's shape is
+// not the one the editor writes.
+export function applyUnionChanges(
+  source: string,
+  changes: { union: string; add: string[]; remove: string[] }[],
+): string | null {
+  // git stores LF; a Windows checkout reads CRLF. A patch keeps the line
+  // ending the file already uses, so the commit the owner reviews is one line.
+  const eol = source.includes('\r\n') ? '\r\n' : '\n';
+  let out = source;
+  for (const change of changes) {
+    const block = readUnionBlock(out, change.union);
+    if (!block) return null;
+    const removed = new Set(change.remove);
+    const members = block.members.filter((id) => !removed.has(id));
+    for (const id of change.add) if (!members.includes(id)) members.push(id);
+    out = `${out.slice(0, block.from)}${renderUnion(change.union, members, eol)}${out.slice(block.to)}`;
   }
   return out;
 }
 
-export function patchUnionSource(source: string, union: string, id: string): string | null {
-  const marker = `export type ${union} =\n`;
-  const at = source.indexOf(marker);
-  if (at < 0) return null;
-  const insertAt = at + marker.length;
-  return `${source.slice(0, insertAt)}  | '${id}'\n${source.slice(insertAt)}`;
+// Ids whose documents have landed but whose union does not match them:
+// missing members to append, stale members to drop. committedStructures() reads
+// the post-PUT base, so a document that has not landed keeps the branch's ids
+// and never reads as stale.
+export function diffIdsWithUnions(
+  store: DraftStore,
+  typesSource: string,
+): { added: { union: string; id: string }[]; removed: { union: string; id: string }[] } {
+  const structures = store.committedStructures();
+  const added: { union: string; id: string }[] = [];
+  const removed: { union: string; id: string }[] = [];
+  for (const spec of UNION_SPECS) {
+    const block = readUnionBlock(typesSource, spec.union);
+    if (!block) continue;
+    const live = new Set(spec.ids(structures));
+    for (const id of live) if (!block.members.includes(id)) added.push({ union: spec.union, id });
+    for (const id of block.members) if (!live.has(id)) removed.push({ union: spec.union, id });
+  }
+  return { added, removed };
 }
 
 // --- the store ---------------------------------------------------------------------
@@ -1070,26 +1148,42 @@ export async function saveDraft(
   return { results, stoppedEarly: false };
 }
 
-// The third leg of §3.1: once the documents that introduce new ids have
-// landed, append those ids to their unions in src/types/index.ts so the next
-// CI build compiles. Returns the updated source/sha, or null when the patch
-// could not be written (the EditBar reports it and the owner finishes the
-// edit in Gitea).
+// The third leg of §3.1: once the documents that add or drop ids have landed,
+// bring their unions in src/types/index.ts to exactly those ids so the next CI
+// build compiles. Returns the updated source/sha, or null when nothing needs
+// changing (an unpatchable shape or a rejected PUT is reported to the EditBar,
+// and the owner finishes that edit in Gitea).
 export async function saveIdUnions(
   store: DraftStore,
   types: { source: string; sha: string },
   branch: string,
-): Promise<{ added: { union: string; id: string }[]; source?: string; sha?: string; failed?: number } | null> {
-  const added = newIdsInCommitted(store, types.source);
-  if (added.length === 0) return null;
-  let source = types.source;
-  for (const { union, id } of added) {
-    const patched = patchUnionSource(source, union, id);
-    if (!patched) return { added, failed: 0 };
-    source = patched;
-  }
-  const message = `content: add id union members (${added.map((a) => a.id).join(', ')})`;
+): Promise<{
+  added: { union: string; id: string }[];
+  removed: { union: string; id: string }[];
+  source?: string;
+  sha?: string;
+  failed?: number;
+} | null> {
+  const { added, removed } = diffIdsWithUnions(store, types.source);
+  if (added.length === 0 && removed.length === 0) return null;
+  const grouped = new Map<string, { add: string[]; remove: string[] }>();
+  const bucket = (union: string) => {
+    const existing = grouped.get(union);
+    if (existing) return existing;
+    const fresh = { add: [] as string[], remove: [] as string[] };
+    grouped.set(union, fresh);
+    return fresh;
+  };
+  for (const { union, id } of added) bucket(union).add.push(id);
+  for (const { union, id } of removed) bucket(union).remove.push(id);
+  const source = applyUnionChanges(
+    types.source,
+    [...grouped].map(([union, change]) => ({ union, ...change })),
+  );
+  if (source === null) return { added, removed, failed: 0 };
+  const summary = [...added.map((a) => `+${a.id}`), ...removed.map((r) => `-${r.id}`)].join(', ');
+  const message = `content: update id union members (${summary})`;
   const res = await putTextFile(TYPES_FILE, source, message, types.sha, branch);
-  if (!res.ok) return { added, failed: res.status };
-  return { added, source, sha: res.sha };
+  if (!res.ok) return { added, removed, failed: res.status };
+  return { added, removed, source, sha: res.sha };
 }

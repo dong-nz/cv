@@ -281,7 +281,8 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     const conflicted = results.filter((r) => r.status === 'conflict').map((r) => r.id);
     setConflicts((prev) => [...new Set([...prev.filter((id) => !written.has(id)), ...conflicted])]);
 
-    // The third leg of §3.1: append ids whose documents landed to their unions.
+    // The third leg of §3.1: bring the unions to the ids whose documents
+    // landed — appended when a record was added, dropped when one was deleted.
     const types = typesRef.current;
     if (types) {
       const union = await saveIdUnions(store, types, branch);

@@ -66,7 +66,7 @@
   "mergeHint": "đã ghi lên branch — merge vào master để deploy",
   "offline": "ngoại tuyến — đang hiển thị nội dung đóng gói, không lưu được",
   "draftRestored": "bản nháp đã khôi phục từ phiên này",
-  "unionNote": "id mới cũng được thêm vào src/types/index.ts",
+  "unionNote": "các id union trong src/types/index.ts đã được cập nhật theo nội dung đã lưu",
   "unionFailed": "không cập nhật được src/types/index.ts — hãy hoàn tất sửa trong Gitea",
   "appearsHome": "Trang chủ",
   "appearsResume": "CV PDF",
