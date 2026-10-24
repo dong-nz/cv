@@ -126,7 +126,16 @@ export function TagListEditor({
       <button
         type="button"
         className="edit-add-inline"
-        onClick={() => write([...items, s.edit.newTag])}
+        // The project card body is a link (Projects.tsx, ProjectsListPage.tsx).
+        // A click here must not reach that anchor — otherwise adding a tag
+        // navigates to the project instead. Same guard the item controls use
+        // (mousedown stopped) plus the click guard EditableText uses.
+        onMouseDown={(event) => event.stopPropagation()}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          write([...items, s.edit.newTag]);
+        }}
       >
         <PlusIcon size={12} />
         {addLabel}
