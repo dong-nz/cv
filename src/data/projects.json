@@ -70,21 +70,5 @@
         "type": "text"
       }
     ]
-  },
-  {
-    "id": "test",
-    "category": "software-engineering",
-    "technologies": [
-      "typescript",
-      "html",
-      "nginx"
-    ],
-    "featured": true,
-    "sections": [
-      {
-        "id": "new-section",
-        "type": "text"
-      }
-    ]
   }
 ]
