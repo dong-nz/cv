@@ -39,27 +39,5 @@
         "content": "Model fine-tuned for AWB detection, processing 70,000 images/month. Presented at Tech Talk workshop."
       }
     }
-  },
-  "facility-management": {
-    "summary": "Built a digital twin platform for logistics facilities — facility modeling, real-time monitoring, and recommendation system.",
-    "sections": {
-      "vision": {
-        "content": "Transition from manual operations to an Operation Intelligence Platform — collect data, monitor, analyze, recommend, decide."
-      },
-      "result": {
-        "content": "Platform supports facility modeling, real-time visibility, and recommendations for capacity planning."
-      }
-    }
-  },
-  "local-llm-experiments": {
-    "summary": "Technical exploration of running local MoE LLMs with llama.cpp — GPU offloading, VRAM optimization, performance tracing.",
-    "sections": {
-      "exploration": {
-        "content": "Technical exploration of MoE (Mixture of Experts), expert routing, GPU offloading, VRAM optimization, prefill/decode pipeline."
-      },
-      "learnings": {
-        "content": "Understand the system → Measure → Analyze → Optimize. Not about showing off hardware — but demonstrating engineering approach."
-      }
-    }
   }
 }
