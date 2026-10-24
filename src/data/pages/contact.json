@@ -11,7 +11,8 @@
         "linkedinUrl",
         "linkedinHandle",
         "telegramUrl",
-        "telegramHandle"
+        "telegramHandle",
+        "name"
       ]
     }
   ],

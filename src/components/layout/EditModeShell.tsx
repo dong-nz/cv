@@ -1,8 +1,9 @@
 // EditModeShell (spec-v4 §5.1, §5.2): the lazy edit-mode wrapper around the
-// real site. It authenticates through the protected proxy, fetches the live
-// master documents, holds the draft, and re-wraps the tree in an
-// I18nProvider override — the seven routes ARE the preview. Visitors never
-// mount this component; its code is never in the entry chunk (§7 P3.4).
+// real site. It authenticates through the protected proxy, reads the live
+// documents the current route's manifest claims (the rest arrive on
+// navigation), holds the draft, and re-wraps the tree in an I18nProvider
+// override — the seven routes ARE the preview. Visitors never mount this
+// component; its code is never in the entry chunk (§7 P3.4).
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useLocation, useNavigate } from 'react-router';
@@ -14,11 +15,13 @@ import {
   DRAFT_DOCS,
   DraftStore,
   bundledBase,
+  entityOfDoc,
   fetchDoc,
   saveDraft,
   recordForTitlePath,
 } from '@/i18n/draft';
-import type { DocBase, DocSaveResult, DraftDocId } from '@/i18n/draft';
+import type { DocBase, DocSaveResult, DraftDocId, DraftDocMeta, SavedDraft } from '@/i18n/draft';
+import { metasForDocs, scopeForPath } from '@/i18n/edit-scope';
 import {
   DEFAULT_BRANCH,
   DRAFT_STORAGE,
@@ -51,6 +54,33 @@ const categoryMap = (data: unknown): Record<string, unknown> => {
   if (typeof categories !== 'object' || categories === null || Array.isArray(categories)) return {};
   return Object.fromEntries(Object.entries(categories));
 };
+
+// One wave per scope (§5.1). Each helper catches its own failure, so a label
+// rejection that lands while the documents are still in flight is never an
+// unhandled rejection, and the two failure paths stay separate: a document
+// failure is the offline state, a label failure only disables rule 7.
+async function loadDocs(metas: DraftDocMeta[], branch: string): Promise<DocBase[] | null> {
+  try {
+    return await Promise.all(metas.map((meta) => fetchDoc(meta.file, branch)));
+  } catch {
+    return null;
+  }
+}
+
+// Rule 7's inputs. A failed read yields null: the save bar says the label
+// check could not run, and the rule is skipped rather than guessed at from a
+// bundle that may predate the branch.
+async function loadLabels(branch: string): Promise<CategoryLabels | null> {
+  try {
+    const [vi, en] = await Promise.all([
+      fetchDoc(LABEL_FILES.vi, branch),
+      fetchDoc(LABEL_FILES.en, branch),
+    ]);
+    return { vi: categoryMap(vi.data), en: categoryMap(en.data) };
+  } catch {
+    return null;
+  }
+}
 
 export default function EditModeShell({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
@@ -119,6 +149,10 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
     const rest = params.toString();
     navigate(`${location.pathname}?edit${rest ? `&${rest}` : ''}${location.hash}`, { replace: true });
   }, [phase, location.pathname, location.search, location.hash, navigate]);
+  // Which documents and label documents this session has actually read from
+  // the branch (§5.1). A navigation fetches only what is missing here.
+  const liveDocsRef = useRef(new Set<DraftDocId>());
+  const labelsLiveRef = useRef(false);
 
   // The session's initialization runs once per mount: the entry URL is read
   // from a ref and `stripEditQuery` is stable, so a route change inside the
@@ -152,55 +186,62 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
       setPhase('loading');
 
       // Draft initialization is the live repository files, never the bundle
-      // (§5.1); the bundle is only the offline fallback, flagged stale.
+      // (§5.1); the bundle is only the offline fallback, flagged stale. The
+      // scope is the documents this route's manifest claims plus whatever a
+      // restored draft already touched — those must be read live, so their blob
+      // shas are known before any PUT. Everything else stays bundled until a
+      // navigation asks for it.
       let offline = false;
-      let bases: Record<DraftDocId, DocBase> | null = null;
-      // One concurrent wave instead of 14 serialized round-trips. The handlers
-      // are attached in the same tick the requests are made, so a label
-      // rejection that lands while the documents are still in flight is not an
-      // unhandled rejection; the two failure paths stay separate — a document
-      // failure is the offline state, a label failure only disables rule 7.
-      const docsRequest = Promise.all(
-        DRAFT_DOCS.map((meta) => fetchDoc(meta.file, branch)),
-      ).then(
-        (docs) => ({ ok: true as const, docs }),
-        () => ({ ok: false as const }),
-      );
-      const labelsRequest = Promise.all([
-        fetchDoc(LABEL_FILES.vi, branch),
-        fetchDoc(LABEL_FILES.en, branch),
-      ]).then(
-        ([vi, en]) => ({ ok: true as const, vi, en }),
-        () => ({ ok: false as const }),
-      );
-      const docs = await docsRequest;
-      if (docs.ok) {
-        bases = {} as Record<DraftDocId, DocBase>;
-        DRAFT_DOCS.forEach((meta, index) => {
-          bases![meta.id] = docs.docs[index];
-        });
-      } else {
-        offline = true;
-      }
-      if (!bases) bases = bundledBase();
-
-      // Rule 7's inputs. A failed read leaves the labels null: the save bar
-      // says the label check could not run, and the rule is skipped rather
-      // than guessed at from a bundle that may predate the branch.
-      let labels: CategoryLabels | null = null;
-      const labelDocs = await labelsRequest;
-      if (labelDocs.ok) {
-        labels = { vi: categoryMap(labelDocs.vi.data), en: categoryMap(labelDocs.en.data) };
-      } else {
-        setLabelsUnavailable(true);
-      }
-
-      const created = new DraftStore(bases, labels);
-
+      let saved: SavedDraft | null = null;
       const stored = sessionStorage.getItem(DRAFT_STORAGE);
       if (stored) {
         try {
-          const drifted = created.applySaved(JSON.parse(stored));
+          saved = JSON.parse(stored) as SavedDraft;
+        } catch {
+          saved = null;
+        }
+      }
+      const initial = scopeForPath(window.location.pathname);
+      const wanted = new Set<DraftDocId>(initial.docs);
+      if (saved) {
+        for (const id of Object.keys(saved.docs)) wanted.add(id as DraftDocId);
+      }
+      const metas = metasForDocs([...wanted]);
+      const needLabels =
+        initial.needsLabels || metas.some((meta) => entityOfDoc(meta.id) === 'projects');
+      // The two waves start in the same tick and each catches its own failure,
+      // so a label rejection that lands while the documents are still in
+      // flight is not an unhandled rejection. A document failure is the offline
+      // state; a label failure only disables rule 7.
+      const docsPromise = loadDocs(metas, branch);
+      const labelsPromise = needLabels ? loadLabels(branch) : Promise.resolve(null);
+      const docs = await docsPromise;
+      const labels = needLabels ? await labelsPromise : null;
+      if (docs === null) {
+        offline = true;
+      } else {
+        metas.forEach((meta) => {
+          liveDocsRef.current.add(meta.id);
+        });
+      }
+      if (needLabels) {
+        if (labels === null) {
+          setLabelsUnavailable(true);
+        } else {
+          labelsLiveRef.current = true;
+        }
+      }
+      const bases = bundledBase();
+      if (docs) {
+        metas.forEach((meta, index) => {
+          bases[meta.id] = docs[index];
+        });
+      }
+      const created = new DraftStore(bases, labels);
+
+      if (saved) {
+        try {
+          const drifted = created.applySaved(saved);
           if (drifted.length > 0) setConflicts(drifted);
           setDraftRestored(true);
         } catch {
@@ -218,6 +259,50 @@ export default function EditModeShell({ children }: { children: ReactNode }) {
       cancelled = true;
     };
   }, [refresh, stripEditQuery]);
+
+  // A route change needs the documents that route renders (§5.1): only the
+  // missing ones are read, and only documents the draft has not touched adopt
+  // the fresh baseline. The page keeps rendering the bundled copy while those
+  // few reads are in flight; a save of a still-bundled document goes through
+  // the conflict flow in draft.ts instead of overwriting the branch.
+  useEffect(() => {
+    if (phase !== 'ready' || !store) return;
+    const scope = scopeForPath(location.pathname);
+    const metas = metasForDocs(scope.docs).filter((meta) => !liveDocsRef.current.has(meta.id));
+    const needLabels = scope.needsLabels && !labelsLiveRef.current;
+    if (metas.length === 0 && !needLabels) return;
+    let cancelled = false;
+    const load = async () => {
+      const docsPromise = loadDocs(metas, branch);
+      const labelsPromise = needLabels ? loadLabels(branch) : Promise.resolve(null);
+      const docs = await docsPromise;
+      const labels = needLabels ? await labelsPromise : null;
+      if (cancelled) return;
+      if (docs === null) {
+        // The page stays on the bundled copy and the shell says so; saving is
+        // disabled until a reload can read the branch again.
+        setPhase('offline');
+        return;
+      }
+      metas.forEach((meta, index) => {
+        store.adoptBase(meta.id, docs[index]);
+        liveDocsRef.current.add(meta.id);
+      });
+      if (needLabels) {
+        if (labels === null) {
+          setLabelsUnavailable(true);
+        } else {
+          store.setCategoryLabels(labels);
+          labelsLiveRef.current = true;
+        }
+      }
+      refresh(store);
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [phase, store, branch, location.pathname, refresh]);
 
   // Mid-edit navigation guard (§5.2).
   useEffect(() => {

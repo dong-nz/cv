@@ -1,8 +1,10 @@
 // Typed loader for the page manifests (spec-v4-data-organization §5): which
 // joined records and which page-owned UI groups each page consumes.
 // Manifests are language-neutral, part of validation, and read-only in the
-// app — they exist for provenance (EditBar grouping, orphan-field rule),
-// never for rendering.
+// app — they exist for provenance (EditBar grouping, orphan-field rule) and
+// for the edit-mode fetch scope (spec-v4-live-edit §5.1), never for rendering.
+// A manifest describes the whole page, chrome included: the footer renders
+// `profile.name` on every route, so every manifest claims it.
 import aboutJson from './pages/about.json';
 import contactJson from './pages/contact.json';
 import experienceJson from './pages/experience.json';

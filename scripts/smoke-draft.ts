@@ -2,11 +2,14 @@
 // spec-v4-data-organization §6.1). Id unions are no longer the store's
 // business — scripts/generate-content-types.ts derives them from these very
 // documents (spec-v5), so what is checked here is the draft itself: text
-// writes, record add/delete/rename, conflicts and rebase, and the validator
-// rules a rejected edit is reported through.
+// writes, record add/delete/rename, conflicts and rebase, the validator rules
+// a rejected edit is reported through, and the scoped-baseline rules of
+// spec-v4-live-edit §5.1 (adoptBase, and a save that must not PUT a
+// bundle-seeded document).
 // Run: pnpm tsx scripts/smoke-draft.ts
-import { DraftStore, bundledBase } from '../src/i18n/draft';
+import { DraftStore, bundledBase, saveDraft } from '../src/i18n/draft';
 import type { CategoryLabels } from '../src/i18n/validate';
+import type { DocBase } from '../src/i18n/draft';
 import projectsEnUiJson from '../src/i18n/locales/en/ui/projects.json';
 import projectsViUiJson from '../src/i18n/locales/vi/ui/projects.json';
 
@@ -163,4 +166,46 @@ if (store7.isDirty()) fail('a rejected structure write mutated the draft');
 const acceptedCategory = store7.setStructured('projects', '[0].category', 'logistics');
 if (acceptedCategory !== null) fail(`labeled category rejected: ${JSON.stringify(acceptedCategory)}`);
 
-console.log('draft store smoke: all 11 checks passed');
+// 12. adoptBase (spec-v4-live-edit §5.1): a document the draft has not touched
+// accepts the live baseline a later navigation read brings; a document it has
+// already changed keeps its draft and its origin — a late read never silently
+// replaces work.
+const store8 = new DraftStore(structuredClone(bases), LABELS);
+// The live copy keeps the bundled ids: an adopted structure document whose ids
+// have no text entries would be a real validation failure, not a probe.
+const liveGroups = (structuredClone(bases.skills.data) as { id: string; skills: string[] }[]).map(
+  (group) => ({ ...group, skills: [...group.skills, 'LIVE SKILL'] }),
+);
+const liveSkills: DocBase = { data: liveGroups, sha: 'live-sha' };
+store8.adoptBase('skills', liveSkills);
+if (store8.shaOf('skills') !== 'live-sha') fail('adoptBase kept the bundled sha');
+if (JSON.stringify(store8.dataOf('skills')) !== JSON.stringify(liveSkills.data))
+  fail('adoptBase did not replace the bundled data');
+if (store8.setValue('vi', 'profile.bio', 'KEEP MINE') !== null)
+  fail('the touched-document edit was rejected');
+const liveProfile: DocBase = { data: { bio: 'THEIR BIO' }, sha: 'other-sha' };
+store8.adoptBase('profile.vi', liveProfile);
+if (store8.shaOf('profile.vi') !== '') fail('a touched document adopted a live sha');
+if ((store8.dataOf('profile.vi') as Record<string, unknown>).bio !== 'KEEP MINE')
+  fail('a late read replaced drafted work');
+
+// 13. A baseline that came from the bundle carries no blob sha, so the save
+// pipeline must not PUT it over the branch (Gitea reads an empty sha as a
+// create). It reads the branch first — with no proxy reachable here that read
+// fails, so the document reports a failure, the save stops before any write,
+// and the draft survives.
+const store9 = new DraftStore(structuredClone(bases), LABELS);
+if (store9.setValue('vi', 'profile.bio', 'SCOPED BASELINE') !== null)
+  fail('the scoped-save probe edit was rejected');
+const saveProbe = await saveDraft(store9, () => {}, 'master');
+const firstResult = saveProbe.results[0];
+if (!firstResult || firstResult.id !== 'profile.vi')
+  fail(`unexpected save results: ${JSON.stringify(saveProbe.results)}`);
+if (firstResult.status !== 'failed')
+  fail(`a bundle-seeded draft was not read from the branch first: ${firstResult.status}`);
+if (!saveProbe.stoppedEarly) fail('the save continued after the branch read failed');
+if (saveProbe.results.length !== 1) fail('the save kept going past the stopped document');
+if ((store9.dataOf('profile.vi') as Record<string, unknown>).bio !== 'SCOPED BASELINE')
+  fail('a failed save lost the draft');
+
+console.log('draft store smoke: all 13 checks passed');

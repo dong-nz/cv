@@ -96,6 +96,7 @@ The current `ui.json` namespaces map 1:1 onto groups; the split is mechanical. O
 - `entity` uses the §3 entity ids; `fields` are paths into the joined text/structure records; `"*"` claims the whole entity.
 - `ui` lists **page-owned** groups only. Component-owned groups (`navigation`, `footer`, `social`, `common`, `resume`, `edit`) are owned by the component side and provenance for them is the component mapping in §4 — they are not repeated in every manifest.
 - Manifests are language-neutral (which data a page shows is not a translation fact). They are structure-side data: part of validation, committed like structure documents, **read-only in the app** (`spec-v4-inline-editing.md` §3) — edited as repo files by the developer.
+- A manifest describes the whole page, **chrome included**: the footer renders `profile.name` on every route, so every manifest claims it. Component-owned *UI* groups stay out of the manifest (previous bullet — chrome labels have no entity provenance to name), but a content field a page renders through its chrome is still that page's claim. This is what makes the manifest usable as the edit-mode read scope (spec-v4-live-edit §5.2, row 26): a session reads exactly the documents the current route's manifest claims, so a page cannot be served a document it does not describe.
 
 Initial content mapping — derived from the code scan of every consumer (2026-10-23), to be re-derived exactly at implementation:
 
@@ -103,11 +104,11 @@ Initial content mapping — derived from the code scan of every consumer (2026-1
 |---|---|---|---|---|
 | `home` | `name`, `tagline`, `roles`, `bio`, `currentInterests`, `philosophy`, `tldr`, links (`email`, handles) | `*` (Expertise) | `*` (timeline) | featured subset: `title`, `summary`, `metrics` |
 | `about` | `name`, `bio`, `subtitle`, `currentInterests`, `philosophy` | `*` | — | — |
-| `experience` | `tldr` | — | `*` | — |
-| `projects` | — | — | — | `*`: `title`, `summary`, `metrics` |
-| `project-detail` | — | — | — | per-id: `title`, `summary`, `role`, `metrics`, `sections.*` |
-| `contact` | links (`email`, handles) | — | — | — |
-| `philosophy` | `philosophyQuotes` | — | — | — |
+| `experience` | `tldr`, `name` (footer) | — | `*` | — |
+| `projects` | `name` (footer) | — | — | `*`: `title`, `summary`, `metrics` |
+| `project-detail` | `name` (footer) | — | — | per-id: `title`, `summary`, `role`, `metrics`, `sections.*` |
+| `contact` | links (`email`, handles), `name` (footer) | — | — | — |
+| `philosophy` | `philosophyQuotes`, `name` (footer) | — | — | — |
 | `resume` (synthetic) | `name`, `title`, `bio`, `email`, links | `*` | `*` | `*` |
 
 `home` does **not** claim `title` — the code scan shows Hero renders `name`/`roles`/`tagline` only; `title` is consumed by the resume generator, which the synthetic manifest now covers honestly.
@@ -159,4 +160,5 @@ Order decided 2026-10-23: this spec lands **after** `spec-v4-inline-editing.md` 
 |---|---|---|
 | 0 | Design agreed (D1–D5) | ✅ Done 2026-10-23 |
 | 1–6 | Implementation steps §7 | ✅ Done 2026-10-23 — content split (4 files × 2 languages) + UI split (14 groups × 2) with merge asserted in `index.ts`; `src/data/pages/*.json` (8 manifests) + `pages.ts` + `PageId`/`PageManifestClaim`/`PageManifest` in `src/types/index.ts`; validator rules 1–4 in `validate.ts` (run at load and by `validate:content`); `draft.ts` registry data-driven over 12 writable documents (4 structure + 8 text, `entityOfDoc`/`docEntityMap` exported for provenance + EditBar); `describeField()` names the per-entity file automatically; EditBar "appears on" annotations via `manifestsClaiming`/`recordEntity`; AGENTS.md Data Layer + Live Edit Mode + Component Structure updated |
+| 7 | Manifests describe the whole page, chrome included: every manifest claims `profile.name`, because the footer renders it on every route — the same claim set is the edit-mode read scope (spec-v4-live-edit §5.2, row 26) | ✅ Done 2026-10-24 — `projects.json` and `project-detail.json` gained a `profile: ["name"]` claim, `contact` / `experience` / `philosophy` gained `name` in their existing claim; the rule is stated in `pages.ts`'s header. Verified: `pnpm validate:content`, `tsc -b`, `pnpm build`, and the scope probe over all 7 routes (evidence in live-edit row 26) |
 | — | Acceptance §8 | 🟡 Automated rows verified 2026-10-23 (see §8 checkboxes); browser rows open — the owner verifies in a real browser |

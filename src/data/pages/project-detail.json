@@ -5,7 +5,8 @@
     {
       "entity": "projects",
       "fields": ["title", "summary", "role", "metrics", "technologies", "category", "sections.*"]
-    }
+    },
+    { "entity": "profile", "fields": ["name"] }
   ],
   "ui": ["projectDetail"]
 }

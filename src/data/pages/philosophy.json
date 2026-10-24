@@ -2,7 +2,7 @@
   "id": "philosophy",
   "route": "/philosophy",
   "content": [
-    { "entity": "profile", "fields": ["philosophyQuotes"] }
+    { "entity": "profile", "fields": ["philosophyQuotes", "name"] }
   ],
   "ui": ["philosophy"]
 }

@@ -2,7 +2,8 @@
   "id": "projects",
   "route": "/projects",
   "content": [
-    { "entity": "projects", "fields": ["*"] }
+    { "entity": "projects", "fields": ["*"] },
+    { "entity": "profile", "fields": ["name"] }
   ],
   "ui": ["projects"]
 }

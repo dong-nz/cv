@@ -928,6 +928,22 @@ export class DraftStore {
     this.base.set(id, fresh);
   }
 
+  // A document the session did not need on the entry route becomes needed
+  // after a navigation (spec-v4-live-edit §5.1): its live baseline replaces the
+  // bundled one. A document the draft already changed keeps its draft and its
+  // origin — a late read never silently replaces work.
+  adoptBase(id: DraftDocId, doc: DocBase): void {
+    if (this.working.has(id)) return;
+    this.base.set(id, doc);
+    this.origin.set(id, doc.data);
+  }
+
+  // Rule 7's category labels arrive with the documents of the route that
+  // renders a project, which a session may reach only after a navigation.
+  setCategoryLabels(labels: CategoryLabels | null): void {
+    this.categoryLabels = labels;
+  }
+
   // Rebase (§5.6): a real three-way merge of origin → mine against origin →
   // theirs. Paths only I touched replay onto the refreshed base; a path both
   // sides changed differently is a conflict the store refuses to resolve —
@@ -985,6 +1001,27 @@ export async function saveDraft(
     const meta = DRAFT_DOCS.find((d) => d.id === id)!;
     const paths = store.changedPaths(id);
     const message = `content: ${meta.file} (${paths.length} path${paths.length === 1 ? '' : 's'})`;
+    // A baseline that came from the bundle carries no blob sha. Gitea reads an
+    // empty sha as a create (422 "repository file already exists"), and PUTting
+    // a bundle-seeded draft over the branch would drop whatever the branch has.
+    // Read the branch first and hand the document to the conflict flow: rebase
+    // replays my paths onto the fresh base, take-theirs discards them. Reached
+    // when a document is edited before its scoped read lands, or when a
+    // restored draft touches a document this route never renders.
+    if (!store.shaOf(id)) {
+      try {
+        store.resetBase(id, await fetchDoc(meta.file, branch));
+      } catch {
+        const stalled: DocSaveResult = { id, status: 'failed' };
+        results.push(stalled);
+        onResult(stalled);
+        return { results, stoppedEarly: true };
+      }
+      const bundleSeeded: DocSaveResult = { id, status: 'conflict' };
+      results.push(bundleSeeded);
+      onResult(bundleSeeded);
+      continue;
+    }
     const res = await putDoc(meta.file, store.dataOf(id), message, store.shaOf(id), branch);
     if (res.ok) {
       store.markWritten(id, res.sha);
