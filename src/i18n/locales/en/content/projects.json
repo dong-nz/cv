@@ -44,6 +44,15 @@
     "title": "Test",
     "summary": "hello world.",
     "role": "Owner",
-    "sections": {}
+    "sections": {
+      "new-section": {
+        "title": "New section",
+        "content": "Write the section here."
+      },
+      "new-section-2": {
+        "title": "New section",
+        "content": "Write the section here."
+      }
+    }
   }
 }
