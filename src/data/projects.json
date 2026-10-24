@@ -70,5 +70,14 @@
         "type": "text"
       }
     ]
+  },
+  {
+    "id": "test",
+    "category": "experiment",
+    "technologies": [
+      "typescript"
+    ],
+    "featured": false,
+    "sections": []
   }
 ]
