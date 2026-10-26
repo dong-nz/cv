@@ -1,0 +1,141 @@
+name: Deploy Static Site
+
+on:
+  push:
+    branches:
+      - feature/github-migration
+
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    # Site identity (spec-v4-deploy-infra D10/D12, spec-v6 D3): the build and the
+    # resume generator derive every published URL and the page title from these two
+    # values; the build fails loudly when either is missing. They are repository
+    # variables — public values, not secrets.
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      SITE_NAME: ${{ vars.SITE_NAME }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v3
+        with:
+          cache: true
+          version: ^12.0.0
+          runtime: node@24
+      - run: pnpm tsx scripts/validate-content.ts
+      - run: pnpm build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: static-site
+          path: dist/
+          retention-days: 5
+
+  generate-resume:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      contents: read
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      SITE_NAME: ${{ vars.SITE_NAME }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/setup@v3
+        with:
+          cache: true
+          version: ^12.0.0
+          runtime: node@24
+
+      # Cache Playwright browser — download once, reuse
+      - name: Cache Playwright browser
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - run: pnpm install --frozen-lockfile
+      - run: npx playwright install chromium
+      - run: npx playwright install-deps chromium
+
+      # Generate English version (default)
+      - run: pnpm tsx scripts/generate-resume.ts --lang=en
+
+      # Generate Vietnamese version
+      - run: pnpm tsx scripts/generate-resume.ts --lang=vi
+
+      # Upload both PDF artifacts
+      - uses: actions/upload-artifact@v7
+        with:
+          name: resume-pdf-en
+          path: dist/resume.pdf
+          retention-days: 1
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: resume-pdf-vi
+          path: dist/resume-vi.pdf
+          retention-days: 1
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, generate-resume]
+    permissions:
+      contents: read
+    steps:
+      # The stack directory is the server's deployment layout, not repository
+      # content: it comes from the STACK_DIR repository variable (spec-v6 D15). An
+      # empty or malformed value would aim rsync at /dist/ on the remote host, so the
+      # job refuses it here — before any artifact download, before anything reaches the
+      # server — exactly like the site-identity check refuses a missing SITE_URL.
+      - name: Check stack directory
+        env:
+          STACK_DIR: ${{ vars.STACK_DIR }}
+        run: |
+          case "$STACK_DIR" in
+            /*) ;;
+            *)
+              echo "::error::STACK_DIR is not an absolute path — add it as a repository variable (Settings → Secrets and variables → Variables), value: the Dockge stack directory, e.g. /opt/stacks/dong-site"
+              exit 1
+              ;;
+          esac
+          case "$STACK_DIR" in
+            */)
+              echo "::error::STACK_DIR must not end with / — this job appends /dist/ itself"
+              exit 1
+              ;;
+          esac
+          echo "Deploy target: $STACK_DIR/dist/"
+      - uses: actions/download-artifact@v8
+        with:
+          name: static-site
+          path: dist/
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: resume-pdf-en
+          path: dist/
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: resume-pdf-vi
+          path: dist/
+
+      - name: rsync deployments
+        uses: burnett01/rsync-deployments@v9
+        with:
+          debug: true
+          switches: -avzr --delete
+          path: dist/
+          remote_path: ${{ vars.STACK_DIR }}/dist/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}

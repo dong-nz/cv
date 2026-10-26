@@ -18,7 +18,7 @@ function siteIdentity(): Plugin {
       if (config.command === 'build' && (!siteUrl || !siteName)) {
         throw new Error(
           'SITE_URL / SITE_NAME are not set — the production build needs the site identity. ' +
-            'Provide them as CI variables (Gitea Actions variables) or in the local .env; see .env.example.',
+            'Provide them as CI repository variables (GitHub Actions) or in the local .env; see .env.example.',
         )
       }
       // Dev fallbacks keep `pnpm dev` bootable with no environment at all.
@@ -33,10 +33,11 @@ function siteIdentity(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
-  const contentsApiUrl = env.GITEA_CONTENTS_API || process.env.GITEA_CONTENTS_API || ''
-  // Dev parity with the production nginx `/api/content/` proxy (spec-v4 §6.2):
-  // both read the same GITEA_CONTENTS_API value. Without it there is no proxy —
-  // edit mode falls back to the offline state, exactly like a missing token.
+  const contentsApiUrl = env.CONTENT_API_BASE || process.env.CONTENT_API_BASE || ''
+  // Dev parity with the production nginx `/api/content/` proxy (spec-v4 §6.2,
+  // spec-v6 D4): both read the same CONTENT_API_BASE value and send the same
+  // Authorization form. Without it there is no proxy — edit mode falls back to
+  // the offline state, exactly like a missing token.
   const contentsApi = contentsApiUrl ? new URL(contentsApiUrl) : null
   return {
     plugins: [react(), siteIdentity()],
@@ -54,8 +55,10 @@ export default defineConfig(({ mode }) => {
               rewrite: (p) => p.replace(/^\/api\/content\//, contentsApi.pathname),
               configure: (proxy) => {
                 proxy.on('proxyReq', (proxyReq) => {
-                  const token = env.GITEA_TOKEN || process.env.GITEA_TOKEN
-                  if (token) proxyReq.setHeader('Authorization', `token ${token}`)
+                  const token = env.CONTENT_API_TOKEN || process.env.CONTENT_API_TOKEN
+                  // Bearer, not the legacy "token" prefix: the dev proxy must send
+                  // exactly what the production nginx proxy sends (spec-v6 D4).
+                  if (token) proxyReq.setHeader('Authorization', `Bearer ${token}`)
                 })
               },
             },

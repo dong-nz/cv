@@ -3,6 +3,8 @@
 > **Parent:** `spec.md` (product vision), `specs/v3/spec-v3-i18n.md` (supersedes its Phase 2)
 > **Status:** rev.4 — Phases 1–3 implemented 2026-10-22 (see §12 rows 3–15). Remaining (2026-10-23): the owner-side infra setup + first verified run per `spec-v4-deploy-infra.md` rev.7 (Gitea Actions variables `SITE_URL`/`SITE_NAME`, stack `secrets/site_config` with the restricted `GITEA_TOKEN`), and the owner's browser walkthrough. Content documents are pushed and on `master` (§12 row 11); the production nginx step (§6.3) is automated repo-side by `deploy-infra.yml`.
 
+> **Amended on 2026-10-26 by `specs/v6/spec-v6-github-actions.md`:** the content repository is GitHub-hosted and both pipelines run on GitHub Actions. §6.1's status codes describe the Gitea answers live when this spec was written — GitHub answers a stale blob sha as **409 Conflict**, and 422 "sha must be provided" when the sha is missing for an existing file; `draft.ts` handles all three. The write path's shape is identical on both providers (`?ref=`, `branch` in the PUT body, blob-sha concurrency, sequential PUTs, no branch creation), and §6.3's Basic-auth proxy remains the security boundary.
+
 ---
 
 ## Overview

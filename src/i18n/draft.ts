@@ -217,9 +217,9 @@ function encodeBase64(text: string): string {
 export async function fetchDoc(file: string, branch: string): Promise<DocBase> {
   const res = await fetch(proxyUrl(file, branch));
   if (!res.ok) throw new Error(`GET ${file}: ${res.status}`);
-  // The contents response carries both the blob sha (`sha`) and the last
-  // commit that touched the file (`last_commit_sha`). Gitea 28's UpdateFile
-  // concurrency field is the blob sha — that is the value the draft keeps.
+  // The contents response carries the blob sha (`sha`) — the same field the
+  // Contents API concurrency check wants, on GitHub and on Gitea alike — and the
+  // last commit that touched the file. The draft keeps the blob sha.
   const json = (await res.json()) as { content?: string; sha?: string };
   return {
     data: JSON.parse(decodeBase64(json.content ?? '')),
@@ -238,10 +238,10 @@ async function putBase64(
   blobSha: string,
   branch: string,
 ): Promise<PutResult> {
-  // Gitea 28 UpdateFileOptions: `sha` is the blob ID of the file to update —
-  // empty means create (an existing file then answers 422 "repository file
-  // already exists"), a stale one means a concurrency mismatch. The FileResponse
-  // returns the new blob sha at `content.sha`.
+  // UpdateFileOptions: `sha` is the blob ID of the file to update — empty means
+  // create (an existing file then refuses it), a stale one is a concurrency
+  // mismatch: GitHub answers 409 Conflict, Gitea 28 answered 422 with a "does not
+  // match" message. The response carries the new blob sha at `content.sha`.
   const res = await fetch(proxyUrl(file, branch), {
     method: 'PUT',
     headers: { 'content-type': 'application/json' },
@@ -267,7 +267,7 @@ async function putBase64(
 }
 
 // Serialize exactly as the repository file is formatted (2-space indent, key
-// order preserved from the parsed document) so Gitea diffs stay reviewable
+// order preserved from the parsed document) so repository diffs stay reviewable
 // (§6.1).
 export function putDoc(
   file: string,
@@ -985,12 +985,21 @@ export type DocSaveResult = {
   http?: number;
 };
 
-// Sequential PUTs, one commit per touched document (§6.1). A blob-sha
-// mismatch — Gitea 28 answers 422 with a "does not match" message, older
-// deployments answered 412 — refreshes that document's base and reports a
-// conflict without stopping the sequence; any other failure stops so a retry
-// resumes from the first unwritten document — landed documents are never
-// rewritten (§5.6).
+// The Contents API's answer to a stale blob sha: GitHub 409 Conflict, Gitea 28
+// 422 with a "does not match" message, older deployments 412. All three mean the
+// branch moved under this document — the conflict flow resolves it (§5.6).
+function isConflict(status: number, message: string): boolean {
+  return (
+    status === 409 ||
+    status === 412 ||
+    (status === 422 && /does not match/i.test(message))
+  );
+}
+
+// Sequential PUTs, one commit per touched document (§6.1). A conflict refreshes
+// that document's base and reports it without stopping the sequence; any other
+// failure stops so a retry resumes from the first unwritten document — landed
+// documents are never rewritten (§5.6).
 export async function saveDraft(
   store: DraftStore,
   onResult: (result: DocSaveResult) => void,
@@ -1001,9 +1010,10 @@ export async function saveDraft(
     const meta = DRAFT_DOCS.find((d) => d.id === id)!;
     const paths = store.changedPaths(id);
     const message = `content: ${meta.file} (${paths.length} path${paths.length === 1 ? '' : 's'})`;
-    // A baseline that came from the bundle carries no blob sha. Gitea reads an
-    // empty sha as a create (422 "repository file already exists"), and PUTting
-    // a bundle-seeded draft over the branch would drop whatever the branch has.
+    // A baseline that came from the bundle carries no blob sha. The API reads an
+    // empty sha as a create, and an existing file refuses it (GitHub 422 "sha must
+    // be provided", Gitea 422 "repository file already exists"). PUTting a
+    // bundle-seeded draft over the branch would drop whatever the branch has.
     // Read the branch first and hand the document to the conflict flow: rebase
     // replays my paths onto the fresh base, take-theirs discards them. Reached
     // when a document is edited before its scoped read lands, or when a
@@ -1030,7 +1040,7 @@ export async function saveDraft(
       onResult(result);
       continue;
     }
-    if (res.status === 412 || (res.status === 422 && /does not match/i.test(res.message))) {
+    if (isConflict(res.status, res.message)) {
       try {
         store.resetBase(id, await fetchDoc(meta.file, branch));
       } catch {

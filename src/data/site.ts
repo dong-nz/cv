@@ -1,8 +1,8 @@
 /**
  * Site identity — deployment-time configuration, not a repository literal
- * (spec-v4-deploy-infra D10/D12). CI supplies SITE_URL / SITE_NAME as Gitea
- * Actions variables on the build and resume jobs; local runs read them from the
- * uncommitted `.env` (see `.env.example`). A missing value fails loudly — a
+ * (spec-v4-deploy-infra D10/D12, spec-v6 D3). CI supplies SITE_URL / SITE_NAME
+ * as repository variables on the build and resume jobs; local runs read them from
+ * the uncommitted `.env` (see `.env.example`). A missing value fails loudly — a
  * half-configured sitemap, meta block or resume is never emitted.
  *
  * Browser code does not import this module today; the scripts

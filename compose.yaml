@@ -10,8 +10,9 @@ services:
     # Source the config file, then hand over to the image's official entrypoint.
     # set -a is REQUIRED: a sourced assignment is a shell variable, not an env var —
     # without export the entrypoint child (and its envsubst step) sees nothing and
-    # the template renders unsubstituted (reproduced locally 2026-10-23: unknown
-    # "gitea_contents_api" variable). The nginx command is inline: a compose
+    # the template renders unsubstituted (reproduced locally 2026-10-23 as an
+    # "unknown variable" failure; the names are content_api_* since spec-v6). The
+    # nginx command is inline: a compose
     # entrypoint override does NOT keep the image's CMD (CMD=[]) — an empty "$@"
     # makes the exec a no-op, exit 0, restart loop.
     entrypoint: ["sh", "-c", "set -a; . /run/secrets/site_config; exec /docker-entrypoint.sh nginx -g 'daemon off;'"]
@@ -20,9 +21,9 @@ services:
       # REGEX the official entrypoint matches against each variable name
       # (`t ~ /^(filter)$/`) — alternatives MUST be separated with |, a comma
       # matches nothing and leaves ${…} in the rendered config (nginx -t then
-      # fails: unknown "gitea_contents_api" variable — reproduced 2026-10-23).
+      # fails with an unknown variable — reproduced 2026-10-23).
       # $uri/$host stay nginx runtime variables. The filter is not sensitive.
-      NGINX_ENVSUBST_FILTER: GITEA_TOKEN|GITEA_CONTENTS_API
+      NGINX_ENVSUBST_FILTER: CONTENT_API_TOKEN|CONTENT_API_BASE
     volumes:
       - ./dist:/usr/share/nginx/html:ro
       # Mounted as a template: the image's envsubst step renders it to

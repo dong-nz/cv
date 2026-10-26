@@ -5,9 +5,9 @@
 // writes, record add/delete/rename, conflicts and rebase, the validator rules
 // a rejected edit is reported through, and the scoped-baseline rules of
 // spec-v4-live-edit §5.1 (adoptBase, and a save that must not PUT a
-// bundle-seeded document).
+// bundle-seeded document), and the Contents API conflict answer of spec-v6 D5.
 // Run: pnpm tsx scripts/smoke-draft.ts
-import { DraftStore, bundledBase, saveDraft } from '../src/i18n/draft';
+import { DraftStore, bundledBase, PROXY_BASE, saveDraft } from '../src/i18n/draft';
 import type { CategoryLabels } from '../src/i18n/validate';
 import type { DocBase } from '../src/i18n/draft';
 import projectsEnUiJson from '../src/i18n/locales/en/ui/projects.json';
@@ -190,7 +190,7 @@ if ((store8.dataOf('profile.vi') as Record<string, unknown>).bio !== 'KEEP MINE'
   fail('a late read replaced drafted work');
 
 // 13. A baseline that came from the bundle carries no blob sha, so the save
-// pipeline must not PUT it over the branch (Gitea reads an empty sha as a
+// pipeline must not PUT it over the branch (the API reads an empty sha as a
 // create). It reads the branch first — with no proxy reachable here that read
 // fails, so the document reports a failure, the save stops before any write,
 // and the draft survives.
@@ -208,4 +208,52 @@ if (saveProbe.results.length !== 1) fail('the save kept going past the stopped d
 if ((store9.dataOf('profile.vi') as Record<string, unknown>).bio !== 'SCOPED BASELINE')
   fail('a failed save lost the draft');
 
-console.log('draft store smoke: all 13 checks passed');
+// 14. A blob-sha conflict belongs to the conflict flow, not to a hard stop.
+// GitHub answers 409 Conflict with a body the Gitea-era message matcher would
+// not recognise — the status alone must drive the flow: refresh that document's
+// base from the branch, report a conflict, and keep the sequence going.
+const store10 = new DraftStore(structuredClone(bases), LABELS);
+for (const id of ['profile.vi', 'profile.en'] as const) {
+  const branchCopy = structuredClone(bases[id]);
+  branchCopy.sha = `branch-${id}`;
+  store10.resetBase(id, branchCopy);
+}
+if (store10.setValue('vi', 'profile.bio', 'CONFLICT MINE') !== null)
+  fail('the conflict-probe edit was rejected');
+if (store10.setValue('en', 'profile.bio', 'CONFLICT MINE EN') !== null)
+  fail('the second conflict-probe edit was rejected');
+
+const branchDoc = (id: 'profile.vi' | 'profile.en', bio: string) => {
+  const data = structuredClone(bases[id].data) as Record<string, unknown>;
+  data.bio = bio;
+  return { encoded: Buffer.from(JSON.stringify(data, null, 2)).toString('base64'), sha: `moved-${id}` };
+};
+const viBranch = branchDoc('profile.vi', 'THEIR BIO');
+const enBranch = branchDoc('profile.en', 'THEIR BIO EN');
+
+const realFetch = globalThis.fetch;
+globalThis.fetch = (async (input: unknown, init?: { method?: string }) => {
+  const url = String(input);
+  if (!url.startsWith(PROXY_BASE)) fail(`the save left the proxy: ${url}`);
+  const branch = url.includes('/vi/content/') ? viBranch : enBranch;
+  if ((init?.method ?? 'GET') === 'PUT')
+    return new Response(JSON.stringify({ message: 'Conflict', documentation_url: 'https://docs.github.com/rest' }), { status: 409 });
+  return new Response(JSON.stringify({ content: branch.encoded, sha: branch.sha }), { status: 200 });
+}) as unknown as typeof fetch;
+
+const conflictSave = await saveDraft(store10, () => {}, 'master');
+globalThis.fetch = realFetch;
+if (conflictSave.results.length !== 2)
+  fail(`a 409 cut the save short: ${JSON.stringify(conflictSave.results)}`);
+if (!conflictSave.results.every((r) => r.status === 'conflict' && r.http === 409))
+  fail(`a 409 was not reported as a conflict: ${JSON.stringify(conflictSave.results)}`);
+if (conflictSave.stoppedEarly) fail('a conflict stopped the save sequence');
+if (store10.shaOf('profile.vi') !== 'moved-profile.vi') fail('the conflict did not refresh the base from the branch');
+if (store10.shaOf('profile.en') !== 'moved-profile.en') fail('the second conflict did not refresh its base');
+if ((store10.dataOf('profile.vi') as Record<string, unknown>).bio !== 'CONFLICT MINE')
+  fail('a conflict dropped the draft');
+// The refreshed base is what the conflict UI resolves against: my path and the
+// branch path both moved, so the store must hand the field over, not pick a side.
+if (store10.rebase('profile.vi') === null) fail('a 409 left nothing for the conflict UI to resolve');
+
+console.log('draft store smoke: all 14 checks passed');

@@ -1,0 +1,145 @@
+name: Redeploy Nginx
+
+# Infra files only (spec-v4-deploy-infra D1): a change to the nginx template,
+# the compose definition, or the Basic-auth file redeploys the container —
+# content commits never do. workflow_dispatch is the token-rotation runbook.
+on:
+  push:
+    branches:
+      - feature/github-migration
+    paths:
+      - nginx.conf
+      - compose.yaml
+      - deploy/htpasswd
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-infra
+  cancel-in-progress: false
+
+jobs:
+  redeploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      # The stack directory and the container name are the server's deployment layout,
+      # not repository content: both come from repository variables (spec-v6 D15), and
+      # STACK_DIR is the same value `deploy.yml` uses. A missing STACK_DIR would rsync
+      # the three infra files into the remote user's home and then run docker in the
+      # wrong place; a CONTAINER_NAME that disagrees with the service this repository
+      # ships would recreate nothing and probe a container that does not exist. Both are
+      # refused here — before any rsync, before anything reaches the server.
+      - name: Check stack variables
+        env:
+          STACK_DIR: ${{ vars.STACK_DIR }}
+          CONTAINER_NAME: ${{ vars.CONTAINER_NAME }}
+        run: |
+          case "$STACK_DIR" in
+            /*) ;;
+            *)
+              echo "::error::STACK_DIR is not an absolute path — add it as a repository variable (Settings → Secrets and variables → Variables), value: the Dockge stack directory, e.g. /opt/stacks/dong-site"
+              exit 1
+              ;;
+          esac
+          case "$STACK_DIR" in
+            */)
+              echo "::error::STACK_DIR must not end with / — this job appends the slashes it needs"
+              exit 1
+              ;;
+          esac
+          # The name is used twice over: as the compose service to recreate, and as the
+          # docker target of the health probe. compose.yaml — this repository — declares
+          # both, so the variable is checked against the file it has to agree with.
+          if ! grep -qE "^  ${CONTAINER_NAME}:" compose.yaml; then
+            echo "::error::CONTAINER_NAME is not a service in compose.yaml — the recreate step names a compose service, so the two must match"
+            exit 1
+          fi
+          if ! grep -qF "container_name: ${CONTAINER_NAME}" compose.yaml; then
+            echo "::error::CONTAINER_NAME does not match container_name in compose.yaml — docker exec and docker logs target that name"
+            exit 1
+          fi
+          echo "Stack: $STACK_DIR, container: $CONTAINER_NAME"
+
+      # Ship exactly the three triggered files. Never .env, never secrets/ (D6).
+      # The action builds the rsync source as "$GITHUB_WORKSPACE/$path" and passes
+      # it as one argument (entrypoint.sh) — so NO --relative: -R mirrors the whole
+      # absolute workspace path onto the server (run 2026-10-23 created
+      # dong-site/workspace/dong.nguyen/cv/… on the VPS). Plain -avz lands each
+      # file's basename in remote_path; the htpasswd step names deploy/ itself.
+      - name: Sync nginx.conf
+        uses: burnett01/rsync-deployments@v9
+        with:
+          switches: -avz
+          path: nginx.conf
+          remote_path: ${{ vars.STACK_DIR }}/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      - name: Sync compose.yaml
+        uses: burnett01/rsync-deployments@v9
+        with:
+          switches: -avz
+          path: compose.yaml
+          remote_path: ${{ vars.STACK_DIR }}/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+      - name: Sync deploy/htpasswd
+        uses: burnett01/rsync-deployments@v9
+        with:
+          switches: -avz
+          path: deploy/htpasswd
+          remote_path: ${{ vars.STACK_DIR }}/deploy/
+          remote_host: ${{ secrets.DEPLOY_HOST }}
+          remote_port: ${{ secrets.DEPLOY_SSH_PORT }}
+          remote_user: ${{ secrets.DEPLOY_USER }}
+          remote_key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+
+      # Test-before-touch (D3): the throwaway container runs the same entrypoint
+      # render pipeline as production, with placeholder values — nginx -t checks
+      # syntax only, so the real token never enters this container or the job.
+      # A failure here fails the job; the live container keeps serving.
+      # The placeholder must be a resolvable literal IP: a literal hostname in
+      # proxy_pass IS resolved while the config is parsed (spec-v4-deploy-infra §4).
+      - name: Test new config
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cd "${{ vars.STACK_DIR }}"
+            docker run --rm \
+              -v "$PWD/nginx.conf:/etc/nginx/templates/default.conf.template:ro" \
+              -v "$PWD/deploy/htpasswd:/etc/nginx/htpasswd:ro" \
+              -e CONTENT_API_TOKEN=placeholder \
+              -e CONTENT_API_BASE=http://127.0.0.1:1 \
+              -e 'NGINX_ENVSUBST_FILTER=CONTENT_API_TOKEN|CONTENT_API_BASE' \
+              nginx:alpine nginx -t
+
+      # Apply + verify (D4): recreate is the same command the Dockge deploy
+      # button runs, with the service/container names from CONTAINER_NAME — already
+      # checked against compose.yaml above. The health probe uses wget because
+      # nginx:alpine carries no curl; on failure the job prints the container log and
+      # fails.
+      - name: Recreate and probe
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          port: ${{ secrets.DEPLOY_SSH_PORT }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
+          script: |
+            cd "${{ vars.STACK_DIR }}"
+            docker compose up -d --force-recreate "${{ vars.CONTAINER_NAME }}"
+            sleep 2
+            if ! docker exec "${{ vars.CONTAINER_NAME }}" wget -q -O /dev/null http://127.0.0.1/; then
+              docker logs --tail 50 "${{ vars.CONTAINER_NAME }}"
+              exit 1
+            fi
+            docker exec "${{ vars.CONTAINER_NAME }}" nginx -t

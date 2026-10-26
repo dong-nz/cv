@@ -1,6 +1,6 @@
 # Portfolio
 
-Personal engineering portfolio — a bilingual (EN/VI) single-page app built with React 19, TypeScript and Vite. All content is data-driven: language-neutral structure documents in `src/data/*.json`, per-language text dictionaries in `src/i18n/locales/`, joined at load. An authenticated edit mode (`?edit`) edits the live site in place and writes the documents back to the git repository through a Gitea Contents API proxy; pushing to `master` deploys through Gitea Actions CI.
+Personal engineering portfolio — a bilingual (EN/VI) single-page app built with React 19, TypeScript and Vite. All content is data-driven: language-neutral structure documents in `src/data/*.json`, per-language text dictionaries in `src/i18n/locales/`, joined at load. An authenticated edit mode (`?edit`) edits the live site in place and writes the documents back to the git repository through a Contents API proxy; pushing to `master` deploys through GitHub Actions CI.
 
 Product and feature specifications: [`docs/design/spec.md`](docs/design/spec.md) and [`docs/design/specs/`](docs/design/).
 
@@ -33,10 +33,10 @@ cp .env.example .env
 |---|---|---|
 | `SITE_URL` | for `pnpm build` | canonical origin — every published absolute URL (meta tags, sitemap, robots, resume links) derives from it. `pnpm dev` falls back to `http://localhost:5173` without it |
 | `SITE_NAME` | for `pnpm build` | page `<title>` and Open Graph / Twitter meta. Dev fallback: `Portfolio (dev)` |
-| `GITEA_CONTENTS_API` | optional | full Gitea Contents-API base URL (`…/api/v1/repos/<owner>/<repo>/contents/`). Enables the dev `/api/content/` proxy — the exact mirror of the production nginx location |
-| `GITEA_TOKEN` | optional | Gitea access token the dev proxy attaches to write requests |
+| `CONTENT_API_BASE` | optional | full Contents-API base URL (`https://api.github.com/repos/<owner>/<repo>/contents/`). Enables the dev `/api/content/` proxy — the exact mirror of the production nginx location |
+| `CONTENT_API_TOKEN` | optional | access token the dev proxy attaches to write requests (`Authorization: Bearer …`, the same form the production proxy sends) |
 
-Without the two `GITEA_*` values everything still runs; edit mode is offline (bundled content, save disabled).
+Without the two `CONTENT_API_*` values everything still runs; edit mode is offline (bundled content, save disabled).
 
 ### 3. Run
 
@@ -44,7 +44,7 @@ Without the two `GITEA_*` values everything still runs; edit mode is offline (bu
 pnpm dev        # http://localhost:5173 with HMR
 ```
 
-Edit mode: open any route with `?edit` (or `?edit=<branch>` to read and write a specific branch; bare `?edit` resumes the last branch, default `master`). In dev the proxy uses `GITEA_TOKEN` directly — no login prompt.
+Edit mode: open any route with `?edit` (or `?edit=<branch>` to read and write a specific branch; bare `?edit` resumes the last branch, default `master`). In dev the proxy uses `CONTENT_API_TOKEN` directly — no login prompt.
 
 ### 4. Commands
 
@@ -75,8 +75,8 @@ To exercise the real serving path — nginx SPA routing, caching, the authentica
 pnpm build
 mkdir -p secrets
 # secrets/site_config — exactly two lines, chmod 600, never committed:
-#   GITEA_TOKEN=<token>
-#   GITEA_CONTENTS_API=https://<gitea-host>/api/v1/repos/<owner>/<repo>/contents/
+#   CONTENT_API_TOKEN=<token>
+#   CONTENT_API_BASE=https://api.github.com/repos/<owner>/<repo>/contents/
 chmod 600 secrets/site_config
 docker network create docker-network   # once; compose.yaml joins it
 docker compose up -d
@@ -84,27 +84,31 @@ docker compose up -d
 
 `compose.yaml` defines no published port (the VPS container is reached through its own fronting); `compose.override.yaml` — auto-merged by `docker compose`, never shipped by the pipeline — publishes the container on the local loopback. Open **`http://127.0.0.1:8081/`** in a browser; `?edit` there asks for HTTP Basic credentials from `deploy/htpasswd`. If 8081 is taken on your machine, change the host port in `compose.override.yaml`. Stop the stack with `docker compose stop`.
 
-## Production deployment (Gitea CI)
+## Production deployment (GitHub Actions)
 
 ### Pipelines
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| [`.gitea/workflows/deploy.yml`](.gitea/workflows/deploy.yml) | push to `master` | `build` (validate content → `pnpm build`) → `generate-resume` (EN + VI PDFs) → `deploy` rsyncs `dist/` (PDFs included) to `/opt/stacks/dong-site/dist/` on the VPS |
-| [`.gitea/workflows/deploy-infra.yml`](.gitea/workflows/deploy-infra.yml) | push to `master` touching `nginx.conf` / `compose.yaml` / `deploy/htpasswd`, or manual dispatch | rsyncs exactly those three files to the stack directory, tests the new config in a throwaway container (`nginx -t`), then `docker compose up -d --force-recreate` + health probe |
+| [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) | push to `master` | `build` (validate content → `pnpm build`) → `generate-resume` (EN + VI PDFs) → `deploy` rsyncs `dist/` (PDFs included) to `${STACK_DIR}/dist/` on the VPS |
+| [`.github/workflows/deploy-infra.yml`](.github/workflows/deploy-infra.yml) | push to `master` touching `nginx.conf` / `compose.yaml` / `deploy/htpasswd`, or manual dispatch | rsyncs exactly those three files to the stack directory, tests the new config in a throwaway container (`nginx -t`), then `docker compose up -d --force-recreate` + health probe |
 
 Only `master` deploys. A content commit never restarts nginx; an infra commit never rebuilds the site. The VPS stack is managed by Dockge (`/opt/stacks/dong-site`); the repository is the single source of truth for the three infra files.
 
+The repository is GitHub-primary and public; the pipelines run on GitHub-hosted runners (free for public repositories). `master` carries no branch protection on purpose: edit mode writes straight to it, and the validation step in `build` is what keeps a malformed content commit from deploying. `.gitea/workflows/` is kept only until the first green GitHub run is verified, then deleted (spec-v6 D9).
+
 ### One-time setup
 
-**1. Gitea Actions variables** — Settings → Actions → Variables (repository level):
+**1. GitHub repository variables** — Settings → Secrets and variables → Actions → **Variables** (repository level):
 
 | Name | Value |
 |---|---|
 | `SITE_URL` | the canonical origin, e.g. `https://cv.example.com` (no trailing slash) |
 | `SITE_NAME` | the page title string |
+| `STACK_DIR` | the absolute stack directory on the VPS, e.g. `/opt/stacks/dong-site` — **no trailing slash** |
+| `CONTAINER_NAME` | the compose service / container name, e.g. `dong-site` — it must match `compose.yaml`, and the infra job checks that it does |
 
-These are public values, so they live in the `vars.` context, not secrets (spec-v4-deploy-infra D10/D12, rev.7). A production build without them fails with an error naming the variable.
+These are public values, so they live in the `vars.` context, not secrets (spec-v4-deploy-infra D10/D12, spec-v6 D3 and D15). A production build without `SITE_URL` / `SITE_NAME` fails with an error naming the variable; both deploy jobs refuse a missing, relative or trailing-slash `STACK_DIR`, and the infra job refuses a `CONTAINER_NAME` that is not the service `compose.yaml` declares. Every check runs as the job's first step, before anything reaches the VPS.
 
 **2. Deployment SSH access** — a deploy user on the VPS plus an SSH key.
 
@@ -131,7 +135,7 @@ ssh gitea-deployer@vps.example.com -p 2222 -i "$HOME\.ssh\gitea_deploy_key" -o I
 Get-Content -Raw "$HOME\.ssh\gitea_deploy_key"   # this content becomes DEPLOY_SSH_PRIVATE_KEY
 ```
 
-Then create Gitea Actions **secrets** — Settings → Actions → Secrets:
+Then create GitHub Actions **secrets** — Settings → Secrets and variables → Actions → **Secrets**:
 
 | Secret | Value |
 |---|---|
@@ -140,7 +144,7 @@ Then create Gitea Actions **secrets** — Settings → Actions → Secrets:
 | `DEPLOY_USER` | `gitea-deployer` |
 | `DEPLOY_SSH_PRIVATE_KEY` | the private key content |
 
-**3. VPS stack config** — in the stack directory `/opt/stacks/dong-site/`, create `secrets/site_config` (chmod 600, exactly the two `KEY=value` lines shown in step 5 above). The token should be a dedicated Gitea **restricted access token** (`site-contents-write`: this repository only, Contents write, with an expiry). The pipeline never rsyncs `secrets/`, so it can never touch this file; it never appears in `docker inspect` or the Dockge env tab.
+**3. VPS stack config** — in the stack directory `/opt/stacks/dong-site/`, create `secrets/site_config` (chmod 600, exactly the two `KEY=value` lines shown in step 5 above). The token should be a dedicated GitHub **fine-grained PAT** (`site-contents-write`: this repository only, `Contents: Read and write`, with an expiry). The pipeline never rsyncs `secrets/`, so it can never touch this file; it never appears in `docker inspect` or the Dockge env tab.
 
 **4. Edit-mode login** — production `/api/content/` sits behind HTTP Basic (`auth_basic` + `deploy/htpasswd`, committed as hashes). The browser prompts once per session.
 
@@ -148,6 +152,6 @@ Then create Gitea Actions **secrets** — Settings → Actions → Secrets:
 
 Open `https://<SITE_URL>/any-route?edit` (append `=<branch>` to target another branch — it must already exist; the edit UI never creates branches). Edits preview live; saving writes each touched document as its own commit through the proxy, and merging that branch into `master` deploys it via `deploy.yml`.
 
-## Spec status (v4)
+## Spec status
 
-Implemented: locale dictionaries + page manifests (`spec-v4-data-organization.md`), inline editing on every record surface (`spec-v4-inline-editing.md`), live edit + save pipeline (`spec-v4-live-edit.md`), CI pipelines + env-driven site identity (`spec-v4-deploy-infra.md`, rev.7). Remaining owner-side steps are tracked in each spec's Progress Tracking section.
+Implemented: locale dictionaries + page manifests (`spec-v4-data-organization.md`), inline editing on every record surface (`spec-v4-inline-editing.md`), live edit + save pipeline (`spec-v4-live-edit.md`), CI pipelines + env-driven site identity (`spec-v4-deploy-infra.md`, rev.7), GitHub Actions CI with the GitHub-backed write path (`spec-v6-github-actions.md`). Remaining owner-side steps are tracked in each spec's Progress Tracking section.
