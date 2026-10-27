@@ -75,7 +75,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: resume-pdf-en
-          path: dist/resume.pdf
+          path: dist/resume-en.pdf
           retention-days: 1
 
       - uses: actions/upload-artifact@v7

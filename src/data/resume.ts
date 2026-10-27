@@ -15,5 +15,6 @@ export const resumeQr: { id: string; file: string; label: string }[] = [
   { id: 'zalo', file: 'zalo.jpg', label: 'Zalo' },
 ]
 
-export const resumeUrlFor = (lang: Language): string =>
-  lang === 'en' ? '/resume.pdf' : `/resume-${lang}.pdf`
+export const resumeFileNameFor = (lang: Language): string => `resume-${lang}.pdf`
+
+export const resumeUrlFor = (lang: Language): string => `/${resumeFileNameFor(lang)}`

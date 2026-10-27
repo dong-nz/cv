@@ -235,8 +235,7 @@ if (previewMode) {
 } else {
   const page = await browser.newPage();
   for (const lang of langs) {
-    const langSuffix = lang === 'en' ? '' : `-${lang}`;
-    const outputPath = join(ROOT, `dist/resume${langSuffix}.pdf`);
+    const outputPath = join(ROOT, `dist/resume-${lang}.pdf`);
     mkdirSync(dirname(outputPath), { recursive: true });
     await page.setContent(pages[lang]);
     await page.pdf({
@@ -246,7 +245,7 @@ if (previewMode) {
       preferCSSPageSize: true,
       tagged: true,
     });
-    console.log(`resume${langSuffix}.pdf generated at ${outputPath} [${lang}]`);
+    console.log(`resume-${lang}.pdf generated at ${outputPath} [${lang}]`);
   }
   await browser.close();
 }

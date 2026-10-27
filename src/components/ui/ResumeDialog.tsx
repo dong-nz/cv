@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { resumeUrlFor, resumeLanguages, resumeLanguageLabels } from '@/data/resume'
+import { resumeFileNameFor, resumeUrlFor, resumeLanguages, resumeLanguageLabels } from '@/data/resume'
 import { useI18n } from '@/i18n/provider'
 
 type ResumeDialogProps = {
@@ -78,7 +78,7 @@ export function ResumeDialog({ open, close, panelRef, dialogId }: ResumeDialogPr
                   onClick={close}
                 >
                   <span className="resume-modal-option-label">{resumeLanguageLabels[optionLang]}</span>
-                  <span className="resume-modal-option-file">{resumeUrlFor(optionLang)}</span>
+                  <span className="resume-modal-option-file">{resumeFileNameFor(optionLang)}</span>
                 </a>
               ))}
             </div>
