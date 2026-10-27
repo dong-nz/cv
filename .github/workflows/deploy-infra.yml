@@ -6,7 +6,7 @@ name: Redeploy Nginx
 on:
   push:
     branches:
-      - feature/github-migration
+      - master
     paths:
       - nginx.conf
       - compose.yaml

@@ -3,7 +3,7 @@ name: Deploy Static Site
 on:
   push:
     branches:
-      - feature/github-migration
+      - master
 
 
 concurrency:
