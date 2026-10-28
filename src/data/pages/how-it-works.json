@@ -1,0 +1,8 @@
+{
+  "id": "how-it-works",
+  "route": "/how-it-works",
+  "content": [
+    { "entity": "profile", "fields": ["name"] }
+  ],
+  "ui": ["howItWorks"]
+}

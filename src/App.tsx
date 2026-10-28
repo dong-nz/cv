@@ -10,12 +10,13 @@ import { editRequested, hasEditFlag } from '@/i18n/edit-session'
 import { HomePage } from '@/pages/HomePage'
 
 // HomePage stays eager: it is the landing route and owns the LCP, so its code must
-// already be in the entry chunk. The other six split out and load on navigation.
+// already be in the entry chunk. The other seven split out and load on navigation.
 const AboutPage = lazy(() => import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })))
 const ExperiencePage = lazy(() => import('@/pages/ExperiencePage').then((m) => ({ default: m.ExperiencePage })))
 const ProjectsListPage = lazy(() => import('@/pages/ProjectsListPage').then((m) => ({ default: m.ProjectsListPage })))
 const ProjectDetailPage = lazy(() => import('@/pages/ProjectDetailPage').then((m) => ({ default: m.ProjectDetailPage })))
 const PhilosophyPage = lazy(() => import('@/pages/PhilosophyPage').then((m) => ({ default: m.PhilosophyPage })))
+const HowItWorksPage = lazy(() => import('@/pages/HowItWorksPage').then((m) => ({ default: m.HowItWorksPage })))
 
 const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ default: m.ContactPage })))
 
@@ -60,6 +61,7 @@ function App() {
                     <Route path="/projects" element={<ProjectsListPage />} />
                     <Route path="/projects/:id" element={<ProjectDetailPage />} />
                     <Route path="/philosophy" element={<PhilosophyPage />} />
+                    <Route path="/how-it-works" element={<HowItWorksPage />} />
                     <Route path="/contact" element={<ContactPage />} />
                   </Routes>
                 </Suspense>

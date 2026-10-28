@@ -37,3 +37,7 @@ dist-ssr
 # Generated code (spec-v5): src/types/content-ids.ts is produced by
 # scripts/generate-content-types.ts from src/data/*.json on predev/prebuild/prepare.
 /src/types/content-ids.ts
+
+# Raw screen footage for the captured video variant (spec-v7-intro-video §6):
+# local material only — the rendered public/media/*.mp4 is the committed artifact.
+/video/inputs/*.mp4

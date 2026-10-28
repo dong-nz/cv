@@ -1,2 +1,8 @@
+# `video/` is the standalone Remotion project that renders the /how-it-works
+# intro video (spec-v7-intro-video). It is a workspace member so `pnpm install`
+# inside it resolves against this lockfile instead of walking up and ignoring it;
+# the SPA never imports anything from that tree.
+packages:
+  - video
 allowBuilds:
   esbuild: true

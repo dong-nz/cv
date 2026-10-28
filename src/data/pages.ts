@@ -9,6 +9,7 @@ import aboutJson from './pages/about.json';
 import contactJson from './pages/contact.json';
 import experienceJson from './pages/experience.json';
 import homeJson from './pages/home.json';
+import howItWorksJson from './pages/how-it-works.json';
 import philosophyJson from './pages/philosophy.json';
 import projectDetailJson from './pages/project-detail.json';
 import projectsJson from './pages/projects.json';
@@ -23,6 +24,7 @@ export const pageManifests: PageManifest[] = [
   projectDetailJson,
   contactJson,
   philosophyJson,
+  howItWorksJson,
   resumeJson,
 ] as PageManifest[];
 

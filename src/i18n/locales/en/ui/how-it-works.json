@@ -1,0 +1,29 @@
+{
+  "heading": "How this site works",
+  "intro": "This portfolio has no CMS admin area. The content lives in a git repository, editing happens on the very pages you are looking at, and every merge to master deploys automatically.",
+  "videoAria": "Introduction video: how the portfolio stores its content in git, edits it live on the site, and deploys through GitHub Actions",
+  "stepsTitle": "Three moving parts",
+  "steps": [
+    {
+      "title": "Live editing on the real pages",
+      "body": "Append ?edit to any URL. After an HTTP Basic prompt at the nginx proxy, the page you are looking at becomes the editor: text, tags, records and settings edit in place. Every save becomes a commit to a branch through the GitHub Contents API; on a conflict a three-way rebase keeps your edit."
+    },
+    {
+      "title": "Git is the content store",
+      "body": "Content is JSON: language-neutral structure documents, per-language text dictionaries and per-page field manifests. Branches are previews — ?edit=preview lets you edit and view a branch before anything reaches master. No database, no admin panel."
+    },
+    {
+      "title": "Merge to master, go live",
+      "body": "Pushing master triggers the GitHub Actions pipeline: a type-checked build, bilingual resume PDFs, and an rsync deploy to the VPS. Infrastructure changes redeploy the container through their own guarded workflow. From commit to live in minutes."
+    }
+  ],
+  "chaptersTitle": "Chapters",
+  "chapters": [
+    { "time": "0:00", "label": "Intro" },
+    { "time": "0:05", "label": "Content as documents" },
+    { "time": "0:14", "label": "Live editing" },
+    { "time": "0:32", "label": "Git as the content store" },
+    { "time": "0:43", "label": "Automatic deployment" },
+    { "time": "0:55", "label": "Closing" }
+  ]
+}

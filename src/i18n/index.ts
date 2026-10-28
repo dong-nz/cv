@@ -24,6 +24,7 @@ import uiProjectsViJson from './locales/vi/ui/projects.json';
 import uiContactViJson from './locales/vi/ui/contact.json';
 import uiProjectDetailViJson from './locales/vi/ui/project-detail.json';
 import uiPhilosophyViJson from './locales/vi/ui/philosophy.json';
+import uiHowItWorksViJson from './locales/vi/ui/how-it-works.json';
 import uiCommonViJson from './locales/vi/ui/common.json';
 import uiResumeViJson from './locales/vi/ui/resume.json';
 import uiEditViJson from './locales/vi/ui/edit.json';
@@ -38,6 +39,7 @@ import uiProjectsEnJson from './locales/en/ui/projects.json';
 import uiContactEnJson from './locales/en/ui/contact.json';
 import uiProjectDetailEnJson from './locales/en/ui/project-detail.json';
 import uiPhilosophyEnJson from './locales/en/ui/philosophy.json';
+import uiHowItWorksEnJson from './locales/en/ui/how-it-works.json';
 import uiCommonEnJson from './locales/en/ui/common.json';
 import uiResumeEnJson from './locales/en/ui/resume.json';
 import uiEditEnJson from './locales/en/ui/edit.json';
@@ -91,6 +93,7 @@ const uiVi: UIDict = {
   contact: uiContactViJson,
   projectDetail: uiProjectDetailViJson,
   philosophy: uiPhilosophyViJson,
+  howItWorks: uiHowItWorksViJson,
   common: uiCommonViJson,
   resume: uiResumeViJson,
   edit: uiEditViJson,
@@ -108,6 +111,7 @@ const uiEn: UIDict = {
   contact: uiContactEnJson,
   projectDetail: uiProjectDetailEnJson,
   philosophy: uiPhilosophyEnJson,
+  howItWorks: uiHowItWorksEnJson,
   common: uiCommonEnJson,
   resume: uiResumeEnJson,
   edit: uiEditEnJson,

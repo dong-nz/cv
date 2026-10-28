@@ -20,6 +20,7 @@ import projectsJson from './locales/vi/ui/projects.json';
 import contactJson from './locales/vi/ui/contact.json';
 import projectDetailJson from './locales/vi/ui/project-detail.json';
 import philosophyJson from './locales/vi/ui/philosophy.json';
+import howItWorksJson from './locales/vi/ui/how-it-works.json';
 import commonJson from './locales/vi/ui/common.json';
 import resumeJson from './locales/vi/ui/resume.json';
 import editJson from './locales/vi/ui/edit.json';
@@ -152,6 +153,7 @@ export type UIDict = {
   contact: typeof contactJson;
   projectDetail: typeof projectDetailJson;
   philosophy: typeof philosophyJson;
+  howItWorks: typeof howItWorksJson;
   common: typeof commonJson;
   resume: typeof resumeJson;
   edit: typeof editJson;

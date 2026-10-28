@@ -27,7 +27,8 @@ export type PageId =
   | 'projects'
   | 'project-detail'
   | 'contact'
-  | 'philosophy';
+  | 'philosophy'
+  | 'how-it-works';
 
 export type ManifestId = PageId | 'resume';
 

@@ -1,0 +1,22 @@
+{
+  "name": "portfolio-intro-video",
+  "private": true,
+  "type": "module",
+  "description": "Standalone Remotion project for the /how-it-works intro video. Not a site dependency — the SPA never imports this tree.",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render src/index.ts Explainer ../public/media/how-it-works.mp4",
+    "render-captured": "remotion render src/index.ts Explainer ../public/media/how-it-works.mp4 --propsFile=captured.json",
+    "poster": "remotion still src/index.ts Explainer ../public/media/how-it-works-poster.jpg --frame=60"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "remotion": "^4.0.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}

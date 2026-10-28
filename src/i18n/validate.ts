@@ -221,6 +221,7 @@ const MANIFEST_IDS = [
   'project-detail',
   'contact',
   'philosophy',
+  'how-it-works',
   'resume',
 ] as const;
 
@@ -281,7 +282,7 @@ export function collectManifestIssues(
 ): ContentIssue[] {
   const issues: ContentIssue[] = [];
 
-  // Rule 1: exactly the seven route manifests plus the synthetic resume
+  // Rule 1: exactly the eight route manifests plus the synthetic resume
   // consumer — no orphan or missing manifest.
   const ids: string[] = pageManifests.map((m) => m.id);
   for (const id of MANIFEST_IDS) {

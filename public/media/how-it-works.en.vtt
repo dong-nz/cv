@@ -1,0 +1,19 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:05.400
+This site's CMS is a git repository.
+
+00:00:05.500 --> 00:00:13.900
+Everything the site shows is a JSON document: structure documents, per-language dictionaries and field manifests — joined once at build time.
+
+00:00:14.000 --> 00:00:31.900
+?edit turns the live site into the editor. HTTP Basic at the nginx proxy is the only gate; every save is a commit through the GitHub Contents API.
+
+00:00:32.000 --> 00:00:42.900
+Content lives as JSON in the repository: branches are previews, and merging to master publishes.
+
+00:00:43.000 --> 00:00:54.900
+Merging to master runs the pipeline — build, resume PDFs, deploy — from commit to live in minutes.
+
+00:00:55.000 --> 00:01:02.000
+Edit on the live site. Stored in git. Live on merge to master.

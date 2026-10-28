@@ -1,0 +1,29 @@
+{
+  "heading": "Trang hoạt động như thế nào",
+  "intro": "Portfolio này không có vùng quản trị CMS. Nội dung nằm trong một repository git, việc chỉnh sửa diễn ra ngay trên trang bạn đang xem, và mỗi lần merge vào master đều tự động triển khai.",
+  "videoAria": "Video giới thiệu: cách trang lưu nội dung trong git, chỉnh sửa trực tiếp trên site và triển khai tự động qua GitHub Actions",
+  "stepsTitle": "Ba mảnh ghép",
+  "steps": [
+    {
+      "title": "Chỉnh sửa trực tiếp trên trang thật",
+      "body": "Thêm ?edit vào bất kỳ URL nào. Sau hộp thoại HTTP Basic ở nginx, chính trang bạn đang xem trở thành trình soạn thảo: văn bản, thẻ, bản ghi và cấu hình chỉnh sửa ngay tại chỗ. Mỗi lần lưu trở thành một commit trên nhánh qua GitHub Contents API; khi có xung đột, bản rebase ba phía giữ lại chỉnh sửa của bạn."
+    },
+    {
+      "title": "Git là kho nội dung",
+      "body": "Nội dung là các tệp JSON: tài liệu cấu trúc trung lập ngôn ngữ, từ điển văn bản theo từng ngôn ngữ và manifest trường theo từng trang. Nhánh là bản xem trước — ?edit=preview cho phép sửa và xem một nhánh trước khi lên master. Không có database, không có admin panel."
+    },
+    {
+      "title": "Merge vào master, lên site",
+      "body": "Push vào master kích hoạt pipeline GitHub Actions: build có type-check, tạo resume PDF song ngữ, rsync lên VPS. Thay đổi hạ tầng được tái triển khai bằng workflow riêng có kiểm tra trước. Từ commit đến khi live chỉ vài phút."
+    }
+  ],
+  "chaptersTitle": "Các chương",
+  "chapters": [
+    { "time": "0:00", "label": "Giới thiệu" },
+    { "time": "0:05", "label": "Nội dung là tài liệu JSON" },
+    { "time": "0:14", "label": "Chỉnh sửa trực tiếp" },
+    { "time": "0:32", "label": "Git là kho nội dung" },
+    { "time": "0:43", "label": "Triển khai tự động" },
+    { "time": "0:55", "label": "Kết" }
+  ]
+}
