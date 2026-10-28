@@ -13,7 +13,7 @@ Mọi thứ trang hiển thị đều là tài liệu JSON: cấu trúc, từ đ
 Nội dung nằm trong repository dưới dạng JSON: nhánh là bản xem trước, merge vào master là công bố.
 
 00:00:43.000 --> 00:00:54.900
-Merge vào master chạy pipeline — build, tạo resume PDF, triển khai — từ commit đến khi live chỉ vài phút.
+Merge vào master chạy pipeline GitHub Actions — build, tạo resume PDF, triển khai — từ commit đến khi live chỉ vài phút.
 
 00:00:55.000 --> 00:01:02.000
 Sửa ngay trên trang thật. Lưu trong git. Live khi merge vào master.

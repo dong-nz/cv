@@ -13,7 +13,7 @@ Everything the site shows is a JSON document: structure documents, per-language 
 Content lives as JSON in the repository: branches are previews, and merging to master publishes.
 
 00:00:43.000 --> 00:00:54.900
-Merging to master runs the pipeline — build, resume PDFs, deploy — from commit to live in minutes.
+Merging to master runs the GitHub Actions pipeline — build, resume PDFs, deploy — from commit to live in minutes.
 
 00:00:55.000 --> 00:01:02.000
 Edit on the live site. Stored in git. Live on merge to master.

@@ -16,9 +16,11 @@ const TREE = [
 export const GitStorage: React.FC = () => {
   const frame = useCurrentFrame();
   const branchDraw = drawIn(frame, 55, 45);
-  const mergeDraw = drawIn(frame, 130, 45);
+  const mergeDraw = drawIn(frame, 140, 45);
+  const branchOn = appear(frame, 100);
+  const mergedOn = appear(frame, 185);
   const pulse = interpolate(frame % 50, [0, 25, 50], [0, 0.6, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-  const commitOn = appear(frame, 180);
+  const commitOn = appear(frame, 115);
 
   return (
     <AbsoluteFill style={{ background: theme.bg, fontFamily: theme.sans }}>
@@ -61,7 +63,7 @@ export const GitStorage: React.FC = () => {
         </div>
       </Panel>
 
-      <Fade start={170} y={20}>
+      <Fade start={105} y={20}>
         <Panel width={470} style={{ left: 480, top: 480 }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <span style={{ width: 12, height: 12, borderRadius: 6, background: theme.accent }} />
@@ -102,15 +104,15 @@ export const GitStorage: React.FC = () => {
           pathLength={1}
           strokeDasharray={1}
           strokeDashoffset={mergeDraw}
-          markerEnd="url(#arrow-success)"
+          markerEnd={mergeDraw < 0.1 ? 'url(#arrow-success)' : undefined}
         />
         <circle cx={1100} cy={680} r={9} fill={theme.borderStrong} />
-        <circle cx={1240} cy={460} r={11} fill={theme.accent} />
-        <circle cx={1240} cy={460} r={11 + 12 * pulse} fill="none" stroke={theme.accent} strokeWidth={2} opacity={1 - pulse} />
-        <circle cx={1370} cy={680} r={11} fill={theme.success} />
+        <circle cx={1240} cy={460} r={11} fill={theme.accent} opacity={branchOn} />
+        <circle cx={1240} cy={460} r={11 + 12 * pulse} fill="none" stroke={theme.accent} strokeWidth={2} opacity={(1 - pulse) * branchOn} />
+        <circle cx={1370} cy={680} r={11} fill={theme.success} opacity={mergedOn} />
       </svg>
 
-      <Fade start={40}>
+      <Fade start={95}>
         <div style={{ position: 'absolute', left: 1110, top: 380, width: 260, textAlign: 'center' }}>
           <Label size={18}>preview branch · drafts</Label>
         </div>
@@ -120,7 +122,7 @@ export const GitStorage: React.FC = () => {
           <Label size={18} color={theme.textMuted}>master · deploys</Label>
         </div>
       </Fade>
-      <Fade start={165}>
+      <Fade start={195}>
         <div style={{ position: 'absolute', left: 1250, top: 728 }}>
           <span style={{ background: 'rgba(107, 184, 134, 0.14)', border: `1px solid ${theme.success}`, borderRadius: 8, padding: '6px 12px' }}>
             <Label size={16} color={theme.success}>merge = publish</Label>

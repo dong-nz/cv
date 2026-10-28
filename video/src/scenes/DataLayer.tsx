@@ -14,9 +14,8 @@ const DOCS = [
 
 export const DataLayer: React.FC = () => {
   const frame = useCurrentFrame();
-  const joinOn = appear(frame, 120);
-  const pageOn = appear(frame, 175);
-  const arrowA = drawIn(frame, 95, 35);
+  const pageOn = appear(frame, 195);
+  const arrowA = drawIn(frame, 100, 35);
   const arrowB = drawIn(frame, 150, 35);
   const pulse = interpolate(frame % 60, [0, 30, 60], [0, 0.55, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
 
@@ -46,7 +45,7 @@ export const DataLayer: React.FC = () => {
         </Fade>
       ))}
 
-      <Fade start={110} y={18}>
+      <Fade start={135} y={18}>
         <Panel width={240} accent style={{ left: 900, top: 410, textAlign: 'center', background: theme.accentTint }}>
           <Label size={24} color={theme.accent}>joined once</Label>
           <div style={{ marginTop: 6, fontSize: 16, color: theme.textSecondary }}>at build time</div>
@@ -74,7 +73,7 @@ export const DataLayer: React.FC = () => {
             pathLength={1}
             strokeDasharray={1}
             strokeDashoffset={arrowA}
-            markerEnd="url(#arrow)"
+            markerEnd={arrowA < 0.1 ? 'url(#arrow)' : undefined}
             opacity={0.8}
           />
         ))}
@@ -86,11 +85,11 @@ export const DataLayer: React.FC = () => {
           pathLength={1}
           strokeDasharray={1}
           strokeDashoffset={arrowB}
-          markerEnd="url(#arrow-accent)"
+          markerEnd={arrowB < 0.1 ? 'url(#arrow-accent)' : undefined}
         />
       </svg>
 
-      <Fade start={165} y={24}>
+      <Fade start={185} y={24}>
         <BrowserFrame width={300} height={420} style={{ left: 1200, top: 245 }}>
           <div style={{ display: 'flex', gap: 8, padding: '14px 16px 0' }}>
             {['EN', 'VI'].map((l, i) => (
@@ -109,7 +108,7 @@ export const DataLayer: React.FC = () => {
               </span>
             ))}
           </div>
-          <PageSkeleton active={joinOn > 0.5} />
+          <PageSkeleton active={frame > 190} />
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 3, background: theme.accent, opacity: pageOn }} />
         </BrowserFrame>
       </Fade>

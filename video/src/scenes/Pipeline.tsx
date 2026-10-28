@@ -10,15 +10,21 @@ const JOBS = [
   { name: 'deploy', detail: 'rsync dist/ → VPS stack' },
 ];
 
-// Centered group: push + three job cards span 465–1455 (center 960) at y 210–330;
+// Sequential chain: a card is only reached by an arrow that starts drawing
+// after the previous card has appeared — push → arrow → build → arrow →
+// resume → arrow → deploy → arrow → live site. The three job cards sit inside
+// one dashed GitHub Actions group box so the runner is named on screen, not
+// just implied by the job names.
+// Centered group: push 449–659 + group box 689–1471 (center 960) at y 180–358;
 // infra card and browser occupy y 470–790 — above the bullet row (y 840+).
 export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
   const frame = useCurrentFrame();
-  const arrow1 = drawIn(frame, 30, 25);
-  const arrow2 = drawIn(frame, 75, 25);
-  const arrow3 = drawIn(frame, 120, 25);
-  const infraOn = appear(frame, 165);
-  const deployed = appear(frame, 235);
+  const arrow1 = drawIn(frame, 40, 25);
+  const arrow2 = drawIn(frame, 95, 25);
+  const arrow3 = drawIn(frame, 150, 25);
+  const arrowDown = drawIn(frame, 200, 30);
+  const infraOn = appear(frame, 185);
+  const deployed = appear(frame, 240);
 
   return (
     <AbsoluteFill style={{ background: theme.bg, fontFamily: theme.sans }}>
@@ -27,7 +33,7 @@ export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
         index="04 · AUTO DEPLOYMENT"
         title="Merge to master — the pipeline ships it"
         bullets={[
-          'deploy.yml: build · resume PDFs · deploy — three jobs',
+          'GitHub Actions runs deploy.yml: build · resume PDFs · deploy',
           'nginx.conf / compose.yaml changes redeploy the stack itself',
           'No CMS, no manual upload: push to master is the publish button',
         ]}
@@ -35,7 +41,7 @@ export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
       />
 
       <Fade start={10}>
-        <Panel width={210} style={{ left: 465, top: 210 }}>
+        <Panel width={210} style={{ left: 449, top: 210 }}>
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <span style={{ width: 12, height: 12, borderRadius: 6, background: theme.success }} />
             <Label size={20}>push to master</Label>
@@ -44,9 +50,28 @@ export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
         </Panel>
       </Fade>
 
+      <Fade start={50} y={14}>
+        <div
+          style={{
+            position: 'absolute',
+            left: 689,
+            top: 180,
+            width: 782,
+            height: 178,
+            borderRadius: 12,
+            border: `1px dashed ${theme.borderStrong}`,
+          }}
+        >
+          <div style={{ position: 'absolute', left: 16, top: 10, fontFamily: theme.mono, fontSize: 15 }}>
+            <span style={{ color: theme.accent }}>GitHub Actions</span>
+            <span style={{ color: theme.textMuted }}> · .github/workflows/deploy.yml</span>
+          </div>
+        </div>
+      </Fade>
+
       {JOBS.map((j, i) => (
-        <Fade key={j.name} start={45 + i * 45} y={20}>
-          <Panel width={230} style={{ left: 705 + i * 260, top: 210 }}>
+        <Fade key={j.name} start={65 + i * 55} y={20}>
+          <Panel width={230} style={{ left: 705 + i * 260, top: 222 }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <span style={{ width: 10, height: 10, borderRadius: 5, background: theme.accent }} />
               <Mono size={18} color={theme.textPrimary}>{j.name}</Mono>
@@ -64,13 +89,13 @@ export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
 
       <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0 }}>
         <ArrowDefs />
-        <path d="M 680 265 L 700 265" fill="none" stroke={theme.textMuted} strokeWidth={2} pathLength={1} strokeDasharray={1} strokeDashoffset={arrow1} markerEnd="url(#arrow)" />
-        <path d="M 940 265 L 960 265" fill="none" stroke={theme.textMuted} strokeWidth={2} pathLength={1} strokeDasharray={1} strokeDashoffset={arrow2} markerEnd="url(#arrow)" />
-        <path d="M 1200 265 L 1220 265" fill="none" stroke={theme.textMuted} strokeWidth={2} pathLength={1} strokeDasharray={1} strokeDashoffset={arrow3} markerEnd="url(#arrow)" />
-        <path d="M 1160 340 L 1160 465" fill="none" stroke={theme.accent} strokeWidth={2.5} pathLength={1} strokeDasharray={1} strokeDashoffset={drawIn(frame, 150, 30)} markerEnd="url(#arrow-accent)" />
+        <path d="M 662 282 L 700 282" fill="none" stroke={theme.textMuted} strokeWidth={2} pathLength={1} strokeDasharray={1} strokeDashoffset={arrow1} markerEnd={arrow1 < 0.1 ? 'url(#arrow)' : undefined} />
+        <path d="M 940 282 L 960 282" fill="none" stroke={theme.textMuted} strokeWidth={2} pathLength={1} strokeDasharray={1} strokeDashoffset={arrow2} markerEnd={arrow2 < 0.1 ? 'url(#arrow)' : undefined} />
+        <path d="M 1200 282 L 1220 282" fill="none" stroke={theme.textMuted} strokeWidth={2} pathLength={1} strokeDasharray={1} strokeDashoffset={arrow3} markerEnd={arrow3 < 0.1 ? 'url(#arrow)' : undefined} />
+        <path d="M 1340 362 L 1340 465" fill="none" stroke={theme.accent} strokeWidth={2.5} pathLength={1} strokeDasharray={1} strokeDashoffset={arrowDown} markerEnd={arrowDown < 0.1 ? 'url(#arrow-accent)' : undefined} />
       </svg>
 
-      <Fade start={160} y={20}>
+      <Fade start={185} y={20}>
         <Panel width={440} style={{ left: 465, top: 480, opacity: infraOn }}>
           <Label size={18}>infra follows the same rules</Label>
           <div style={{ marginTop: 10 }}>
@@ -80,7 +105,7 @@ export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
         </Panel>
       </Fade>
 
-      <Fade start={225} y={24}>
+      <Fade start={230} y={24}>
         <BrowserFrame width={460} height={320} style={{ left: 995, top: 470 }}>
           {captured ? (
             <OffthreadVideo
@@ -90,7 +115,7 @@ export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
           ) : (
             <>
               <PageSkeleton active={deployed > 0.5} />
-              <Fade start={245}>
+              <Fade start={250}>
                 <div style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, background: 'rgba(10, 12, 10, 0.62)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ background: theme.accentTint, border: `1px solid ${theme.accent}`, borderRadius: 10, padding: '14px 22px', display: 'flex', gap: 10, alignItems: 'center' }}>
                     <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth={2.5} strokeLinecap="round">
