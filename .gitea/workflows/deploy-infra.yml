@@ -97,8 +97,11 @@ jobs:
       # bcrypt hash is riddled with `$` and appleboy's `envs:` mechanism exports
       # values unquoted, so the remote shell would expand `$2y…` away. Written
       # BEFORE the test step: nginx -t opens auth_basic_user_file, so its mount
-      # needs a real file. chmod 600 keeps the credential readable only by the
-      # stack owner. Needs the HTPASSWD_CONTENT secret on Gitea too.
+      # needs a real file. chmod 644, NOT 600: nginx verifies Basic auth in the
+      # worker process (the image's nginx user, uid 101) and opens
+      # auth_basic_user_file per request — a 600 file owned by the deploy user
+      # is unreadable there (13: Permission denied on /api/content/, 2026-10-28).
+      # Needs the HTPASSWD_CONTENT secret on Gitea too.
       - name: Write deploy/htpasswd from the secret
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -115,7 +118,7 @@ jobs:
             fi
             mkdir -p deploy
             printf '%s\n' "$HTPASSWD" > deploy/htpasswd
-            chmod 600 deploy/htpasswd
+            chmod 644 deploy/htpasswd
 
       # Test-before-touch (D3): the throwaway container runs the same entrypoint
       # render pipeline as production, with placeholder values — nginx -t checks

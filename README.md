@@ -148,7 +148,7 @@ Then create GitHub Actions **secrets** — Settings → Secrets and variables �
 | `DEPLOY_SSH_PORT` | SSH port |
 | `DEPLOY_USER` | `gitea-deployer` |
 | `DEPLOY_SSH_PRIVATE_KEY` | the private key content |
-| `HTPASSWD_CONTENT` | the one htpasswd line — output of `htpasswd -nbB <user> '<pass>'` (user + bcrypt hash). The infra job writes it to `${STACK_DIR}/deploy/htpasswd` (chmod 600); the credential never appears in the repository (spec-v6 D16) |
+| `HTPASSWD_CONTENT` | the one htpasswd line — output of `htpasswd -nbB <user> '<pass>'` (user + bcrypt hash). The infra job writes it to `${STACK_DIR}/deploy/htpasswd` (chmod 644 — the nginx worker, uid 101, opens the file per request; see spec-v6 D16 §7.1 follow-up); the credential never appears in the repository |
 
 **3. VPS stack config** — in the stack directory `/opt/stacks/dong-site/`, create `secrets/site_config` (chmod 600, exactly the two `KEY=value` lines shown in step 5 above). The token should be a dedicated GitHub **fine-grained PAT** (`site-contents-write`: this repository only, `Contents: Read and write`, with an expiry). The pipeline never rsyncs `secrets/`, so it can never touch this file; it never appears in `docker inspect` or the Dockge env tab.
 

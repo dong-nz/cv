@@ -99,7 +99,15 @@ jobs:
       # away; the htpasswd character set (user name + bcrypt base64) contains no
       # single quote, so this quoting is exact. Written BEFORE the test step:
       # nginx -t opens auth_basic_user_file, so its mount needs a real file.
-      # chmod 600 keeps the credential readable only by the stack owner.
+      # chmod 644, NOT 600: nginx verifies Basic auth in the worker process —
+      # the image's unprivileged nginx user (uid 101) — and opens
+      # auth_basic_user_file per request, so the file must be readable by a uid
+      # other than the deploy user's. A 600 file made the live site answer
+      # open() … 13: Permission denied on /api/content/ (2026-10-28): nginx -t
+      # and the wget probe run as root, which ignores DAC permissions, and / has
+      # no auth — only a real Basic-auth request reads the file as uid 101. The
+      # file holds a bcrypt hash only; 644 is the mode production ran with while
+      # it was rsynced from the repository.
       - name: Write deploy/htpasswd from the secret
         uses: appleboy/ssh-action@v1.2.0
         with:
@@ -116,7 +124,7 @@ jobs:
             fi
             mkdir -p deploy
             printf '%s\n' "$HTPASSWD" > deploy/htpasswd
-            chmod 600 deploy/htpasswd
+            chmod 644 deploy/htpasswd
 
       # Test-before-touch (D3): the throwaway container runs the same entrypoint
       # render pipeline as production, with placeholder values — nginx -t checks
