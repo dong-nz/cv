@@ -32,7 +32,7 @@ Do not start coding based only on the user's description.
 
 ## 4. Conversation language
 
-**IMPORTANT:** All responses are in Vietnamese. Source code and docs are in English.
+**IMPORTANT:** All responses are in English.
 
 ## 5. Don't run the headless browser to verify.
 

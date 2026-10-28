@@ -78,11 +78,16 @@ mkdir -p secrets
 #   CONTENT_API_TOKEN=<token>
 #   CONTENT_API_BASE=https://api.github.com/repos/<owner>/<repo>/contents/
 chmod 600 secrets/site_config
+# deploy/htpasswd — the Basic-auth file is not committed (spec-v6 D16), but the
+# compose mount needs it locally. Generate one line with any htpasswd tool
+# (e.g. `docker run --rm httpd:2 htpasswd -nbB editor '<pass>'`) and save it:
+mkdir -p deploy
+docker run --rm httpd:2 htpasswd -nbB editor '<pass>' > deploy/htpasswd
 docker network create docker-network   # once; compose.yaml joins it
 docker compose up -d
 ```
 
-`compose.yaml` defines no published port (the VPS container is reached through its own fronting); `compose.override.yaml` — auto-merged by `docker compose`, never shipped by the pipeline — publishes the container on the local loopback. Open **`http://127.0.0.1:8081/`** in a browser; `?edit` there asks for HTTP Basic credentials from `deploy/htpasswd`. If 8081 is taken on your machine, change the host port in `compose.override.yaml`. Stop the stack with `docker compose stop`.
+`compose.yaml` defines no published port (the VPS container is reached through its own fronting); `compose.override.yaml` — auto-merged by `docker compose`, never shipped by the pipeline — publishes the container on the local loopback. Open **`http://127.0.0.1:8081/`** in a browser; `?edit` there asks for HTTP Basic credentials against the local `deploy/htpasswd` you just created (the production copy is written by the infra pipeline from the `HTPASSWD_CONTENT` secret). If 8081 is taken on your machine, change the host port in `compose.override.yaml`. Stop the stack with `docker compose stop`.
 
 ## Production deployment (GitHub Actions)
 
@@ -91,9 +96,9 @@ docker compose up -d
 | Workflow | Trigger | What it does |
 |---|---|---|
 | [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) | push to `master` | `build` (validate content → `pnpm build`) → `generate-resume` (EN + VI PDFs) → `deploy` rsyncs `dist/` (PDFs included) to `${STACK_DIR}/dist/` on the VPS |
-| [`.github/workflows/deploy-infra.yml`](.github/workflows/deploy-infra.yml) | push to `master` touching `nginx.conf` / `compose.yaml` / `deploy/htpasswd`, or manual dispatch | rsyncs exactly those three files to the stack directory, tests the new config in a throwaway container (`nginx -t`), then `docker compose up -d --force-recreate` + health probe |
+| [`.github/workflows/deploy-infra.yml`](.github/workflows/deploy-infra.yml) | push to `master` touching `nginx.conf` / `compose.yaml`, or manual dispatch | rsyncs exactly those two files to the stack directory, writes `deploy/htpasswd` there from the `HTPASSWD_CONTENT` repository secret, tests the new config in a throwaway container (`nginx -t`), then `docker compose up -d --force-recreate` + health probe |
 
-Only `master` deploys. A content commit never restarts nginx; an infra commit never rebuilds the site. The VPS stack is managed by Dockge (`/opt/stacks/dong-site`); the repository is the single source of truth for the three infra files.
+Only `master` deploys. A content commit never restarts nginx; an infra commit never rebuilds the site. The VPS stack is managed by Dockge (`/opt/stacks/dong-site`); the repository is the single source of truth for the two infra files — the Basic-auth file is the exception: it lives only on the server, written from the `HTPASSWD_CONTENT` secret (spec-v6 D16).
 
 The repository is GitHub-primary and public; the pipelines run on GitHub-hosted runners (free for public repositories). `master` carries no branch protection on purpose: edit mode writes straight to it, and the validation step in `build` is what keeps a malformed content commit from deploying. `.gitea/workflows/` is kept only until the first green GitHub run is verified, then deleted (spec-v6 D9).
 
@@ -143,10 +148,11 @@ Then create GitHub Actions **secrets** — Settings → Secrets and variables �
 | `DEPLOY_SSH_PORT` | SSH port |
 | `DEPLOY_USER` | `gitea-deployer` |
 | `DEPLOY_SSH_PRIVATE_KEY` | the private key content |
+| `HTPASSWD_CONTENT` | the one htpasswd line — output of `htpasswd -nbB <user> '<pass>'` (user + bcrypt hash). The infra job writes it to `${STACK_DIR}/deploy/htpasswd` (chmod 600); the credential never appears in the repository (spec-v6 D16) |
 
 **3. VPS stack config** — in the stack directory `/opt/stacks/dong-site/`, create `secrets/site_config` (chmod 600, exactly the two `KEY=value` lines shown in step 5 above). The token should be a dedicated GitHub **fine-grained PAT** (`site-contents-write`: this repository only, `Contents: Read and write`, with an expiry). The pipeline never rsyncs `secrets/`, so it can never touch this file; it never appears in `docker inspect` or the Dockge env tab.
 
-**4. Edit-mode login** — production `/api/content/` sits behind HTTP Basic (`auth_basic` + `deploy/htpasswd`, committed as hashes). The browser prompts once per session.
+**4. Edit-mode login** — production `/api/content/` sits behind HTTP Basic (`auth_basic` + the htpasswd file the infra pipeline writes from the `HTPASSWD_CONTENT` secret — the hash is no longer in the public repository). The browser prompts once per session. Rotating the editor password: regenerate the line (`htpasswd -nbB <user> '<new-pass>'`), overwrite the secret, run `deploy-infra` via `workflow_dispatch` — no commit involved.
 
 ### Editing content in production
 

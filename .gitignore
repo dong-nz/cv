@@ -27,8 +27,12 @@ dist-ssr
 
 # Deployment/runtime config (spec-v4-deploy-infra D10/D13): the stack's
 # secrets/site_config and the local .env carry site identity and the write token.
+# spec-v6 D16: the Basic-auth file is not repository content either — the
+# pipeline writes it on the VPS from the HTPASSWD_CONTENT secret; the local copy
+# exists only so `docker compose` can mount it.
 .env
 /secrets/
+/deploy/htpasswd
 
 # Generated code (spec-v5): src/types/content-ids.ts is produced by
 # scripts/generate-content-types.ts from src/data/*.json on predev/prebuild/prepare.
