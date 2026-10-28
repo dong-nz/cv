@@ -21,9 +21,9 @@
   "chapters": [
     { "time": "0:00", "label": "Giới thiệu" },
     { "time": "0:05", "label": "Nội dung là tài liệu JSON" },
-    { "time": "0:14", "label": "Chỉnh sửa trực tiếp" },
-    { "time": "0:32", "label": "Git là kho nội dung" },
-    { "time": "0:43", "label": "Triển khai tự động" },
-    { "time": "0:55", "label": "Kết" }
+    { "time": "0:19", "label": "Chỉnh sửa trực tiếp" },
+    { "time": "0:42", "label": "Git là kho nội dung" },
+    { "time": "0:56", "label": "Triển khai tự động" },
+    { "time": "1:13", "label": "Kết" }
   ]
 }

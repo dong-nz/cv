@@ -1,6 +1,6 @@
 import React from 'react';
 import { useCurrentFrame } from 'remotion';
-import { appear } from './motion';
+import { appear, drawIn } from './motion';
 import { theme } from './theme';
 
 export const Fade: React.FC<{ start: number; y?: number; children: React.ReactNode }> = ({
@@ -15,35 +15,72 @@ export const Fade: React.FC<{ start: number; y?: number; children: React.ReactNo
   );
 };
 
-export const SceneChrome: React.FC<{
-  index: string;
-  title: string;
-  bullets: string[];
-  bulletStart?: number;
-}> = ({ index, title, bullets, bulletStart = 60 }) => (
-  <>
-    <div style={{ position: 'absolute', top: 80, left: 120 }}>
-      <Fade start={4}>
-        <div style={{ fontSize: 20, letterSpacing: '0.22em', color: theme.accent }}>{index}</div>
-      </Fade>
-      <Fade start={14} y={20}>
-        <div style={{ fontSize: 44, fontWeight: 650, color: theme.textPrimary, marginTop: 10 }}>
-          {title}
-        </div>
-      </Fade>
-    </div>
-    <div style={{ position: 'absolute', left: 120, bottom: 90, maxWidth: 700 }}>
-      {bullets.map((b, i) => (
-        <Fade key={i} start={bulletStart + i * 40}>
-          <div style={{ display: 'flex', gap: 14, marginBottom: 16 }}>
-            <span style={{ color: theme.accent, fontSize: 22, lineHeight: 1.45 }}>▸</span>
-            <span style={{ fontSize: 23, color: theme.textSecondary, lineHeight: 1.45 }}>{b}</span>
-          </div>
-        </Fade>
-      ))}
-    </div>
-  </>
+export const SceneChrome: React.FC<{ index: string; title: string }> = ({ index, title }) => (
+  <div style={{ position: 'absolute', top: 80, left: 120 }}>
+    <Fade start={4}>
+      <div style={{ fontSize: 20, letterSpacing: '0.22em', color: theme.accent }}>{index}</div>
+    </Fade>
+    <Fade start={14} y={20}>
+      <div style={{ fontSize: 44, fontWeight: 650, color: theme.textPrimary, marginTop: 10 }}>
+        {title}
+      </div>
+    </Fade>
+  </div>
 );
+
+// A callout that points at a diagram element: the leader line draws only after
+// the target has appeared, and the chip only after the line completes — the
+// scene's explanations therefore follow the diagram beat by beat instead of
+// sitting in a fixed text row. `target` is the anchor on the element, `anchor`
+// the chip-side end of the line.
+export const Callout: React.FC<{
+  target: [number, number];
+  anchor: [number, number];
+  chip: { x: number; y: number; width: number };
+  start: number;
+  accent?: boolean;
+  children: string;
+}> = ({ target, anchor, chip, start, accent, children }) => {
+  const frame = useCurrentFrame();
+  const line = drawIn(frame, start, 12);
+  const chipOn = appear(frame, start + 12);
+  return (
+    <>
+      <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <line
+          x1={target[0]}
+          y1={target[1]}
+          x2={anchor[0]}
+          y2={anchor[1]}
+          stroke={accent ? theme.accent : theme.borderStrong}
+          strokeWidth={1.5}
+          pathLength={1}
+          strokeDasharray={1}
+          strokeDashoffset={line}
+        />
+      </svg>
+      <div
+        style={{
+          position: 'absolute',
+          left: chip.x,
+          top: chip.y,
+          width: chip.width,
+          opacity: chipOn,
+          transform: `translateY(${(1 - chipOn) * 10}px)`,
+          background: theme.surface,
+          border: `1px solid ${accent ? theme.accent : theme.borderStrong}`,
+          borderRadius: 8,
+          padding: '8px 12px',
+          fontSize: 15,
+          color: theme.textSecondary,
+          lineHeight: 1.45,
+        }}
+      >
+        {children}
+      </div>
+    </>
+  );
+};
 
 export const Panel: React.FC<{
   width: number;

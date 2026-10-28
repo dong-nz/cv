@@ -1,6 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, interpolate, useCurrentFrame } from 'remotion';
-import { ArrowDefs, BrowserFrame, Fade, Label, Mono, PageSkeleton, Panel, SceneBackground, SceneChrome } from '../kit';
+import { ArrowDefs, BrowserFrame, Callout, Fade, Label, Mono, PageSkeleton, Panel, SceneBackground, SceneChrome } from '../kit';
 import { appear, drawIn } from '../motion';
 import { theme } from '../theme';
 
@@ -22,16 +22,7 @@ export const DataLayer: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: theme.bg, fontFamily: theme.sans }}>
       <SceneBackground />
-      <SceneChrome
-        index="01 · CONTENT AS DOCUMENTS"
-        title="Everything the site shows is a JSON document"
-        bullets={[
-          'Structure documents — language-neutral ids and order',
-          'Per-language dictionaries — EN and VI text, joined at build time',
-          'Field manifests — a missing key fails the build, never the page',
-        ]}
-        bulletStart={70}
-      />
+      <SceneChrome index="01 · CONTENT AS DOCUMENTS" title="Everything the site shows is a JSON document" />
 
       {DOCS.map((d, i) => (
         <Fade key={d.path} start={30 + i * 28} y={22}>
@@ -112,6 +103,25 @@ export const DataLayer: React.FC = () => {
           <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 3, background: theme.accent, opacity: pageOn }} />
         </BrowserFrame>
       </Fade>
+
+      <Callout
+        target={[600, 672]}
+        anchor={[600, 693]}
+        chip={{ x: 420, y: 695, width: 380 }}
+        start={110}
+      >
+        Field manifests claim every field a page renders — a missing key fails the build, never a silent half-render.
+      </Callout>
+
+      <Callout
+        target={[1502, 350]}
+        anchor={[1537, 340]}
+        chip={{ x: 1540, y: 315, width: 340 }}
+        start={200}
+        accent
+      >
+        EN and VI render through the same components — the join happened once, at build time.
+      </Callout>
     </AbsoluteFill>
   );
 };

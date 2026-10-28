@@ -21,9 +21,9 @@
   "chapters": [
     { "time": "0:00", "label": "Intro" },
     { "time": "0:05", "label": "Content as documents" },
-    { "time": "0:14", "label": "Live editing" },
-    { "time": "0:32", "label": "Git as the content store" },
-    { "time": "0:43", "label": "Automatic deployment" },
-    { "time": "0:55", "label": "Closing" }
+    { "time": "0:19", "label": "Live editing" },
+    { "time": "0:42", "label": "Git as the content store" },
+    { "time": "0:56", "label": "Automatic deployment" },
+    { "time": "1:13", "label": "Closing" }
   ]
 }

@@ -3,17 +3,17 @@ WEBVTT
 00:00:00.000 --> 00:00:05.400
 Hệ thống quản trị nội dung của trang này chính là một repository git.
 
-00:00:05.500 --> 00:00:13.900
+00:00:05.500 --> 00:00:19.400
 Mọi thứ trang hiển thị đều là tài liệu JSON: cấu trúc, từ điển theo từng ngôn ngữ và manifest trường — ghép một lần lúc build.
 
-00:00:14.000 --> 00:00:31.900
+00:00:19.500 --> 00:00:42.700
 ?edit biến chính trang đang xem thành trình soạn thảo. HTTP Basic ở nginx là cánh cửa duy nhất; mỗi lần lưu là một commit qua GitHub Contents API.
 
-00:00:32.000 --> 00:00:42.900
+00:00:42.800 --> 00:00:56.700
 Nội dung nằm trong repository dưới dạng JSON: nhánh là bản xem trước, merge vào master là công bố.
 
-00:00:43.000 --> 00:00:54.900
+00:00:56.800 --> 00:01:13.700
 Merge vào master chạy pipeline GitHub Actions — build, tạo resume PDF, triển khai — từ commit đến khi live chỉ vài phút.
 
-00:00:55.000 --> 00:01:02.000
+00:01:13.800 --> 00:01:20.800
 Sửa ngay trên trang thật. Lưu trong git. Live khi merge vào master.

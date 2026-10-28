@@ -1,6 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, OffthreadVideo, staticFile, useCurrentFrame } from 'remotion';
-import { ArrowDefs, BrowserFrame, Fade, Label, Mono, PageSkeleton, Panel, SceneBackground, SceneChrome } from '../kit';
+import { ArrowDefs, BrowserFrame, Callout, Fade, Label, Mono, PageSkeleton, Panel, SceneBackground, SceneChrome } from '../kit';
 import { appear, drawIn } from '../motion';
 import { theme } from '../theme';
 
@@ -29,16 +29,7 @@ export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
   return (
     <AbsoluteFill style={{ background: theme.bg, fontFamily: theme.sans }}>
       <SceneBackground />
-      <SceneChrome
-        index="04 · AUTO DEPLOYMENT"
-        title="Merge to master — the pipeline ships it"
-        bullets={[
-          'GitHub Actions runs deploy.yml: build · resume PDFs · deploy',
-          'nginx.conf / compose.yaml changes redeploy the stack itself',
-          'No CMS, no manual upload: push to master is the publish button',
-        ]}
-        bulletStart={70}
-      />
+      <SceneChrome index="04 · AUTO DEPLOYMENT" title="Merge to master — the pipeline ships it" />
 
       <Fade start={10}>
         <Panel width={210} style={{ left: 449, top: 210 }}>
@@ -129,6 +120,25 @@ export const Pipeline: React.FC<{ captured: boolean }> = ({ captured }) => {
           )}
         </BrowserFrame>
       </Fade>
+
+      <Callout
+        target={[555, 322]}
+        anchor={[555, 347]}
+        chip={{ x: 449, y: 350, width: 230 }}
+        start={30}
+        accent
+      >
+        No CMS, no manual upload — the push to master is the publish button.
+      </Callout>
+
+      <Callout
+        target={[1457, 560]}
+        anchor={[1467, 545]}
+        chip={{ x: 1470, y: 500, width: 330 }}
+        start={245}
+      >
+        From commit to live in minutes — the updated page is the receipt.
+      </Callout>
     </AbsoluteFill>
   );
 };

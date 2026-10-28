@@ -1,6 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, OffthreadVideo, staticFile, useCurrentFrame } from 'remotion';
-import { BrowserFrame, Fade, Label, Mono, PageSkeleton, SceneBackground, SceneChrome } from '../kit';
+import { BrowserFrame, Callout, Fade, Label, Mono, PageSkeleton, SceneBackground, SceneChrome } from '../kit';
 import { appear, typed } from '../motion';
 import { theme } from '../theme';
 
@@ -46,17 +46,7 @@ export const LiveEdit: React.FC<{ captured: boolean }> = ({ captured }) => {
   return (
     <AbsoluteFill style={{ background: theme.bg, fontFamily: theme.sans }}>
       <SceneBackground />
-      <SceneChrome
-        index="02 · LIVE EDITING"
-        title="?edit turns the live site into the editor"
-        bullets={[
-          'The page you are looking at becomes the editor — same components visitors see',
-          'HTTP Basic at the nginx proxy is the only gate',
-          'Text, tags, records and settings edit inline on the preview',
-          'Every save is a commit through the GitHub Contents API',
-        ]}
-        bulletStart={70}
-      />
+      <SceneChrome index="02 · LIVE EDITING" title="?edit turns the live site into the editor" />
 
       <BrowserFrame
         width={760}
@@ -168,6 +158,44 @@ export const LiveEdit: React.FC<{ captured: boolean }> = ({ captured }) => {
           </>
         )}
       </BrowserFrame>
+
+      <Callout
+        target={[1342, 232]}
+        anchor={[1367, 228]}
+        chip={{ x: 1370, y: 205, width: 330 }}
+        start={150}
+        accent
+      >
+        ?edit attaches edit mode — the very page being viewed becomes the editor.
+      </Callout>
+
+      <Callout
+        target={[578, 450]}
+        anchor={[505, 450]}
+        chip={{ x: 140, y: 420, width: 360 }}
+        start={215}
+      >
+        HTTP Basic at the nginx proxy is the only gate — the site itself carries no accounts system.
+      </Callout>
+
+      <Callout
+        target={[578, 242]}
+        anchor={[505, 252]}
+        chip={{ x: 140, y: 235, width: 360 }}
+        start={325}
+      >
+        Text, tags, records and settings edit inline — pencil-triggered, commit on blur, Vietnamese-IME safe.
+      </Callout>
+
+      <Callout
+        target={[700, 762]}
+        anchor={[700, 795]}
+        chip={{ x: 600, y: 800, width: 420 }}
+        start={465}
+        accent
+      >
+        Every save is a commit through the GitHub Contents API; a 409 conflict three-way rebases and keeps your edit.
+      </Callout>
     </AbsoluteFill>
   );
 };

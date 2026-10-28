@@ -1,6 +1,6 @@
 import React from 'react';
 import { AbsoluteFill, interpolate, useCurrentFrame } from 'remotion';
-import { ArrowDefs, Fade, Label, Mono, Panel, SceneBackground, SceneChrome } from '../kit';
+import { ArrowDefs, Callout, Fade, Label, Mono, Panel, SceneBackground, SceneChrome } from '../kit';
 import { appear, drawIn } from '../motion';
 import { theme } from '../theme';
 
@@ -25,16 +25,7 @@ export const GitStorage: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: theme.bg, fontFamily: theme.sans }}>
       <SceneBackground />
-      <SceneChrome
-        index="03 · GIT AS THE STORAGE"
-        title="A content edit is a file edit"
-        bullets={[
-          'Drafts live on a branch; master stays the published site',
-          'A branch preview is a URL: ?edit=preview',
-          'History, review and rollback come from git, free of charge',
-        ]}
-        bulletStart={70}
-      />
+      <SceneChrome index="03 · GIT AS THE STORAGE" title="A content edit is a file edit" />
 
       <Panel width={470} style={{ left: 480, top: 200 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -129,6 +120,34 @@ export const GitStorage: React.FC = () => {
           </span>
         </div>
       </Fade>
+
+      <Callout
+        target={[478, 300]}
+        anchor={[455, 262]}
+        chip={{ x: 130, y: 230, width: 320 }}
+        start={40}
+      >
+        Content is plain JSON documents in the repository — no database, no admin panel.
+      </Callout>
+
+      <Callout
+        target={[1253, 460]}
+        anchor={[1447, 435]}
+        chip={{ x: 1450, y: 400, width: 340 }}
+        start={110}
+        accent
+      >
+        Drafts live on a branch — ?edit=preview opens the same site on that branch.
+      </Callout>
+
+      <Callout
+        target={[700, 655]}
+        anchor={[700, 685]}
+        chip={{ x: 480, y: 690, width: 380 }}
+        start={125}
+      >
+        History, review and rollback come from git, free of charge.
+      </Callout>
     </AbsoluteFill>
   );
 };
