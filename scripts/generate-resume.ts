@@ -128,8 +128,6 @@ function renderQr(lang: Language): string {
 // --- Render HTML helpers ---
 function renderExperience(exps: ResolvedExperienceEntry[]): string {
   return exps
-    // open-to-work (variant 'current') is excluded from the resume PDF entirely
-    .filter(exp => exp.variant !== 'current')
     .map(exp => {
       const variantClass = exp.variant ? ` ${exp.variant}` : '';
       const companyLine = [exp.company, exp.location].filter(Boolean).join(' · ');

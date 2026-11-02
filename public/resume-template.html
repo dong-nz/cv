@@ -149,6 +149,9 @@
       border: 2px solid var(--meta);
     }
 
+    /* current (open-to-work) — accent bullet, mirroring the site timeline's live node */
+    .exp-entry.current::before { background: var(--accent); }
+
     .exp-entry.gap .exp-title { color: var(--meta); font-style: italic; }
     .exp-entry.gap .exp-company { font-style: italic; }
     .exp-entry.gap .exp-responsibilities li { color: var(--muted); font-style: italic; }
