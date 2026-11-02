@@ -40,6 +40,7 @@ export function HowItWorksPage() {
       >
         <SectionHeading
           id="how-it-works-heading"
+          level="h1"
           title={s.howItWorks.heading}
           tag={s.howItWorks.heading}
         />

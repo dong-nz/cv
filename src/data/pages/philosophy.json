@@ -4,5 +4,5 @@
   "content": [
     { "entity": "profile", "fields": ["philosophyQuotes", "name"] }
   ],
-  "ui": ["philosophy"]
+  "ui": ["philosophy", "meta"]
 }

@@ -26,7 +26,7 @@ export function ExperiencePage() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title={s.experience.heading} tag={s.common.experienceTag} />
+        <SectionHeading level="h1" title={s.experience.heading} tag={s.common.experienceTag} />
         <div className="timeline">
           {c.experiences.map((exp, i) => (
             <motion.div

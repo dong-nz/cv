@@ -27,7 +27,7 @@ export function PhilosophyPage() {
                     visible: {opacity: 1, transition: {duration: 0.5}},
                 }}
             >
-                <SectionHeading id="philosophy-heading" title={s.philosophy.heading} tag={s.philosophy.heading}/>
+                <SectionHeading id="philosophy-heading" level="h1" title={s.philosophy.heading} tag={s.philosophy.heading}/>
                 <div className="prose prose-wide">
                     {c.profile.philosophyQuotes.map((quote, i) => (
                         <motion.div

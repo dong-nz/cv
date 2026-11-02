@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router'
 import { motion, type Transition } from 'motion/react'
 import { Badge } from '@/components/ui/Badge'
 import { Tag } from '@/components/ui/Tag'
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { EditableText } from '@/components/ui/EditableText'
 import { InView } from '@/components/ui/InView'
 import { useI18n } from '@/i18n/provider'
@@ -37,7 +38,7 @@ export function ProjectDetailPage() {
           viewport={{ once: true, amount: 0.1 }}
           variants={sectionVariants}
         >
-          <h2>{s.projectDetail.notFound}</h2>
+          <SectionHeading level="h1" title={s.projectDetail.notFound} />
           <p>
             <Link to="/projects">{s.projectDetail.backToProjects} ←</Link>
           </p>
@@ -102,7 +103,7 @@ export function ProjectDetailPage() {
               viewport={{ once: true, amount: 0.2 }}
               transition={itemTransition(0.16)}
             >
-              <h3>{s.projectDetail.impact}</h3>
+              <h2>{s.projectDetail.impact}</h2>
               <TagListEditor
                 arrayPath={`projects.${project.id}.metrics`}
                 items={project.metrics ?? []}
@@ -122,7 +123,7 @@ export function ProjectDetailPage() {
             viewport={{ once: true, amount: 0.2 }}
             transition={itemTransition(0.24)}
           >
-            <h3>{s.projectDetail.role}</h3>
+            <h2>{s.projectDetail.role}</h2>
             <EditableText as="p" path={`projects.${project.id}.role`} label={s.edit.fields.projectRole}>
               {project.role}
             </EditableText>
@@ -134,7 +135,7 @@ export function ProjectDetailPage() {
             viewport={{ once: true, amount: 0.2 }}
             transition={itemTransition(0.32)}
           >
-            <h3>{s.projectDetail.technologies}</h3>
+            <h2>{s.projectDetail.technologies}</h2>
             <TagListEditor
               doc="projects"
               arrayPath={`[${c.projects.findIndex((p) => p.id === project.id)}].technologies`}
@@ -149,14 +150,14 @@ export function ProjectDetailPage() {
 
           {(edit || (project.sections?.length ?? 0) > 0) && (
             <div>
-              <motion.h3
+              <motion.h2
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.2 }}
                 transition={itemTransition(0.4)}
               >
                 {s.projectDetail.experiments}
-              </motion.h3>
+              </motion.h2>
               {project.sections.map((section, idx) => (
                 <motion.div
                   key={section.id}
@@ -176,13 +177,23 @@ export function ProjectDetailPage() {
                       onDelete={() => edit.deleteRecord('section', { id: section.id, projectId: project.id })}
                     />
                   )}
-                  <EditableText as="h4" path={`projects.${project.id}.sections.${section.id}.title`} label={`${section.title} — ${s.edit.fields.sectionTitle}`}>
+                  <EditableText as="h3" path={`projects.${project.id}.sections.${section.id}.title`} label={`${section.title} — ${s.edit.fields.sectionTitle}`}>
                     {section.title}
                   </EditableText>
-                  <EditableText as="p" path={`projects.${project.id}.sections.${section.id}.content`} label={`${section.title} — ${s.edit.fields.sectionContent}`} multiline>
-                    {section.content}
-                  </EditableText>
-                  <Tag accent>{section.type}</Tag>
+                  {/* spec-v8 §4: diagram and code sections are monospace blocks —
+                      the ASCII pipeline diagrams in the VI document render as
+                      written; the record's type chip is edit-mode chrome, never
+                      public content. */}
+                  {(section.type === 'diagram' || section.type === 'code') ? (
+                    <EditableText as="pre" className="project-diagram" path={`projects.${project.id}.sections.${section.id}.content`} label={`${section.title} — ${s.edit.fields.sectionContent}`} multiline>
+                      {section.content}
+                    </EditableText>
+                  ) : (
+                    <EditableText as="p" path={`projects.${project.id}.sections.${section.id}.content`} label={`${section.title} — ${s.edit.fields.sectionContent}`} multiline>
+                      {section.content}
+                    </EditableText>
+                  )}
+                  {edit && <Tag accent>{section.type}</Tag>}
                 </motion.div>
               ))}
               {edit && (

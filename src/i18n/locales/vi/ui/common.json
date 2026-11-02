@@ -6,5 +6,9 @@
   "resumeModalClose": "Đóng tùy chọn tải CV",
   "backToTop": "Cuộn lên đầu trang",
   "contactTag": "Liên hệ",
-  "experienceTag": "Kinh nghiệm"
+  "experienceTag": "Kinh nghiệm",
+  "notFoundTitle": "Không tìm thấy trang",
+  "notFoundBody": "Trang bạn tìm không tồn tại — có thể địa chỉ bị gõ sai hoặc trang đã được chuyển đi.",
+  "notFoundHome": "Về trang chủ",
+  "notFoundProjects": "Xem các dự án"
 }

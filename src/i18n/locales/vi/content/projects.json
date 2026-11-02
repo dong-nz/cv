@@ -21,7 +21,7 @@
       },
       "architecture": {
         "title": "Architecture",
-        "content": "```text\nIoT Devices\n    ↓\nProtocol Adapters (HMI/FTP/HTTP)\n    ↓\nHTTP Engine + HMAC Security\n    ↓\nRocketMQ\n    ↓\nDWS Machines\n```"
+        "content": "IoT Devices\n    ↓\nProtocol Adapters (HMI/FTP/HTTP)\n    ↓\nHTTP Engine + HMAC Security\n    ↓\nRocketMQ\n    ↓\nDWS Machines"
       },
       "challenges": {
         "title": "Challenges",
@@ -51,7 +51,7 @@
       },
       "pipeline": {
         "title": "Pipeline",
-        "content": "```text\nImage\n  ↓\nAWB/Label Detection (YOLO)\n  ↓\nBounding Box / OBB\n  ↓\nRotation Correction\n  ↓\nCrop\n  ↓\nOCR\n  ↓\nText Extraction\n```"
+        "content": "Image\n  ↓\nAWB/Label Detection (YOLO)\n  ↓\nBounding Box / OBB\n  ↓\nRotation Correction\n  ↓\nCrop\n  ↓\nOCR\n  ↓\nText Extraction"
       },
       "challenges": {
         "title": "Challenges",

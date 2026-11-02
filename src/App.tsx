@@ -20,6 +20,9 @@ const HowItWorksPage = lazy(() => import('@/pages/HowItWorksPage').then((m) => (
 
 const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ default: m.ContactPage })))
 
+// The in-app 404 is lazy like the other non-LCP routes (spec-v8 §2.1).
+const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })))
+
 // Edit mode is lazy too: visitors never download the draft store, the panel
 // or the save pipeline (spec-v4 §7 P3.4). The gate opens the shell on `?edit`
 // or on a session that is already in the mode; the shell authenticates, or it
@@ -63,6 +66,10 @@ function App() {
                     <Route path="/philosophy" element={<PhilosophyPage />} />
                     <Route path="/how-it-works" element={<HowItWorksPage />} />
                     <Route path="/contact" element={<ContactPage />} />
+                    {/* spec-v8 §2.1: a dead link inside the SPA lands on the
+                        in-app 404 instead of an empty main. Direct hits on
+                        unknown URLs are answered by nginx with a real 404. */}
+                    <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Suspense>
               </Layout>

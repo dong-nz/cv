@@ -28,6 +28,7 @@ import uiHowItWorksViJson from './locales/vi/ui/how-it-works.json';
 import uiCommonViJson from './locales/vi/ui/common.json';
 import uiResumeViJson from './locales/vi/ui/resume.json';
 import uiEditViJson from './locales/vi/ui/edit.json';
+import uiMetaViJson from './locales/vi/ui/meta.json';
 import uiNavEnJson from './locales/en/ui/navigation.json';
 import uiSocialEnJson from './locales/en/ui/social.json';
 import uiFooterEnJson from './locales/en/ui/footer.json';
@@ -43,6 +44,7 @@ import uiHowItWorksEnJson from './locales/en/ui/how-it-works.json';
 import uiCommonEnJson from './locales/en/ui/common.json';
 import uiResumeEnJson from './locales/en/ui/resume.json';
 import uiEditEnJson from './locales/en/ui/edit.json';
+import uiMetaEnJson from './locales/en/ui/meta.json';
 import type {
   ContentEn,
   ContentVi,
@@ -97,6 +99,7 @@ const uiVi: UIDict = {
   common: uiCommonViJson,
   resume: uiResumeViJson,
   edit: uiEditViJson,
+  meta: uiMetaViJson,
 };
 // tsc enforces en completeness against the Vietnamese tree (§3.3).
 const uiEn: UIDict = {
@@ -115,6 +118,7 @@ const uiEn: UIDict = {
   common: uiCommonEnJson,
   resume: uiResumeEnJson,
   edit: uiEditEnJson,
+  meta: uiMetaEnJson,
 };
 
 const structures = {

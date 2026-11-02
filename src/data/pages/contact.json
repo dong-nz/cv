@@ -16,5 +16,5 @@
       ]
     }
   ],
-  "ui": ["contact"]
+  "ui": ["contact", "meta"]
 }

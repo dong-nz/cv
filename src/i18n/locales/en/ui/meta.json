@@ -1,0 +1,26 @@
+{
+  "about": {
+    "title": "About Me",
+    "description": "The person, engineering principles and current interests behind this portfolio — Nguyễn Đông, Senior Software Engineer in Ho Chi Minh City."
+  },
+  "experience": {
+    "title": "Experience",
+    "description": "Work history in Ho Chi Minh City: SAP Lab Vietnam — a logistics digital-twin platform, Lazada — automation and computer vision on sortation lines, and the breaks between."
+  },
+  "projects": {
+    "title": "Projects",
+    "description": "Project case studies with role, constraints and results: IoT-DWS integration across 16 sortations and AWB detection with computer vision."
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "Get in touch with Nguyễn Đông — email, GitHub, LinkedIn and Telegram links."
+  },
+  "philosophy": {
+    "title": "Philosophy",
+    "description": "The engineering principles applied in every project on this site, stated as short quotes with their keywords."
+  },
+  "how-it-works": {
+    "title": "How this site works",
+    "description": "A short explainer of how this portfolio is built: git-backed content, live editing on the page, bilingual dictionaries and automatic deploy through GitHub Actions."
+  }
+}

@@ -5,5 +5,5 @@
     { "entity": "profile", "fields": ["tldr", "name"] },
     { "entity": "experiences", "fields": ["*"] }
   ],
-  "ui": ["experience"]
+  "ui": ["experience", "meta"]
 }

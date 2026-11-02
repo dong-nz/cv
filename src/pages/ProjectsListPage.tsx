@@ -32,7 +32,7 @@ export function ProjectsListPage() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-        <SectionHeading title={s.projects.all} tag={s.projects.all} />
+        <SectionHeading level="h1" title={s.projects.all} tag={s.projects.all} />
         <div className="projects-grid">
           {c.projects.map((project, i) => {
             const card = (

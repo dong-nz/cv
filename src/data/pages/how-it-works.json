@@ -4,5 +4,5 @@
   "content": [
     { "entity": "profile", "fields": ["name"] }
   ],
-  "ui": ["howItWorks"]
+  "ui": ["howItWorks", "meta"]
 }

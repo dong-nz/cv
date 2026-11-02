@@ -24,6 +24,7 @@ import howItWorksJson from './locales/vi/ui/how-it-works.json';
 import commonJson from './locales/vi/ui/common.json';
 import resumeJson from './locales/vi/ui/resume.json';
 import editJson from './locales/vi/ui/edit.json';
+import metaJson from './locales/vi/ui/meta.json';
 
 // --- structure (src/data/*.json) ---
 
@@ -157,4 +158,8 @@ export type UIDict = {
   common: typeof commonJson;
   resume: typeof resumeJson;
   edit: typeof editJson;
+  // Per-page SEO meta (spec-v8 §2): the title/description the route generator
+  // writes into each page's head. Page-owned by definition — the titles match
+  // the page H1s, so the group is claimed by the six static page manifests.
+  meta: typeof metaJson;
 };

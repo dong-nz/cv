@@ -1,0 +1,26 @@
+{
+  "about": {
+    "title": "Giới thiệu",
+    "description": "Con người, nguyên tắc làm việc và mối quan tâm hiện tại của Nguyễn Đông — kỹ sư phần mềm cấp cao tại TP.HCM."
+  },
+  "experience": {
+    "title": "Kinh nghiệm",
+    "description": "Lịch sử làm việc tại TP.HCM: SAP Lab Vietnam — nền tảng digital twin logistics, Lazada — tự động hóa và computer vision trên các dây phân loại, và những khoảng nghỉ giữa hai công ty."
+  },
+  "projects": {
+    "title": "Dự án",
+    "description": "Toàn bộ dự án kèm vai trò, ràng buộc và kết quả: tích hợp IoT-DWS trên 16 dây phân loại và phát hiện AWB bằng computer vision."
+  },
+  "contact": {
+    "title": "Liên hệ",
+    "description": "Liên hệ với Nguyễn Đông — email, GitHub, LinkedIn và Telegram."
+  },
+  "philosophy": {
+    "title": "Triết lý",
+    "description": "Các nguyên tắc kỹ sư được áp dụng trong mọi dự án trên trang này."
+  },
+  "how-it-works": {
+    "title": "Trang hoạt động như thế nào",
+    "description": "Giới thiệu ngắn về cách trang này được xây dựng: nội dung lưu trong git, chỉnh sửa trực tiếp trên trang, từ điển song ngữ và tự động deploy qua GitHub Actions."
+  }
+}

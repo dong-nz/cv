@@ -27,6 +27,7 @@ export function AboutPage() {
           }}
         >
           <SectionHeading
+            level="h1"
             title={s.about.heading}
             subtitle={
               <EditableText

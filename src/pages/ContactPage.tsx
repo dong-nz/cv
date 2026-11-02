@@ -18,7 +18,7 @@ export function ContactPage() {
           visible: { opacity: 1, transition: { duration: 0.5 } },
         }}
       >
-      <SectionHeading title={s.contact.heading} tag={s.common.contactTag} />
+      <SectionHeading level="h1" title={s.contact.heading} tag={s.common.contactTag} />
       <ContactLinks />
       </motion.section>
     </InView>

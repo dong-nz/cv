@@ -8,5 +8,5 @@
     },
     { "entity": "skillGroups", "fields": ["*"] }
   ],
-  "ui": ["about"]
+  "ui": ["about", "meta"]
 }
